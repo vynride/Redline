@@ -13,7 +13,7 @@ VALID = {"scenario_id": "prod-outage-payments", "role": "on_call_engineer", "dif
 
 
 def _make_session(db) -> DrillSession:
-    user = User(email="e@b.com", hashed_password="x", display_name="E")
+    user = User(email="e@b.com", provider="google", provider_account_id="e", display_name="E")
     db.add(user)
     db.commit()
     session = DrillSession(

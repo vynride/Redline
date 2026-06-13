@@ -40,5 +40,9 @@ htmlcov/
 # --- Internal working notes (never commit) ---
 HANDOVER.md
 
-# Next.js generated type shim
+# Next.js generated type shim and incremental build cache
 frontend/next-env.d.ts
+frontend/tsconfig.tsbuildinfo
+
+# Local-only Compose override (machine-specific paths)
+docker-compose.override.yml

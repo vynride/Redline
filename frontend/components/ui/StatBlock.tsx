@@ -17,9 +17,9 @@ export function StatBlock({ label, value, mono, tone = "default", className }: S
       <span className="text-label text-secondary">{label}</span>
       <span
         className={cn(
-          mono ? "font-mono text-stat-mono tabular" : "text-stat",
-          tone === "positive" && "text-positive",
-          tone === "negative" && "text-negative",
+          mono ? "font-mono text-stat-mono tabular text-primary" : "text-stat text-primary",
+          tone === "positive" && "text-emerald-400",
+          tone === "negative" && "text-rose-400",
         )}
       >
         {value}

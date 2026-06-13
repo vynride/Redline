@@ -34,6 +34,19 @@ class Settings(BaseSettings):
     jwt_algorithm: str = Field(default="HS256")
     access_token_expire_minutes: int = Field(default=60 * 24)
 
+    # --- OAuth ---
+    # Base URL of THIS backend, used to build the provider callback URLs. Must
+    # match what you register with the provider: it appends
+    # ``/api/auth/{provider}/callback``.
+    oauth_redirect_base: str = Field(default="http://localhost:8000")
+    # Frontend origin the browser is sent back to after a successful login.
+    frontend_url: str = Field(default="http://localhost:3000")
+
+    google_client_id: str = Field(default="")
+    google_client_secret: str = Field(default="")
+    github_client_id: str = Field(default="")
+    github_client_secret: str = Field(default="")
+
     # --- Sarvam (one key for chat, STT, and TTS) ---
     sarvam_api_key: str = Field(default="")
 

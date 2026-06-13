@@ -1,23 +1,16 @@
-"""Password hashing and JWT helpers."""
+"""JWT helpers.
+
+Redline authenticates exclusively via OAuth (Google, GitHub); once a provider
+confirms an identity we mint our own short-lived JWT. There are no passwords.
+"""
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 
 from app.core.config import settings
-
-_pwd = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-
-def hash_password(plain: str) -> str:
-    return _pwd.hash(plain)
-
-
-def verify_password(plain: str, hashed: str) -> bool:
-    return _pwd.verify(plain, hashed)
 
 
 def create_access_token(subject: str, expires_minutes: Optional[int] = None) -> str:

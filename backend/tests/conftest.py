@@ -78,8 +78,26 @@ def client(db_session):
 
 
 @pytest.fixture
-def auth_headers(client):
-    resp = client.post("/api/auth/register", json={
-        "email": "drill@example.com", "password": "password123", "display_name": "Ava"})
-    assert resp.status_code == 201
-    return {"Authorization": f"Bearer {resp.json()['access_token']}"}
+def make_auth(db_session):
+    """Create an OAuth user directly and return Bearer auth headers for it."""
+    from app.core.security import create_access_token
+    from app.models.user import User
+
+    def _make(email="drill@example.com", display_name="Ava", provider="google"):
+        user = User(
+            provider=provider,
+            provider_account_id=f"{provider}:{email}",
+            email=email,
+            display_name=display_name,
+        )
+        db_session.add(user)
+        db_session.commit()
+        db_session.refresh(user)
+        return {"Authorization": f"Bearer {create_access_token(subject=user.id)}"}
+
+    return _make
+
+
+@pytest.fixture
+def auth_headers(make_auth):
+    return make_auth()

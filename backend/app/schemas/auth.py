@@ -1,20 +1,10 @@
-"""Auth request/response schemas."""
+"""Auth response schemas."""
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
-
-
-class UserCreate(BaseModel):
-    email: EmailStr
-    password: str = Field(min_length=8, max_length=128)
-    display_name: str = Field(min_length=1, max_length=120)
-
-
-class UserLogin(BaseModel):
-    email: EmailStr
-    password: str
+from pydantic import BaseModel, ConfigDict, EmailStr
 
 
 class UserOut(BaseModel):
@@ -22,10 +12,5 @@ class UserOut(BaseModel):
     id: str
     email: EmailStr
     display_name: str
+    avatar_url: Optional[str] = None
     created_at: datetime
-
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str = "bearer"
-    user: UserOut

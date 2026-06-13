@@ -7,7 +7,7 @@ export function ObjectivesChecklist({ objectives, met }: { objectives: string[];
         const done = met.includes(o);
         return (
           <li key={o} className="flex items-start gap-2 text-body">
-            <span className={cn("leading-6", done ? "text-positive" : "text-muted")}>{done ? "✓" : "○"}</span>
+            <span className={cn("leading-6", done ? "text-emerald-400" : "text-muted")}>{done ? "✓" : "○"}</span>
             <span className={done ? "text-primary" : "text-secondary"}>{o}</span>
           </li>
         );

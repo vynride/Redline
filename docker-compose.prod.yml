@@ -1,0 +1,34 @@
+# Production overrides for redline.vynride.dev.
+# Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+#
+# nginx on the host reverse-proxies:
+#   /api/*  → localhost:8000 (backend)
+#   /ws/*   → localhost:8000 (backend, WS upgrade)
+#   /*      → localhost:3000 (frontend)
+#
+# Secrets go in backend/.env on the server (never committed).
+services:
+  db:
+    ports: []  # not exposed to host; backend reaches it via docker network
+
+  backend:
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      DATABASE_URL: postgresql+psycopg2://redline:redline@db:5432/redline
+      CORS_ORIGINS: https://redline.vynride.dev
+      FRONTEND_URL: https://redline.vynride.dev
+      OAUTH_REDIRECT_BASE: https://redline.vynride.dev
+      ENVIRONMENT: production
+      DEBUG: "false"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE: https://redline.vynride.dev
+    ports:
+      - "127.0.0.1:3000:3000"
+    restart: unless-stopped

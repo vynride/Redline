@@ -23,8 +23,8 @@ export function MicButton({ state, onToggle }: { state: MicState; onToggle: () =
         className={cn(
           "grid h-20 w-20 place-items-center rounded-full transition disabled:opacity-40",
           recording
-            ? "bg-negative-soft text-negative ring-4 ring-negative/30 animate-pulse"
-            : "bg-cta-gradient text-on-accent hover:brightness-110",
+            ? "bg-rose-500/15 text-rose-400 ring-4 ring-rose-500/30 animate-pulse"
+            : "bg-neon-duo text-white shadow-[0_10px_40px_-12px_rgba(124,58,237,0.8)] hover:brightness-110",
         )}
       >
         <MicIcon active={recording} />

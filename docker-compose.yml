@@ -25,7 +25,10 @@ services:
       DATABASE_URL: postgresql+psycopg2://redline:redline@db:5432/redline
       CORS_ORIGINS: http://localhost:3000
       JWT_SECRET: change-me-in-production
-    # Secrets (Sarvam) live in backend/.env — not committed.
+      FRONTEND_URL: http://localhost:3000
+      OAUTH_REDIRECT_BASE: http://localhost:8000
+    # Secrets (Sarvam) and OAuth client IDs/secrets live in
+    # backend/.env — not committed.
     env_file:
       - path: ./backend/.env
         required: false
