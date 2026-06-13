@@ -1,13 +1,22 @@
 # Redline — local orchestration.
+#
+# Every published port is bound to 127.0.0.1 so nothing is ever exposed on a
+# public interface — Docker's port publishing bypasses host firewalls (UFW),
+# so the loopback bind is the actual safeguard. Do NOT change these to 0.0.0.0.
+# Production runs the standalone docker-compose.prod.yml, never this file.
 services:
   db:
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: redline
-      POSTGRES_PASSWORD: redline
+      # No default: must be supplied via backend/.env. Never ship a known password.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in backend/.env}
       POSTGRES_DB: redline
+    env_file:
+      - path: ./backend/.env
+        required: false
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - redline_pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -22,7 +31,7 @@ services:
       db:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql+psycopg2://redline:redline@db:5432/redline
+      DATABASE_URL: postgresql+psycopg2://redline:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in backend/.env}@db:5432/redline
       CORS_ORIGINS: http://localhost:3000
       FRONTEND_URL: http://localhost:3000
       OAUTH_REDIRECT_BASE: http://localhost:8000
@@ -32,7 +41,7 @@ services:
       - path: ./backend/.env
         required: false
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
 
   frontend:
     build:
@@ -43,7 +52,7 @@ services:
     depends_on:
       - backend
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
 
 volumes:
   redline_pgdata:
