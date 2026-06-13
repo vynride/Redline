@@ -1,21 +1,21 @@
-<div align="center">
+<p align="center">
+  <img src="frontend/public/logo.svg" alt="Redline" width="88" height="88" />
+</p>
 
-<img src="frontend/public/logo.svg" alt="Redline" height="72" />
+<h1 align="center">Redline</h1>
 
-**AI voice crisis-drill simulator for technical and support teams**
+<p align="center">
+  <em>Crisis communication, practiced.</em>
+</p>
 
-*Drop into a live incident. Respond by voice. Get coached on what you got wrong.*
-
-<br/>
-
-[![Version](https://img.shields.io/badge/version-1.0.0-8B5CF6?style=flat-square)](https://github.com/vynride/Redline)
-[![Next.js](https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=nextdotjs&logoColor=white)](https://nextjs.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql&logoColor=white)](https://postgresql.org)
-[![Sarvam](https://img.shields.io/badge/Sarvam-sarvam--30b-FF6B35?style=flat-square)](https://sarvam.ai)
-[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker&logoColor=white)](https://docs.docker.com/compose)
-
-</div>
+<p align="center">
+  <img alt="Version" src="https://img.shields.io/badge/version-1.0.0-8B5CF6?style=flat-square" />
+  <img alt="Next.js" src="https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=nextdotjs&logoColor=white" />
+  <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi&logoColor=white" />
+  <img alt="PostgreSQL" src="https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql&logoColor=white" />
+  <img alt="Sarvam" src="https://img.shields.io/badge/Sarvam-sarvam--30b-FF6B35?style=flat-square" />
+  <img alt="Docker" src="https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker&logoColor=white" />
+</p>
 
 ---
 
