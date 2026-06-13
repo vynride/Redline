@@ -36,6 +36,35 @@ class Scenario(BaseModel):
     opening_line: str = Field(description="The persona's first spoken line.")
 
 
+class PersonaDraft(BaseModel):
+    """Persona fields an LLM authors — excludes the server-assigned voice id."""
+
+    name: str = Field(description="The persona's full name.")
+    role: str = Field(description="Short snake_case role, e.g. 'angry_customer', 'database_lead'.")
+    base_emotion: Emotion = Field(description="The emotion the persona opens the call in.")
+    description: str = Field(description="One or two sentences on how they behave under pressure.")
+
+
+class ScenarioDraft(BaseModel):
+    """The creative half of a scenario, authored by the LLM from a user prompt.
+
+    Excludes the server-owned fields (``id`` and ``persona.voice_id``); those are
+    assigned in ``scenario_gen`` before the full ``Scenario`` is assembled.
+    """
+
+    title: str = Field(description="A short, punchy incident title.")
+    archetype: Archetype
+    summary: str = Field(description="One or two sentences framing the incident.")
+    roles: list[Role] = Field(description="Responder roles this drill supports (1-3).")
+    difficulties: list[Difficulty] = Field(description="Difficulty tiers offered (1-3).")
+    persona: PersonaDraft
+    stakes: str = Field(description="What is at risk — money, trust, safety, deadlines.")
+    hidden_facts: list[str] = Field(description="Facts the responder must uncover by asking (may be empty).")
+    objectives: list[str] = Field(description="3-5 concrete things a strong responder accomplishes.")
+    severity: SeverityModel
+    opening_line: str = Field(description="The persona's first spoken line — tense and in character.")
+
+
 class ScenarioSummary(BaseModel):
     id: str
     title: str

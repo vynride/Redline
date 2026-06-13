@@ -1,11 +1,13 @@
 import { cn } from "@/lib/cn";
 
-export type MeterTone = "accent" | "positive" | "negative";
+export type MeterTone = "accent" | "positive" | "negative" | "warning";
 
+// Flat, solid fills — the color itself is the signal, no decorative glow.
 const FILLS: Record<MeterTone, string> = {
-  accent: "bg-violet-500 shadow-[0_0_12px_-2px_rgba(139,92,246,0.7)]",
-  positive: "bg-emerald-400 shadow-[0_0_12px_-2px_rgba(52,211,153,0.7)]",
-  negative: "bg-rose-500 shadow-[0_0_12px_-2px_rgba(244,63,94,0.7)]",
+  accent: "bg-violet-500",
+  positive: "bg-emerald-400",
+  negative: "bg-rose-500",
+  warning: "bg-amber-400",
 };
 
 /** A thin progress track used by the severity and confidence readouts. */

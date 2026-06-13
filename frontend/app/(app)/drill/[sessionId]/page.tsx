@@ -6,7 +6,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowRight, PhoneOff } from "lucide-react";
 import { MicButton, type MicState } from "@/components/drill/MicButton";
 import { Transcript, type TranscriptLine } from "@/components/drill/Transcript";
-import { DrillHud } from "@/components/drill/hud/DrillHud";
+import { IncidentClock } from "@/components/drill/IncidentClock";
+import { DrillHud, type Trend } from "@/components/drill/hud/DrillHud";
 import { Button, LoadingScreen } from "@/components/ui";
 import { api } from "@/lib/api";
 import { MicCapture, PcmPlayer } from "@/lib/audio";
@@ -21,10 +22,12 @@ export default function DrillPage() {
 
   const [scenario, setScenario] = useState<Scenario | null>(null);
   const [meta, setMeta] = useState<{ role: Role; difficulty: Difficulty } | null>(null);
+  const [times, setTimes] = useState<{ startedAt: string; endedAt: string | null } | null>(null);
   const [lines, setLines] = useState<TranscriptLine[]>([]);
   const [state, setState] = useState<SessionState | null>(null);
   const [mic, setMic] = useState<MicState>("ready");
   const [ended, setEnded] = useState(false);
+  const [trend, setTrend] = useState<Trend>("flat");
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,6 +35,14 @@ export default function DrillPage() {
   const captureRef = useRef<MicCapture | null>(null);
   const playerRef = useRef<PcmPlayer | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const prevSeverityRef = useRef<number | null>(null);
+
+  // Stamp the end time once so the incident clock freezes; server time wins if we
+  // already have it, otherwise mark the moment the call closed client-side.
+  const stampEnded = useCallback(() => {
+    setEnded(true);
+    setTimes((t) => (t && !t.endedAt ? { ...t, endedAt: new Date().toISOString() } : t));
+  }, []);
 
   // Load session + scenario, seed the transcript, then open the socket.
   useEffect(() => {
@@ -43,11 +54,13 @@ export default function DrillPage() {
         if (cancelled) return;
         setScenario(sc);
         setMeta({ role: session.role, difficulty: session.difficulty });
+        setTimes({ startedAt: session.created_at, endedAt: session.ended_at });
         setLines(session.turns.map((t) => ({ role: t.speaker, text: t.text, emotion: t.emotion as never })));
         setState({
           severity: session.severity, severity_start: session.severity_start, confidence: session.confidence,
           objectives_met: session.objectives_met, escalation_timeline: session.escalation_timeline, status: session.status,
         });
+        prevSeverityRef.current = session.severity;
         if (session.status !== "active") setEnded(true);
       } catch (e) {
         if (!cancelled) setError(e instanceof Error ? e.message : "Could not load the drill.");
@@ -61,12 +74,18 @@ export default function DrillPage() {
           if (msg.type === "transcript") {
             setLines((prev) => [...prev, { role: msg.role, text: msg.text, emotion: msg.emotion }]);
           } else if (msg.type === "state") {
+            // Severity vs. the previous turn drives the momentum arrow.
+            const prev = prevSeverityRef.current;
+            if (prev !== null && msg.state.severity !== prev) {
+              setTrend(msg.state.severity > prev ? "up" : "down");
+            }
+            prevSeverityRef.current = msg.state.severity;
             setState(msg.state);
-            if (msg.state.status !== "active") setEnded(true);
+            if (msg.state.status !== "active") stampEnded();
           } else if (msg.type === "turn_complete") {
             setMic((m) => (m === "ended" ? m : "ready"));
           } else if (msg.type === "session_complete") {
-            setEnded(true);
+            stampEnded();
             setMic("ended");
           } else if (msg.type === "error") {
             setNotice(msg.detail);
@@ -85,7 +104,7 @@ export default function DrillPage() {
       socketRef.current?.close();
       playerRef.current?.close();
     };
-  }, [sessionId]);
+  }, [sessionId, stampEnded]);
 
   // Keep the latest turn in view — also when the "typing" indicator appears so it
   // isn't stranded below the fold.
@@ -125,14 +144,18 @@ export default function DrillPage() {
   const Icon = ARCHETYPE_ICONS[scenario.archetype];
   const sev = SEV[meta.difficulty ?? hardest(scenario.difficulties)];
   const personaRole = scenario.persona.role.replace(/_/g, " ");
+  const turns = lines.filter((l) => l.role === "user").length;
 
   return (
     <div className="flex flex-col gap-4 px-5 py-5 sm:px-8 lg:h-[calc(100dvh-4rem)]">
-      {/* ── Header ─────────────────────────────────────────── */}
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex items-start gap-3.5">
-          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-panel-2 text-violet-300">
-            <Icon className="h-6 w-6" />
+      {/* ── Command bar — title, badges, live clock, end ───── */}
+      <header
+        className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-panel-line bg-panel px-4 py-3 sm:px-5"
+        style={{ animation: "redline-fade-up 0.4s ease-out both" }}
+      >
+        <div className="flex min-w-0 items-center gap-3.5">
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-panel-2 text-violet-300">
+            <Icon className="h-5 w-5" />
           </span>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
@@ -146,30 +169,33 @@ export default function DrillPage() {
                 {ROLE_LABELS[meta.role]}
               </span>
             </div>
-            <h1 className="mt-1 text-h1 text-white">{scenario.title}</h1>
+            <h1 className="mt-0.5 truncate text-h2 text-white">{scenario.title}</h1>
           </div>
         </div>
 
-        {!ended ? (
-          <Button variant="secondary" onClick={endDrill} className="gap-2">
-            <PhoneOff className="h-4 w-4" /> End drill
-          </Button>
-        ) : (
-          <Link href={`/debrief/${sessionId}`}>
-            <Button className="gap-2">
-              View debrief <ArrowRight className="h-4 w-4" />
+        <div className="flex items-center gap-2.5">
+          {times && <IncidentClock startedAt={times.startedAt} endedAt={times.endedAt} />}
+          {!ended ? (
+            <Button variant="secondary" onClick={endDrill} className="gap-2">
+              <PhoneOff className="h-4 w-4" /> End drill
             </Button>
-          </Link>
-        )}
+          ) : (
+            <Link href={`/debrief/${sessionId}`}>
+              <Button className="gap-2">
+                View debrief <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+          )}
+        </div>
       </header>
 
       {/* ── Console: transcript + live HUD, equal-height ───── */}
       <div className="grid min-h-0 flex-1 gap-5 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-stretch">
         {/* Transcript / call console */}
-        <section className="relative flex h-[62vh] min-h-0 flex-col overflow-hidden rounded-2xl border border-panel-line bg-panel lg:h-full">
-          {/* Top gradient accent stripe — matches the dashboard Quick Start banner. */}
-          <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-px bg-gradient-to-r from-transparent via-violet-500/60 to-transparent" />
-
+        <section
+          className="relative flex h-[62vh] min-h-0 flex-col overflow-hidden rounded-2xl border border-panel-line bg-panel lg:h-full"
+          style={{ animation: "redline-fade-up 0.45s ease-out both", animationDelay: "0.05s" }}
+        >
           {/* Call header — who you're on the line with + live status */}
           <div className="flex items-center justify-between gap-3 border-b border-panel-line px-5 py-3.5 sm:px-6">
             <div className="flex min-w-0 items-center gap-3">
@@ -218,7 +244,12 @@ export default function DrillPage() {
           </div>
         </section>
 
-        <DrillHud scenario={scenario} state={state} />
+        <div
+          className="flex min-h-0 flex-col"
+          style={{ animation: "redline-fade-up 0.45s ease-out both", animationDelay: "0.1s" }}
+        >
+          <DrillHud scenario={scenario} state={state} turns={turns} trend={trend} />
+        </div>
       </div>
     </div>
   );

@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app import __version__
-from app.api import auth, scenarios, sessions, ws
+from app.api import auth, generated_scenarios, scenarios, sessions, ws
 from app.core.config import settings
 from app.core.logging import get_logger
 
@@ -43,6 +43,7 @@ def create_app() -> FastAPI:
 
     app.include_router(auth.router)
     app.include_router(scenarios.router)
+    app.include_router(generated_scenarios.router)
     app.include_router(sessions.router)
     app.include_router(ws.router)
 

@@ -60,7 +60,7 @@ def _transcript_block(turns: list[Turn]) -> str:
 
 
 def _build_messages(session: DrillSession, turns: list[Turn]) -> tuple[str, list[ChatMessage]]:
-    scenario = catalog.get_scenario(session.scenario_id)
+    scenario = catalog.scenario_for_session(session)
     title = scenario.title if scenario else session.scenario_id
     objectives = "\n".join(f"  - {o}" for o in (scenario.objectives if scenario else [])) or "  (none)"
     met = "\n".join(f"  - {o}" for o in (session.objectives_met or [])) or "  (none)"

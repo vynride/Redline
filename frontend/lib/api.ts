@@ -35,6 +35,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 export const api = {
   listScenarios: () => request<ScenarioSummary[]>("/api/scenarios"),
   getScenario: (id: string) => request<Scenario>(`/api/scenarios/${id}`),
+  generateScenario: (prompt: string) =>
+    request<Scenario>("/api/generated-scenarios", { method: "POST", body: JSON.stringify({ prompt }) }),
   createSession: (body: SessionCreate) =>
     request<SessionOut>("/api/sessions", { method: "POST", body: JSON.stringify(body) }),
   listSessions: () => request<SessionListItem[]>("/api/sessions"),

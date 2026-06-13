@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ServerCrash, CreditCard, ShieldAlert, AlertTriangle, PackageX, Gauge,
-  Search, Bell, Flame, Mic, LogOut, ArrowRight, X,
+  Search, Bell, Flame, Mic, LogOut, ArrowRight, X, Sparkles,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Avatar } from "@/components/ui";
@@ -69,6 +69,7 @@ function QuickStart({ scenarios }: { scenarios: ScenarioSummary[] }) {
   const [role,       setRole]       = useState<Role>(scenarios[0]?.roles[0] ?? "on_call_engineer");
   const [difficulty, setDifficulty] = useState<Difficulty>(scenarios[0]?.difficulties[0] ?? "warmup");
   const [busy,  setBusy]  = useState(false);
+  const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // A small random sample of example prompts, reshuffled once per page load.
@@ -130,6 +131,26 @@ function QuickStart({ scenarios }: { scenarios: ScenarioSummary[] }) {
     }
   }
 
+  // Author a brand-new scenario from the typed prompt via the LLM, then drop
+  // straight into a drill on it. Role/difficulty fall back to the generated
+  // scenario's own options when the current selection isn't offered.
+  async function handleGenerate() {
+    const prompt = query.trim();
+    if (!prompt || busy || generating) return;
+    setGenerating(true);
+    setError(null);
+    try {
+      const sc = await api.generateScenario(prompt);
+      const r = sc.roles.includes(role) ? role : sc.roles[0];
+      const d = sc.difficulties.includes(difficulty) ? difficulty : sc.difficulties[0];
+      const session = await api.createSession({ scenario_id: sc.id, role: r, difficulty: d });
+      router.push(`/drill/${session.id}`);
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : "Could not generate a scenario.");
+      setGenerating(false);
+    }
+  }
+
   const ScenIcon   = scenario ? META[scenario.archetype].icon : Mic;
   const availRoles = scenario?.roles ?? ALL_ROLES;
   const availDiffs = scenario?.difficulties ?? ALL_DIFFICULTIES;
@@ -156,7 +177,7 @@ function QuickStart({ scenarios }: { scenarios: ScenarioSummary[] }) {
           <img src="/logo.svg" alt="Redline" className="h-9 w-9 shrink-0" />
           <div className="leading-tight">
             <p className="text-[14px] font-semibold text-white">Quick Start</p>
-            <p className="text-[11px] text-muted">Type or click any scenario below</p>
+            <p className="text-[11px] text-muted">Pick a scenario below, or describe your own and hit Generate</p>
           </div>
           {scenario && (
             <div className="ml-auto hidden items-center gap-2 rounded-full border border-panel-line bg-panel-2 px-3 py-1.5 text-[11px] sm:flex">
@@ -283,13 +304,34 @@ function QuickStart({ scenarios }: { scenarios: ScenarioSummary[] }) {
         <div className="flex-1" />
 
         <div className="flex flex-col items-end gap-1.5">
-          <button
-            onClick={() => void handleLaunch()}
-            disabled={busy || !scenario}
-            className="flex items-center gap-2 rounded-xl bg-white px-6 py-2.5 text-[13px] font-semibold text-ink shadow-[0_2px_20px_-4px_rgba(255,255,255,0.2)] transition-all duration-150 hover:scale-[1.03] hover:shadow-[0_4px_28px_-4px_rgba(255,255,255,0.3)] disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-none"
-          >
-            {busy ? "Starting…" : <><span>Launch Drill</span><ArrowRight className="h-4 w-4" /></>}
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Generate a NEW scenario from the typed prompt (LLM), then launch it. */}
+            <button
+              onClick={() => void handleGenerate()}
+              disabled={generating || busy || !query.trim()}
+              title="Generate a brand-new scenario from your prompt"
+              className="flex items-center gap-2 rounded-xl border border-violet-500/45 bg-violet-500/15 px-4 py-2.5 text-[13px] font-semibold text-violet-200 transition-all duration-150 hover:bg-violet-500/25 disabled:opacity-50"
+            >
+              {generating ? (
+                <>
+                  <Sparkles className="h-4 w-4 animate-pulse" />
+                  <span>Generating…</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4" />
+                  <span>Generate</span>
+                </>
+              )}
+            </button>
+            <button
+              onClick={() => void handleLaunch()}
+              disabled={busy || generating || !scenario}
+              className="flex items-center gap-2 rounded-xl bg-white px-6 py-2.5 text-[13px] font-semibold text-ink shadow-[0_2px_20px_-4px_rgba(255,255,255,0.2)] transition-all duration-150 hover:scale-[1.03] hover:shadow-[0_4px_28px_-4px_rgba(255,255,255,0.3)] disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-none"
+            >
+              {busy ? "Starting…" : <><span>Launch Drill</span><ArrowRight className="h-4 w-4" /></>}
+            </button>
+          </div>
           {error && <p className="text-[11px] text-rose-400">{error}</p>}
         </div>
       </div>

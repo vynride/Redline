@@ -7,10 +7,12 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.db import get_db
+from app.models.generated_scenario import GeneratedScenario
 from app.models.session import DrillSession, SessionStatus
 from app.models.turn import Speaker, Turn
 from app.models.user import User
 from app.schemas.debrief import DebriefOut
+from app.schemas.scenario import Scenario
 from app.schemas.session import SessionCreate, SessionDetail, SessionListItem, SessionOut
 from app.services import scenarios as catalog
 from app.services.debrief import get_or_create_debrief
@@ -33,9 +35,17 @@ def create_session(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ) -> DrillSession:
+    # Resolve from the static catalog, then fall back to a scenario this user
+    # generated. Generated scenarios are snapshotted onto the session so the live
+    # drill is self-contained (see services.scenarios.scenario_for_session).
     scenario = catalog.get_scenario(payload.scenario_id)
+    snapshot: dict | None = None
     if scenario is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Scenario not found.")
+        generated = db.get(GeneratedScenario, payload.scenario_id)
+        if generated is None or generated.user_id != user.id:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Scenario not found.")
+        scenario = Scenario.model_validate(generated.scenario_json)
+        snapshot = generated.scenario_json
     if payload.role not in scenario.roles:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                             detail="This role is not available for the selected scenario.")
@@ -46,6 +56,7 @@ def create_session(
     drill = DrillSession(
         user_id=user.id,
         scenario_id=scenario.id,
+        scenario_json=snapshot,
         role=payload.role.value,
         difficulty=payload.difficulty.value,
         severity=scenario.severity.start,
