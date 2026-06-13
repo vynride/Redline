@@ -6,16 +6,19 @@
 #   /ws/*   → 127.0.0.1:8002 (backend, WS upgrade)
 #   /*      → 127.0.0.1:3002 (frontend)
 #
-# Secrets go in backend/.env on the server (never committed). The Postgres password
-# is read from POSTGRES_PASSWORD in a root .env file beside this compose (also never
-# committed) — see .env.example. JWT_SECRET comes from backend/.env.
+# All secrets live in backend/.env on the server (never committed). That file must
+# define DATABASE_URL (Postgres, pointing at the `db` service), POSTGRES_PASSWORD
+# (matching the password in DATABASE_URL), and JWT_SECRET — see backend/.env.example.
 services:
   db:
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: redline
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in the root .env on the server}
       POSTGRES_DB: redline
+      # POSTGRES_PASSWORD is supplied by backend/.env (env_file below).
+    env_file:
+      - path: ./backend/.env
+        required: true
     volumes:
       - redline_pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -31,13 +34,12 @@ services:
       db:
         condition: service_healthy
     environment:
-      # Password comes from the root .env; JWT_SECRET is provided by backend/.env below.
-      DATABASE_URL: postgresql+psycopg2://redline:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in the root .env on the server}@db:5432/redline
       CORS_ORIGINS: https://redline.vynride.dev
       FRONTEND_URL: https://redline.vynride.dev
       OAUTH_REDIRECT_BASE: https://redline.vynride.dev
       ENVIRONMENT: production
       DEBUG: "false"
+      # DATABASE_URL and JWT_SECRET come from backend/.env (env_file below).
     env_file:
       - path: ./backend/.env
         required: true
