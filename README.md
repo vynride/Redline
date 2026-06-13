@@ -1,6 +1,6 @@
 <div align="center">
 
-# Redline
+<img src="https://raw.githubusercontent.com/vynride/Redline/main/frontend/public/logo.svg" alt="Redline" height="72" />
 
 **AI voice crisis-drill simulator for technical and support teams**
 
