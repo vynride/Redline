@@ -4,7 +4,7 @@ services:
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: redline
-      POSTGRES_PASSWORD: redline
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-redline}
       POSTGRES_DB: redline
     ports:
       - "5432:5432"
@@ -22,13 +22,12 @@ services:
       db:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql+psycopg2://redline:redline@db:5432/redline
+      DATABASE_URL: postgresql+psycopg2://redline:${POSTGRES_PASSWORD:-redline}@db:5432/redline
       CORS_ORIGINS: http://localhost:3000
-      JWT_SECRET: change-me-in-production
       FRONTEND_URL: http://localhost:3000
       OAUTH_REDIRECT_BASE: http://localhost:8000
-    # Secrets (Sarvam) and OAuth client IDs/secrets live in
-    # backend/.env — not committed.
+    # JWT_SECRET and the third-party secrets (Sarvam) and OAuth client IDs/secrets
+    # live in backend/.env — not committed.
     env_file:
       - path: ./backend/.env
         required: false
