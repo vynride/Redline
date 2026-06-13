@@ -1,0 +1,30 @@
+{
+  "id": "prod-outage-payments",
+  "title": "Payment API Outage",
+  "archetype": "production_outage",
+  "summary": "Checkout is returning 500s across all regions. Revenue is bleeding and an enterprise customer's engineering manager has joined the bridge demanding answers.",
+  "roles": ["on_call_engineer", "incident_commander", "ops_responder"],
+  "difficulties": ["warmup", "production_like", "redline"],
+  "persona": {
+    "name": "Dana Reyes",
+    "role": "enterprise_customer_eng_manager",
+    "voice_id": "aditya",
+    "base_emotion": "frustrated",
+    "description": "A sharp, time-pressured engineering manager at a top-tier customer. Wants concrete impact scope, a clear owner, and a status cadence. Escalates fast if she hears hedging or jargon without substance; calms when given honest specifics and a commitment."
+  },
+  "stakes": "Every minute of downtime costs the customer ~$4k in failed transactions and erodes a contract renewal due next quarter.",
+  "hidden_facts": [
+    "Root cause is an expired TLS certificate on the payment processor gateway.",
+    "The outage began 12 minutes ago, right after a routine cert-rotation job silently failed.",
+    "A manual cert reissue restores service in ~3 minutes once identified.",
+    "Only card payments are affected; wallet payments still succeed."
+  ],
+  "objectives": [
+    "Acknowledge the impact and reassure without over-promising",
+    "Gather and confirm the blast radius (regions, payment methods, error rate)",
+    "Identify the expired certificate as the likely root cause",
+    "Commit to a clear next update time and owner"
+  ],
+  "severity": { "start": 8, "max": 10, "win_below": 3, "lose_at": 10 },
+  "opening_line": "I've been staring at a wall of failed checkouts for ten minutes. What is actually going on, and when is it fixed?"
+}

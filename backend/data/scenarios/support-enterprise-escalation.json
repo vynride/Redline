@@ -1,0 +1,30 @@
+{
+  "id": "support-enterprise-escalation",
+  "title": "Enterprise Customer Escalation",
+  "archetype": "support_escalation",
+  "summary": "A flagship customer's data export has been broken for two days. The previous agent over-promised and went quiet. Their operations director is now on the line, furious, threatening to churn.",
+  "roles": ["support_lead", "customer_support_agent", "incident_commander"],
+  "difficulties": ["warmup", "production_like", "redline"],
+  "persona": {
+    "name": "Marcus Hale",
+    "role": "angry_customer",
+    "voice_id": "amit",
+    "base_emotion": "angry",
+    "description": "An operations director who feels ignored and disrespected. Opens hot and personal. De-escalates only when he feels genuinely heard, gets an honest account of what went wrong, and hears a concrete plan with ownership. Re-escalates instantly at scripted empathy or fresh vague promises."
+  },
+  "stakes": "This is a six-figure annual account inside its renewal window; a public churn would be cited by two other prospects currently in late-stage deals.",
+  "hidden_facts": [
+    "The export broke after a schema migration changed a column name the export job depended on.",
+    "The fix is already staged and can ship within the hour, but no one told the customer.",
+    "The previous agent promised a callback 'within an hour' yesterday and never followed up.",
+    "A manual one-off export can be delivered to the customer in 15 minutes as a stopgap."
+  ],
+  "objectives": [
+    "Acknowledge the failure and the dropped follow-up without deflecting",
+    "Let the customer feel heard before pivoting to solutions",
+    "Offer the manual export as an immediate stopgap",
+    "Commit to a specific fix time and a named owner for follow-up"
+  ],
+  "severity": { "start": 8, "max": 10, "win_below": 3, "lose_at": 10 },
+  "opening_line": "Two days. Two days my team has been dead in the water, and the last person I spoke to vanished. So convince me why we're still paying you."
+}
