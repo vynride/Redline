@@ -1,0 +1,30 @@
+{
+  "id": "latency-spike-checkout",
+  "title": "Checkout Latency Spike",
+  "archetype": "latency_spike",
+  "summary": "Checkout p99 latency has climbed from 300ms to 9 seconds over twenty minutes. Carts are timing out. The incident commander wants you to lead the technical investigation and keep the bridge informed.",
+  "roles": ["on_call_engineer", "ops_responder", "incident_commander"],
+  "difficulties": ["warmup", "production_like", "redline"],
+  "persona": {
+    "name": "Sam Okafor",
+    "role": "incident_commander",
+    "voice_id": "priya",
+    "base_emotion": "calm",
+    "description": "A seasoned incident commander who stays composed but expects crisp status updates and hypothesis-driven debugging. Pushes back on flailing ('let's just restart everything') and rewards structured narrowing. Grows tense if status updates stop or the responder chases a dead end too long."
+  },
+  "stakes": "Conversion is down 30% and climbing; leadership is watching the revenue graph in real time and a public status-page post is overdue.",
+  "hidden_facts": [
+    "A new recommendation service deployed 25 minutes ago is making an unindexed query on every checkout.",
+    "The database connection pool is saturated as a result, starving checkout.",
+    "Rolling back the recommendation deploy restores latency within two minutes.",
+    "CPU and memory on the app tier look normal, which misleads toward a network theory."
+  ],
+  "objectives": [
+    "Establish a clear timeline and correlate the spike with the recent deploy",
+    "Form and test a hypothesis rather than restarting blindly",
+    "Identify the recommendation deploy / pool saturation as the cause",
+    "Give the commander a concise status update with an ETA and recommended action"
+  ],
+  "severity": { "start": 6, "max": 10, "win_below": 3, "lose_at": 10 },
+  "opening_line": "p99 just crossed nine seconds and it's still climbing. You're driving the investigation — give me your first read and what you're checking."
+}

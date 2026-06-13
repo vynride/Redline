@@ -1,0 +1,30 @@
+{
+  "id": "security-cred-leak",
+  "title": "Leaked API Credentials",
+  "archetype": "security_alert",
+  "summary": "An automated scanner flagged a live production API key committed to a public GitHub repo. A senior security lead has pulled you into a war room to drive containment.",
+  "roles": ["on_call_engineer", "incident_commander", "ops_responder"],
+  "difficulties": ["production_like", "redline"],
+  "persona": {
+    "name": "Priya Nair",
+    "role": "security_lead",
+    "voice_id": "neha",
+    "base_emotion": "urgent",
+    "description": "A calm but relentless security lead running containment. Expects you to think in terms of revoke, rotate, scope-of-access, and evidence. Loses patience with anyone who wants to 'investigate first' before revoking. Reassured by decisive containment and a clear blast-radius assessment."
+  },
+  "stakes": "The key has read/write access to the customer database. Every minute it stays live is a minute an attacker could be exfiltrating data — and a potential breach-disclosure obligation.",
+  "hidden_facts": [
+    "The key was pushed 40 minutes ago and the repo is public.",
+    "Access logs show three calls from an unfamiliar IP in the last 10 minutes.",
+    "The key grants read/write to the primary customer database.",
+    "Rotation is one CLI command but requires also redeploying two dependent services."
+  ],
+  "objectives": [
+    "Revoke the leaked credential immediately rather than investigate first",
+    "Assess the blast radius (what the key could access, signs of misuse)",
+    "Rotate the key and redeploy dependent services",
+    "Preserve evidence and flag potential breach-disclosure"
+  ],
+  "severity": { "start": 7, "max": 10, "win_below": 3, "lose_at": 10 },
+  "opening_line": "We have a live prod key sitting in a public repo right now. Walk me through exactly what you're doing, in order, starting now."
+}
