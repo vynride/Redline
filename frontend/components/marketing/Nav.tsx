@@ -24,7 +24,7 @@ export function Nav() {
           <Link href="/login" className={buttonStyles("ghost", "hidden sm:inline-flex")}>
             Log in
           </Link>
-          <Link href="/register" className={buttonStyles("primary")}>
+          <Link href="/login" className={buttonStyles("primary")}>
             Start a drill
           </Link>
         </div>

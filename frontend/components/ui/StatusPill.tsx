@@ -3,11 +3,12 @@ import { cn } from "@/lib/cn";
 
 export type StatusTone = "positive" | "negative" | "accent" | "neutral";
 
+// DESIGN.md semantic tones — emerald / rose direction, violet accent.
 const TONES: Record<StatusTone, string> = {
-  positive: "bg-positive-soft text-positive",
-  negative: "bg-negative-soft text-negative",
-  accent: "bg-accent-soft text-accent",
-  neutral: "bg-surface-2 text-secondary",
+  positive: "bg-emerald-500/10 text-emerald-400",
+  negative: "bg-rose-500/10 text-rose-400",
+  accent: "bg-violet-500/15 text-violet-300",
+  neutral: "bg-panel-2 text-secondary",
 };
 
 interface StatusPillProps extends HTMLAttributes<HTMLSpanElement> {

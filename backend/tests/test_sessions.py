@@ -29,15 +29,13 @@ def test_session_requires_auth(client):
     assert client.post("/api/sessions", json=VALID).status_code == 401
 
 
-def test_session_list_and_ownership(client, auth_headers):
+def test_session_list_and_ownership(client, auth_headers, make_auth):
     sid = client.post("/api/sessions", json=VALID, headers=auth_headers).json()["id"]
     listed = client.get("/api/sessions", headers=auth_headers)
     assert listed.status_code == 200
     assert any(s["id"] == sid for s in listed.json())
 
-    other = client.post("/api/auth/register", json={
-        "email": "other@b.com", "password": "password123", "display_name": "Bo"}).json()
-    other_headers = {"Authorization": f"Bearer {other['access_token']}"}
+    other_headers = make_auth(email="other@b.com", display_name="Bo")
     assert client.get(f"/api/sessions/{sid}", headers=other_headers).status_code == 404
 
 

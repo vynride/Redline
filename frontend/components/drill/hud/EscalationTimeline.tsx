@@ -8,7 +8,7 @@ export function EscalationTimeline({ events }: { events: EscalationEvent[] }) {
     <ol className="flex flex-col gap-3">
       {events.map((e, i) => (
         <li key={i} className="flex gap-3">
-          <span className="mt-0.5 grid h-6 w-8 shrink-0 place-items-center rounded-full bg-negative-soft font-mono text-label text-negative tabular">
+          <span className="mt-0.5 grid h-6 w-8 shrink-0 place-items-center rounded-full bg-rose-500/10 font-mono text-label text-rose-400 tabular">
             {e.severity}
           </span>
           <span className="text-body text-secondary">{e.event}</span>

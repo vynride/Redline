@@ -3,7 +3,7 @@ import { DIFFICULTY_LABELS } from "@/lib/labels";
 import { cn } from "@/lib/cn";
 import type { SessionListItem } from "@shared/types";
 
-const MEDAL = ["text-accent", "text-secondary", "text-muted"];
+const MEDAL = ["text-violet-300", "text-secondary", "text-muted"];
 
 /** Personal best — top completed drills ranked by score. */
 export function Leaderboard({

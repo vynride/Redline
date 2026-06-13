@@ -20,14 +20,14 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         ref={ref}
         id={inputId}
         className={cn(
-          "h-11 rounded-md border bg-surface-2 px-3.5 text-primary placeholder:text-muted",
+          "h-11 rounded-md border bg-panel px-3.5 text-primary placeholder:text-muted",
           "transition focus:outline-none",
-          error ? "border-negative" : "border-line focus:border-accent",
+          error ? "border-rose-500" : "border-panel-line focus:border-violet-400",
           className,
         )}
         {...props}
       />
-      {error && <span className="text-label text-negative">{error}</span>}
+      {error && <span className="text-label text-rose-400">{error}</span>}
     </label>
   );
 });

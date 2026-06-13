@@ -28,7 +28,7 @@ export function Tabs({ tabs, value, onValueChange, className }: TabsProps) {
             onClick={() => onValueChange(tab.value)}
             className={cn(
               "rounded-full px-4 py-2 text-body-strong transition",
-              active ? "bg-surface-2 text-primary" : "text-secondary hover:text-primary",
+              active ? "bg-panel-2 text-white" : "text-secondary hover:text-white",
             )}
           >
             {tab.label}

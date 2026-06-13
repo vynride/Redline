@@ -20,8 +20,8 @@ export function Transcript({ lines, personaName }: { lines: TranscriptLine[]; pe
             </span>
             <div
               className={cn(
-                "max-w-[80%] rounded-lg px-4 py-3 text-body",
-                isUser ? "bg-surface-2 text-primary" : "border border-line bg-surface text-primary",
+                "max-w-[80%] rounded-2xl px-4 py-3 text-body",
+                isUser ? "bg-violet-500 text-white" : "border border-panel-line bg-panel text-primary",
               )}
             >
               {line.text}

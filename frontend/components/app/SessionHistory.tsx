@@ -33,7 +33,7 @@ export function SessionHistory({
           <Link
             key={s.id}
             href={href}
-            className="flex items-center gap-4 rounded-md px-4 py-3 transition hover:bg-surface-2"
+            className="flex items-center gap-4 rounded-xl px-4 py-3 transition hover:bg-panel-2"
           >
             <div className="flex min-w-0 flex-1 flex-col">
               <span className="truncate text-body-strong text-primary">{titles[s.scenario_id] ?? s.scenario_id}</span>
