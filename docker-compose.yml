@@ -16,7 +16,32 @@ services:
       timeout: 5s
       retries: 5
 
-  # backend and frontend services are added as they come online.
+  backend:
+    build: ./backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+psycopg2://redline:redline@db:5432/redline
+      CORS_ORIGINS: http://localhost:3000
+      JWT_SECRET: change-me-in-production
+    # Secrets (Sarvam) live in backend/.env — not committed.
+    env_file:
+      - path: ./backend/.env
+        required: false
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE: http://localhost:8000
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
 
 volumes:
   redline_pgdata:

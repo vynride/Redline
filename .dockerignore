@@ -1,0 +1,11 @@
+# Context root for the frontend image build.
+.git
+**/node_modules
+**/.next
+**/__pycache__
+**/.venv
+*.db
+.specstory
+HANDOVER.md
+backend
+docs
