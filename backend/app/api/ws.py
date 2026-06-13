@@ -21,6 +21,7 @@ from app.core.config import settings
 from app.core.logging import get_logger
 from app.db import SessionLocal
 from app.models.session import DrillSession, SessionStatus
+from app.models.turn import Speaker
 from app.models.base import utcnow
 from app.schemas.common import Emotion
 from app.schemas.session import SessionState
@@ -33,6 +34,7 @@ from app.schemas.ws import (
     dump,
 )
 from app.services import engine as engine_service
+from app.services.debrief import get_or_create_debrief
 from app.services.llm import get_llm_client
 from app.services.stt import get_stt_service
 from app.services.tts import get_tts_service
@@ -40,6 +42,18 @@ from app.services.tts import get_tts_service
 log = get_logger("redline.ws")
 
 router = APIRouter()
+
+
+async def _emit_complete(websocket: WebSocket, db, session: DrillSession, llm) -> None:
+    """Generate the debrief (if the drill is gradable) and tell the client we're done."""
+    ready = False
+    if any(t.speaker == Speaker.user for t in session.turns):
+        try:
+            await get_or_create_debrief(db, session, llm)
+            ready = True
+        except Exception:  # noqa: BLE001 — a failed debrief should not break the close
+            log.exception("debrief generation failed for session %s", session.id)
+    await websocket.send_json(dump(SessionComplete(debrief_ready=ready)))
 
 
 def _state(session: DrillSession) -> SessionState:
@@ -133,7 +147,7 @@ async def drill_ws(websocket: WebSocket, session_id: str) -> None:
                 await websocket.send_json(dump(TurnComplete(index=persona_index)))
 
                 if session.status != SessionStatus.active:
-                    await websocket.send_json(dump(SessionComplete(debrief_ready=False)))
+                    await _emit_complete(websocket, db, session, llm)
                     break
 
             elif msg_type == "end_session":
@@ -141,7 +155,7 @@ async def drill_ws(websocket: WebSocket, session_id: str) -> None:
                     session.status = SessionStatus.abandoned
                     session.ended_at = utcnow()
                     db.commit()
-                await websocket.send_json(dump(SessionComplete(debrief_ready=False)))
+                await _emit_complete(websocket, db, session, llm)
                 break
 
     except WebSocketDisconnect:
