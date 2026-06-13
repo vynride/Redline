@@ -1,5 +1,4 @@
 # Redline — local orchestration.
-# Fleshed out incrementally; finalized in the May 27 stage.
 services:
   db:
     image: postgres:16-alpine
@@ -17,8 +16,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # backend service added in the May 4+ stages
-  # frontend service added in the May 17+ stages
+  # backend and frontend services are added as they come online.
 
 volumes:
   redline_pgdata:
