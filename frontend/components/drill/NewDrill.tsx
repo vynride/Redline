@@ -106,19 +106,22 @@ export function DrillConfig({
 
   return (
     <div
-      className="fixed inset-0 z-50 grid place-items-center bg-ink/80 p-6 backdrop-blur-sm"
+      className="fixed inset-0 z-50 overflow-y-auto bg-ink/80 backdrop-blur-sm"
       onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-label={`Configure drill: ${scenario.title}`}
     >
-      <motion.div
-        initial={{ opacity: 0, y: 12, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-        className="w-full max-w-lg overflow-hidden rounded-2xl border border-panel-line bg-ink-2 shadow-[0_24px_60px_-28px_rgba(0,0,0,0.85)]"
-        onClick={(e) => e.stopPropagation()}
-      >
+      {/* min-h-full + items-center keeps the modal centered when it fits and lets
+          the overlay scroll (instead of clipping the top) when it doesn't. */}
+      <div className="flex min-h-full items-center justify-center p-4 sm:p-6">
+        <motion.div
+          initial={{ opacity: 0, y: 12, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+          className="w-full max-w-lg overflow-hidden rounded-2xl border border-panel-line bg-ink-2 shadow-[0_24px_60px_-28px_rgba(0,0,0,0.85)]"
+          onClick={(e) => e.stopPropagation()}
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Configure drill: ${scenario.title}`}
+        >
         {/* Header — app-window chrome: icon tile + mono eyebrow + severity */}
         <div className="flex items-start gap-3 border-b border-panel-line px-7 pb-5 pt-6">
           <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-panel-2 text-violet-300">
@@ -186,6 +189,7 @@ export function DrillConfig({
           </div>
         </div>
       </motion.div>
+      </div>
     </div>
   );
 }

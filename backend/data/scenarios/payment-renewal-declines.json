@@ -1,0 +1,30 @@
+{
+  "id": "payment-renewal-declines",
+  "title": "Renewal Decline Wave",
+  "archetype": "payment_failure",
+  "summary": "Subscription renewals started declining en masse overnight — thousands of paying customers are being downgraded to free tier as their cards 'fail.' Support is filling with angry users who insist their cards are fine. The head of finance wants to know if this is real churn or a bug.",
+  "roles": ["on_call_engineer", "incident_commander", "ops_responder"],
+  "difficulties": ["production_like", "redline"],
+  "persona": {
+    "name": "Elena Voss",
+    "role": "head_of_finance",
+    "voice_id": "priya",
+    "base_emotion": "frustrated",
+    "description": "A head of finance who needs to know immediately whether revenue is actually walking out the door or whether this is a self-inflicted bug. Wants the decline reason codes and the scope. Frustrated by anyone who treats a wall of declines as customer behavior without checking the gateway; reassured by someone who reads the reason codes and protects affected customers from wrongful downgrade."
+  },
+  "stakes": "Every wrongly-declined renewal downgrades a paying customer and may churn them permanently; left unchecked through the day it quietly erases a meaningful slice of recurring revenue and floods support.",
+  "hidden_facts": [
+    "A config change rotated the merchant account ID to a new one that isn't fully activated, so the gateway returns a generic 'do not honor' on every charge.",
+    "The customers' cards are perfectly valid — the decline reason codes are identical across all of them, which is the tell.",
+    "Reverting to the previous merchant account immediately restores successful renewals.",
+    "Customers wrongly downgraded need their subscriptions reinstated without a re-charge, not a fresh signup."
+  ],
+  "objectives": [
+    "Determine whether this is real churn or a systemic failure using decline reason codes",
+    "Spot the identical reason code across customers as evidence of a gateway issue",
+    "Trace the cause to the rotated, unactivated merchant account and revert it",
+    "Plan reinstatement of wrongly-downgraded customers without double-charging"
+  ],
+  "severity": { "start": 8, "max": 10, "win_below": 3, "lose_at": 10 },
+  "opening_line": "Thousands of renewals declined overnight and we're hemorrhaging subscribers. Is this customers leaving or is this us — and how fast can you tell me which?"
+}

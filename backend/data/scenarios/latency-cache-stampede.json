@@ -1,0 +1,30 @@
+{
+  "id": "latency-cache-stampede",
+  "title": "Cache Stampede",
+  "archetype": "latency_spike",
+  "summary": "The cache cluster restarted and now the database is melting — every request that used to hit cache is slamming the database at once, latency is through the roof, and the system can't warm the cache back up because it's too overloaded to serve anything. The incident commander wants you to break the deadlock.",
+  "roles": ["on_call_engineer", "ops_responder", "incident_commander"],
+  "difficulties": ["production_like", "redline"],
+  "persona": {
+    "name": "Dana Whitfield",
+    "role": "incident_commander",
+    "voice_id": "priya",
+    "base_emotion": "urgent",
+    "description": "An incident commander who recognizes a self-reinforcing failure when she sees one and wants the loop broken. Asks why the cache won't simply repopulate. Frustrated by 'just wait for it to warm up' when the system is too overloaded to warm up; reassured by a responder who understands you must reduce load to let the cache rebuild."
+  },
+  "stakes": "The site is effectively down and stuck — it cannot recover on its own because the recovery path is exactly what's overloaded; left alone it stays down indefinitely rather than self-healing.",
+  "hidden_facts": [
+    "An empty cache means every request is a cache miss, and identical concurrent misses all hit the database for the same keys (a stampede).",
+    "The database is saturated to the point that no request completes fast enough to actually populate the cache, so it stays empty — a deadlock.",
+    "Shedding or rate-limiting incoming traffic lets a trickle of requests succeed and warm the cache, after which load can be ramped back.",
+    "Adding database capacity is slow and may not arrive before the stampede causes a full outage; reducing load is the fast lever."
+  ],
+  "objectives": [
+    "Recognize the empty-cache stampede and the recovery deadlock it creates",
+    "Reduce incoming load (shed/rate-limit) so a few requests can repopulate the cache",
+    "Avoid 'just wait for warm-up' which can't happen under full load",
+    "Sequence a controlled ramp back once cache hit-rate recovers"
+  ],
+  "severity": { "start": 8, "max": 10, "win_below": 3, "lose_at": 10 },
+  "opening_line": "Cache came back empty and now the database is on fire and it won't repopulate. Why won't it just warm up, and how do we break the loop?"
+}

@@ -1,0 +1,30 @@
+{
+  "id": "prod-outage-dns",
+  "title": "Global DNS Outage",
+  "archetype": "production_outage",
+  "summary": "Customers worldwide suddenly can't reach the site — it resolves for some regions and not others. Nothing was deployed. The incident commander wants you to lead the investigation and is wary of everyone's instinct to blame their own service.",
+  "roles": ["on_call_engineer", "incident_commander", "ops_responder"],
+  "difficulties": ["warmup", "production_like"],
+  "persona": {
+    "name": "Sam Okafor",
+    "role": "incident_commander",
+    "voice_id": "amit",
+    "base_emotion": "calm",
+    "description": "A composed incident commander who guards against tunnel vision. Pushes responders to confirm the layer the problem lives in before touching anything, and rewards anyone who reasons from 'nothing was deployed' to an external or infrastructure cause. Grows tense if the responder starts restarting application services that aren't the problem."
+  },
+  "stakes": "A regional resolution failure means a large share of customers see a dead site with no error to even reach support; prolonged, it triggers a flood of cancellations and a public-status escalation.",
+  "hidden_facts": [
+    "A DNS change to add a new subdomain was pushed an hour ago and included a typo in the zone file that broke a wildcard record.",
+    "Resolver caches mean some regions still serve the old, good record while others have expired to the broken one — explaining the partial outage.",
+    "Reverting the zone change fixes resolution, but propagation will take as long as the TTL (about 15 minutes).",
+    "The application and servers are perfectly healthy, which misleads toward an app-layer theory."
+  ],
+  "objectives": [
+    "Recognize the partial, region-dependent pattern points to DNS, not the app tier",
+    "Resist restarting healthy application services",
+    "Trace the cause to the recent zone-file change and its broken wildcard record",
+    "Revert the change and set expectations around TTL-bound propagation time"
+  ],
+  "severity": { "start": 6, "max": 10, "win_below": 3, "lose_at": 10 },
+  "opening_line": "Half the world can't reach us, half can, and nobody deployed anything. Where are you looking first — and please don't say 'restart everything.'"
+}

@@ -1,0 +1,30 @@
+{
+  "id": "prod-outage-database",
+  "title": "Primary Database Down",
+  "archetype": "production_outage",
+  "summary": "The primary database stopped responding and automatic failover didn't trigger. The entire product is returning errors. A VP of engineering has joined the bridge and wants to know whether to fail over manually and what the data-loss risk is.",
+  "roles": ["on_call_engineer", "incident_commander", "ops_responder"],
+  "difficulties": ["warmup", "production_like", "redline"],
+  "persona": {
+    "name": "Dana Whitfield",
+    "role": "vp_engineering",
+    "voice_id": "priya",
+    "base_emotion": "urgent",
+    "description": "A VP of engineering who stays terse under pressure and asks pointed questions. Wants to understand the data-loss tradeoff before authorizing a manual failover. Impatient with vague reassurance but immediately calmer when given a clear replication-lag number and a decisive recommendation she can sign off on."
+  },
+  "stakes": "Every minute of full outage costs roughly $20k in lost revenue and SLA penalties, but a failover with high replication lag could silently lose recent transactions — a worse outcome than the downtime.",
+  "hidden_facts": [
+    "The primary's disk filled up, which wedged the process; the replica is healthy and only 2 seconds behind.",
+    "Automatic failover didn't trigger because the health check still got a TCP connection, just no query response.",
+    "With only 2 seconds of lag, a manual failover loses at most a trivial amount of in-flight data.",
+    "Freeing disk on the old primary would also recover it, but that takes longer than promoting the replica."
+  ],
+  "objectives": [
+    "Confirm the replica is healthy and check replication lag before deciding",
+    "Explain the data-loss tradeoff of failover in concrete terms (seconds of lag)",
+    "Recommend promoting the replica given the low lag, with a clear rationale",
+    "Identify the full disk as the root cause so the old primary can be recovered safely"
+  ],
+  "severity": { "start": 8, "max": 10, "win_below": 3, "lose_at": 10 },
+  "opening_line": "The whole product is down and failover didn't kick in. Do we promote the replica or not — and what do we lose if we do?"
+}

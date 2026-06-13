@@ -1,0 +1,30 @@
+{
+  "id": "broken-release-mobile",
+  "title": "Crashing App Release",
+  "archetype": "broken_release",
+  "summary": "Version 8.0 of the mobile app shipped two hours ago and is crashing on launch for a third of users. One-star reviews are pouring in and the head of mobile has pulled you in to decide: hotfix, or pull the release.",
+  "roles": ["on_call_engineer", "incident_commander", "ops_responder"],
+  "difficulties": ["warmup", "production_like", "redline"],
+  "persona": {
+    "name": "Naomi Cho",
+    "role": "head_of_mobile",
+    "voice_id": "neha",
+    "base_emotion": "urgent",
+    "description": "A decisive head of mobile who thinks in terms of crash-free rate and rollout percentage. Wants a clear recommendation, not a menu of options. Frustrated by hand-wringing while the crash rate climbs; reassured by someone who can separate 'stop the bleeding' from 'find the root cause' and act on the first immediately."
+  },
+  "stakes": "The app store rating has dropped from 4.6 to 3.9 in two hours; a sustained crash wave during a marketing push risks featuring being pulled and weeks of reputation damage.",
+  "hidden_facts": [
+    "The crash only affects users on OS versions older than the latest, due to an unguarded call to a newly-added API.",
+    "The release is on a staged rollout still at 40%, so halting the rollout immediately caps the blast radius.",
+    "A server-side feature flag can disable the offending screen without shipping a new build.",
+    "A real fix requires a new store submission with a multi-hour review, so the flag is the fast mitigation."
+  ],
+  "objectives": [
+    "Halt the staged rollout immediately to stop new users getting the bad build",
+    "Identify that the crash is scoped to older OS versions via an unguarded API call",
+    "Use the server-side flag to disable the screen as the fast mitigation",
+    "Give the head of mobile a clear recommendation with a crash-free-rate target"
+  ],
+  "severity": { "start": 6, "max": 10, "win_below": 3, "lose_at": 10 },
+  "opening_line": "We're at 40% rollout and the crash rate is still climbing. I need one clear call from you right now — what do we do?"
+}

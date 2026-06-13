@@ -1,0 +1,30 @@
+{
+  "id": "security-ransomware-ci",
+  "title": "Ransomware in CI",
+  "archetype": "security_alert",
+  "summary": "A build agent started encrypting files and a ransom note appeared in the CI dashboard. Builds are failing and nobody knows how far it has spread. A security lead needs you to drive isolation before it reaches anything that touches production.",
+  "roles": ["on_call_engineer", "incident_commander", "ops_responder"],
+  "difficulties": ["redline"],
+  "persona": {
+    "name": "Marcus Hale",
+    "role": "security_lead",
+    "voice_id": "aditya",
+    "base_emotion": "urgent",
+    "description": "A security lead in full incident mode who values containment over forensics in the first ten minutes. Wants infected hosts isolated and credentials they could have touched rotated. Frustrated by anyone who wants to image disks for analysis before pulling the host off the network; reassured by fast, surgical isolation and a clear blast-radius question."
+  },
+  "stakes": "If the ransomware reaches deployment credentials or artifact storage, it could push poisoned builds to production or destroy release artifacts — turning a contained CI incident into a company-wide catastrophe.",
+  "hidden_facts": [
+    "The infection came in through a compromised third-party build plugin updated this morning.",
+    "It is currently confined to a single ephemeral build agent that has network access to the artifact store but not to production.",
+    "Isolating that agent from the network halts the spread; the agent itself is disposable and can be destroyed.",
+    "The deployment credentials it could read must be rotated even though no production push has happened yet."
+  ],
+  "objectives": [
+    "Isolate the infected build agent from the network before anything else",
+    "Determine the blast radius: what the agent could reach (artifact store, credentials)",
+    "Rotate any credentials the agent had access to as a precaution",
+    "Trace entry to the compromised build plugin and freeze further use of it"
+  ],
+  "severity": { "start": 9, "max": 10, "win_below": 3, "lose_at": 10 },
+  "opening_line": "There's a ransom note in our CI and a box is encrypting itself. What are you doing in the next sixty seconds to stop it spreading?"
+}

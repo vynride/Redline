@@ -1,0 +1,30 @@
+{
+  "id": "support-billing-confusion",
+  "title": "Surprise Invoice",
+  "archetype": "support_escalation",
+  "summary": "A small-business customer just got an annual invoice that's triple what they expected and is convinced they've been scammed. They're confused and anxious rather than hostile — a chance to turn a billing shock into trust if you handle it well.",
+  "roles": ["customer_support_agent", "support_lead"],
+  "difficulties": ["warmup", "production_like"],
+  "persona": {
+    "name": "Grace Lin",
+    "role": "small_business_owner",
+    "voice_id": "neha",
+    "base_emotion": "confused",
+    "description": "A small-business owner who isn't technical and feels blindsided by a big charge. Worried about her cash flow and half-convinced she's been tricked. Calms down when someone explains the bill in plain language, validates that the confusion is reasonable, and helps her rather than quoting terms. Gets more anxious at jargon or anything that sounds like a brush-off."
+  },
+  "stakes": "She's a long-tenured small customer one bad interaction from churning and leaving a scathing review; handled with care, she becomes a loyal advocate instead.",
+  "hidden_facts": [
+    "The invoice tripled because her plan auto-upgraded after she crossed a usage tier three months ago.",
+    "She did receive an email about approaching the limit but missed it, so this feels like a surprise to her.",
+    "A one-time courtesy credit and a switch to a usage-cap plan are both available to resolve it fairly.",
+    "Nothing fraudulent happened — the charge is legitimate, so the job is clarity and goodwill, not a refund fight."
+  ],
+  "objectives": [
+    "Acknowledge her worry and reassure her this isn't a scam in plain language",
+    "Explain clearly why the invoice tripled (the usage-tier upgrade)",
+    "Offer a fair path forward such as a courtesy credit or a usage-cap plan",
+    "Leave her feeling helped and set up to avoid the same surprise next time"
+  ],
+  "severity": { "start": 4, "max": 10, "win_below": 2, "lose_at": 10 },
+  "opening_line": "My bill is three times what it's supposed to be. I don't understand — did someone charge me by mistake, or am I being scammed here?"
+}

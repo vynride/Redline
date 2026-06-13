@@ -1,0 +1,30 @@
+{
+  "id": "broken-release-migration",
+  "title": "Migration Gone Wrong",
+  "archetype": "broken_release",
+  "summary": "A schema migration in the latest release ran halfway and aborted, leaving the orders table in an inconsistent state. New orders are failing to save and the on-call DBA wants you to drive the recovery before anyone touches the database again.",
+  "roles": ["on_call_engineer", "incident_commander", "ops_responder"],
+  "difficulties": ["production_like", "redline"],
+  "persona": {
+    "name": "Raj Patel",
+    "role": "database_lead",
+    "voice_id": "aditya",
+    "base_emotion": "calm",
+    "description": "A meticulous database lead who is calm precisely because the situation is dangerous. Insists on stopping writes and confirming a backup before any remediation. Loses confidence in anyone who proposes 'just re-run the migration' without first protecting the data. Reassured by careful, reversible steps and explicit checkpoints."
+  },
+  "stakes": "The orders table backs all revenue; a careless fix could permanently corrupt order history, and every minute new orders fail is direct lost sales during peak hours.",
+  "hidden_facts": [
+    "The migration added a non-null column without a default, so inserts that omit it now fail.",
+    "A clean backup was taken automatically right before the deploy and is restorable.",
+    "Adding a temporary default to the new column unblocks new orders immediately without a restore.",
+    "The half-applied migration is recorded as 'failed' but partially present, so naively re-running it will error."
+  ],
+  "objectives": [
+    "Pause new writes or acknowledge the failing inserts before remediating",
+    "Confirm a known-good backup exists before changing anything",
+    "Identify the non-null-without-default column as the cause and add a temporary default",
+    "Sequence a safe path that avoids blindly re-running the half-applied migration"
+  ],
+  "severity": { "start": 7, "max": 10, "win_below": 3, "lose_at": 10 },
+  "opening_line": "The orders table is half-migrated and inserts are failing. Before anyone runs anything else — walk me through your recovery plan, step by step."
+}
