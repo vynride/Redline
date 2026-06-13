@@ -3,19 +3,24 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ArrowRight, PhoneOff } from "lucide-react";
 import { MicButton, type MicState } from "@/components/drill/MicButton";
 import { Transcript, type TranscriptLine } from "@/components/drill/Transcript";
 import { DrillHud } from "@/components/drill/hud/DrillHud";
-import { Button, Card, LoadingScreen } from "@/components/ui";
+import { Button, LoadingScreen } from "@/components/ui";
 import { api } from "@/lib/api";
 import { MicCapture, PcmPlayer } from "@/lib/audio";
+import { ARCHETYPE_LABELS, ROLE_LABELS } from "@/lib/labels";
+import { ARCHETYPE_ICONS, SEV, hardest } from "@/lib/scenarioMeta";
+import { cn } from "@/lib/cn";
 import { DrillSocket } from "@/lib/ws";
-import type { Scenario, SessionState } from "@shared/types";
+import type { Difficulty, Role, Scenario, SessionState } from "@shared/types";
 
 export default function DrillPage() {
   const sessionId = String(useParams().sessionId);
 
   const [scenario, setScenario] = useState<Scenario | null>(null);
+  const [meta, setMeta] = useState<{ role: Role; difficulty: Difficulty } | null>(null);
   const [lines, setLines] = useState<TranscriptLine[]>([]);
   const [state, setState] = useState<SessionState | null>(null);
   const [mic, setMic] = useState<MicState>("ready");
@@ -37,6 +42,7 @@ export default function DrillPage() {
         const sc = await api.getScenario(session.scenario_id);
         if (cancelled) return;
         setScenario(sc);
+        setMeta({ role: session.role, difficulty: session.difficulty });
         setLines(session.turns.map((t) => ({ role: t.speaker, text: t.text, emotion: t.emotion as never })));
         setState({
           severity: session.severity, severity_start: session.severity_start, confidence: session.confidence,
@@ -81,9 +87,11 @@ export default function DrillPage() {
     };
   }, [sessionId]);
 
+  // Keep the latest turn in view — also when the "typing" indicator appears so it
+  // isn't stranded below the fold.
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [lines]);
+  }, [lines, mic]);
 
   const toggleMic = useCallback(async () => {
     setNotice(null);
@@ -112,36 +120,103 @@ export default function DrillPage() {
   }
 
   if (error) return <p className="text-body text-rose-400">{error}</p>;
-  if (!scenario || !state) return <LoadingScreen />;
+  if (!scenario || !state || !meta) return <LoadingScreen />;
+
+  const Icon = ARCHETYPE_ICONS[scenario.archetype];
+  const sev = SEV[meta.difficulty ?? hardest(scenario.difficulties)];
+  const personaRole = scenario.persona.role.replace(/_/g, " ");
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-h1 text-white">{scenario.title}</h1>
-          <p className="text-body text-secondary">
-            You are facing {scenario.persona.name} · {scenario.persona.role.replace(/_/g, " ")}
-          </p>
+    <div className="flex flex-col gap-4 px-5 py-5 sm:px-8 lg:h-[calc(100dvh-4rem)]">
+      {/* ── Header ─────────────────────────────────────────── */}
+      <header className="flex flex-wrap items-start justify-between gap-4">
+        <div className="flex items-start gap-3.5">
+          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-panel-2 text-violet-300">
+            <Icon className="h-6 w-6" />
+          </span>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
+                {ARCHETYPE_LABELS[scenario.archetype]}
+              </span>
+              <span className={cn("rounded-md px-1.5 py-0.5 font-mono text-[10px] font-semibold", sev.cls)}>
+                {sev.label}
+              </span>
+              <span className="rounded-md bg-panel-2 px-2 py-0.5 text-[11px] font-medium text-secondary">
+                {ROLE_LABELS[meta.role]}
+              </span>
+            </div>
+            <h1 className="mt-1 text-h1 text-white">{scenario.title}</h1>
+          </div>
         </div>
+
         {!ended ? (
-          <Button variant="secondary" onClick={endDrill}>End drill</Button>
+          <Button variant="secondary" onClick={endDrill} className="gap-2">
+            <PhoneOff className="h-4 w-4" /> End drill
+          </Button>
         ) : (
           <Link href={`/debrief/${sessionId}`}>
-            <Button>View debrief</Button>
+            <Button className="gap-2">
+              View debrief <ArrowRight className="h-4 w-4" />
+            </Button>
           </Link>
         )}
-      </div>
+      </header>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
-        <Card className="flex h-[60vh] flex-col">
-          <div ref={scrollRef} className="flex-1 overflow-y-auto pr-2">
-            <Transcript lines={lines} personaName={scenario.persona.name} />
+      {/* ── Console: transcript + live HUD, equal-height ───── */}
+      <div className="grid min-h-0 flex-1 gap-5 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-stretch">
+        {/* Transcript / call console */}
+        <section className="relative flex h-[62vh] min-h-0 flex-col overflow-hidden rounded-2xl border border-panel-line bg-panel lg:h-full">
+          {/* Top gradient accent stripe — matches the dashboard Quick Start banner. */}
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-px bg-gradient-to-r from-transparent via-violet-500/60 to-transparent" />
+
+          {/* Call header — who you're on the line with + live status */}
+          <div className="flex items-center justify-between gap-3 border-b border-panel-line px-5 py-3.5 sm:px-6">
+            <div className="flex min-w-0 items-center gap-3">
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-panel-2 text-violet-300">
+                <Icon className="h-4 w-4" />
+              </span>
+              <div className="min-w-0">
+                <p className="truncate text-body-strong text-white">{scenario.persona.name}</p>
+                <p className="truncate text-label capitalize text-muted">{personaRole}</p>
+              </div>
+            </div>
+            <span
+              className={cn(
+                "inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.12em]",
+                ended ? "border-panel-line text-muted" : "border-emerald-500/40 text-emerald-300",
+              )}
+            >
+              <span
+                className={cn(
+                  "h-1.5 w-1.5 rounded-full",
+                  ended ? "bg-muted" : "bg-emerald-400 animate-pulse",
+                )}
+              />
+              {ended ? "Call ended" : "On the line"}
+            </span>
           </div>
-          <div className="mt-4 border-t border-panel-line pt-4">
-            {notice && <p className="mb-3 text-center text-label text-rose-400">{notice}</p>}
-            <MicButton state={ended ? "ended" : mic} onToggle={toggleMic} />
+
+          {/* Scrollback — conversation kept in a readable centred column */}
+          <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
+            <div className="mx-auto flex min-h-full w-full max-w-3xl flex-col px-5 py-6 sm:px-6">
+              <Transcript
+                lines={lines}
+                personaName={scenario.persona.name}
+                personaIcon={Icon}
+                thinking={!ended && mic === "thinking"}
+              />
+            </div>
           </div>
-        </Card>
+
+          {/* Composer */}
+          <div className="border-t border-panel-line bg-ink-2/40 px-5 py-5">
+            <div className="mx-auto w-full max-w-3xl">
+              {notice && <p className="mb-3 text-center text-label text-rose-400">{notice}</p>}
+              <MicButton state={ended ? "ended" : mic} onToggle={toggleMic} />
+            </div>
+          </div>
+        </section>
 
         <DrillHud scenario={scenario} state={state} />
       </div>

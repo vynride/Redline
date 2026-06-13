@@ -3,11 +3,13 @@
 import { usePathname } from "next/navigation";
 
 /**
- * The dashboard is a full-bleed page (its own sticky header + toolbar span the
- * viewport), so it opts out of the centered container that wraps other app pages.
+ * The dashboard and live drill are full-bleed pages (they span the viewport and
+ * manage their own spacing), so they opt out of the centered container that wraps
+ * the other app pages.
  */
 export function AppContainer({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  if (pathname === "/dashboard") return <>{children}</>;
+  const fullBleed = pathname === "/dashboard" || pathname.startsWith("/drill/");
+  if (fullBleed) return <>{children}</>;
   return <div className="mx-auto max-w-[1180px] px-6 py-12">{children}</div>;
 }
