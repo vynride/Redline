@@ -147,13 +147,7 @@ redline/
 └── README.md
 ```
 
-## 8. Commit timeline (deliverable)
-
-The git history itself is a deliverable: incremental commits backdated across
-**3 May 2026 → 27 May 2026**, each showing real progress. Dates set via
-`GIT_AUTHOR_DATE` / `GIT_COMMITTER_DATE`. See plan for the stage→date mapping.
-
-## 9. Risks / verify-at-build
+## 8. Risks / verify-at-build
 
 - **Bulbul WS contract** — exact `config`/`text`/`flush` framing, base64 audio, header strip.
   Isolated in `tts.py`; non-streaming `/text-to-speech` fallback keeps audio
