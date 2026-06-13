@@ -50,6 +50,35 @@ def _compute_score(db: Session, session_id: str) -> float:
     return round(sum(per_turn) / len(per_turn) * 100, 1)
 
 
+async def opening(db: Session, session: DrillSession, llm: LLMClient) -> EngineTurnOutput:
+    """Generate and persist the persona's opening utterance before the first user turn."""
+    if session.status != SessionStatus.active:
+        raise ValueError("Cannot open a drill that is not active.")
+
+    scenario: Scenario | None = catalog.get_scenario(session.scenario_id)
+    if scenario is None:
+        raise ValueError(f"Scenario '{session.scenario_id}' no longer exists.")
+
+    system = compile_system_prompt(scenario, Role(session.role), Difficulty(session.difficulty))
+    seed: list[ChatMessage] = [{"role": "user", "content": "Begin the incident. Open the call in character."}]
+    output = await llm.generate(system=system, messages=seed, response_schema=EngineTurnOutput)
+
+    persona_turn = Turn(
+        session_id=session.id,
+        index=0,
+        speaker=Speaker.persona,
+        text=output.utterance,
+        emotion=output.emotion.value,
+        severity_after=session.severity,
+        confidence_after=session.confidence,
+        evaluation=output.turn_eval.model_dump(),
+    )
+    db.add(persona_turn)
+    db.commit()
+    db.refresh(session)
+    return output
+
+
 async def step(db: Session, session: DrillSession, user_text: str, llm: LLMClient) -> EngineTurnOutput:
     if session.status != SessionStatus.active:
         raise ValueError("Cannot advance a drill that is not active.")

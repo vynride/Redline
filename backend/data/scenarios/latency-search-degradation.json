@@ -1,0 +1,30 @@
+{
+  "id": "latency-search-degradation",
+  "title": "Search Slowdown",
+  "archetype": "latency_spike",
+  "summary": "Product search has degraded from instant to five-plus seconds, and the slowdown is getting worse through the morning. Conversion is sliding. A product engineering manager wants you to find it before the lunchtime traffic peak makes it unusable.",
+  "roles": ["on_call_engineer", "ops_responder", "incident_commander"],
+  "difficulties": ["warmup", "production_like"],
+  "persona": {
+    "name": "Naomi Cho",
+    "role": "product_eng_manager",
+    "voice_id": "priya",
+    "base_emotion": "frustrated",
+    "description": "A product engineering manager who feels the business pressure and wants a hypothesis fast, but respects rigor. Dislikes guess-and-restart debugging. Pushes for correlation with recent changes and rewards a responder who narrows the search cluster as the culprit with evidence rather than vibes."
+  },
+  "stakes": "Search drives 60% of purchases; if it's unusable by the lunch peak, the day's revenue target is blown and leadership will want a postmortem before the afternoon.",
+  "hidden_facts": [
+    "A reindex job kicked off at 6am is running in the background and saturating the search cluster's CPU.",
+    "The degradation worsens steadily because the reindex is processing ever-larger shards as it goes.",
+    "Pausing or throttling the reindex restores search latency within minutes; it can resume off-peak.",
+    "Application servers and the database are healthy, which misleads toward an app-code theory."
+  ],
+  "objectives": [
+    "Correlate the gradual degradation with the 6am reindex job rather than guessing",
+    "Confirm the search cluster's CPU saturation as the bottleneck",
+    "Throttle or pause the reindex to restore latency before the peak",
+    "Give the manager a hypothesis-backed status with an ETA to recovery"
+  ],
+  "severity": { "start": 5, "max": 10, "win_below": 3, "lose_at": 10 },
+  "opening_line": "Search is at five seconds and climbing, and lunch traffic hits in an hour. What's your first hypothesis and how are you testing it?"
+}

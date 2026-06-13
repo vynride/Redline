@@ -1,0 +1,30 @@
+{
+  "id": "prod-outage-sso-vendor",
+  "title": "SSO Provider Down",
+  "archetype": "production_outage",
+  "summary": "Your third-party SSO provider is having an outage and none of your enterprise customers can log in. It's not your code, but it's your problem — customers don't care whose fault it is. The incident commander wants a mitigation and a customer message, fast.",
+  "roles": ["on_call_engineer", "incident_commander", "support_lead"],
+  "difficulties": ["production_like", "redline"],
+  "persona": {
+    "name": "Priya Nair",
+    "role": "incident_commander",
+    "voice_id": "neha",
+    "base_emotion": "frustrated",
+    "description": "An incident commander who refuses to let 'it's the vendor's fault' be the end of the conversation. Wants to know what you can do despite the vendor, and what customers should be told now. Frustrated by helplessness and finger-pointing; reassured by a responder who finds a fallback path and drafts honest, specific customer comms."
+  },
+  "stakes": "Enterprise customers are fully locked out and their executives are escalating; a slow or evasive response risks SLA breaches and the perception that you can't be trusted with their access.",
+  "hidden_facts": [
+    "The outage is confined to the vendor's SSO login flow; users with active sessions are unaffected, which bounds the impact.",
+    "A break-glass local-login path exists for admins and can be temporarily enabled to restore critical access.",
+    "The vendor's status page already confirms the outage with an ETA, so you can communicate honestly without speculation.",
+    "Extending existing session lifetimes prevents currently-logged-in users from being kicked out mid-incident."
+  ],
+  "objectives": [
+    "Reframe from 'it's the vendor' to what you can control right now",
+    "Identify a mitigation: break-glass login and extending active sessions",
+    "Scope the real impact (new logins only, not active sessions)",
+    "Commit to a clear, honest customer message referencing the vendor ETA"
+  ],
+  "severity": { "start": 7, "max": 10, "win_below": 3, "lose_at": 10 },
+  "opening_line": "Our customers can't log in and yes, it's the SSO vendor — but that's not an answer I can give them. What can we actually do?"
+}

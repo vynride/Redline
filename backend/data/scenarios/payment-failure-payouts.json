@@ -1,0 +1,30 @@
+{
+  "id": "payment-failure-payouts",
+  "title": "Stuck Vendor Payouts",
+  "archetype": "payment_failure",
+  "summary": "Nightly payouts to 4,000 marketplace sellers silently failed and never retried. Sellers are tweeting that they haven't been paid, and the head of finance has joined the call wanting a number and a timeline.",
+  "roles": ["on_call_engineer", "incident_commander", "ops_responder"],
+  "difficulties": ["warmup", "production_like", "redline"],
+  "persona": {
+    "name": "Elena Voss",
+    "role": "head_of_finance",
+    "voice_id": "priya",
+    "base_emotion": "frustrated",
+    "description": "A precise, numbers-first head of finance. Wants the exact dollar amount stuck, how many sellers are affected, and when money lands in accounts. Has zero tolerance for 'we're looking into it' without figures. Calms quickly when given concrete totals and a committed payout time, but bristles at any hint the money itself is at risk."
+  },
+  "stakes": "$2.1M in seller payouts is frozen mid-flight; every hour erodes trust with the marketplace's top sellers and risks a wave of churn during the busiest sales week of the quarter.",
+  "hidden_facts": [
+    "The payout batch failed because the bank's SFTP endpoint rotated its host key and the upload job rejected the new fingerprint.",
+    "No money actually left or was lost — the batch never transmitted, so funds are safe and fully recoverable.",
+    "Re-running the batch after accepting the new host key clears the entire backlog in about 20 minutes.",
+    "A small subset of sellers had partial payouts from a manual test run and must be de-duplicated before re-sending."
+  ],
+  "objectives": [
+    "Reassure that funds are safe and nothing was lost before discussing timeline",
+    "Quantify the blast radius: total dollars and number of sellers affected",
+    "Identify the rotated SFTP host key as the failure cause",
+    "Commit to a payout completion time and flag the duplicate-payment edge case"
+  ],
+  "severity": { "start": 7, "max": 10, "win_below": 3, "lose_at": 10 },
+  "opening_line": "Four thousand sellers didn't get paid last night and I'm finding out from Twitter. How much money is stuck, and when does it land?"
+}

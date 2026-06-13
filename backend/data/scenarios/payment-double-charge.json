@@ -1,0 +1,30 @@
+{
+  "id": "payment-double-charge",
+  "title": "Duplicate Charge Storm",
+  "archetype": "payment_failure",
+  "summary": "A retry bug double-charged thousands of customers in the last hour. Chargebacks are spiking and the partnerships manager at your card processor is on the line warning you're close to a fraud-monitoring threshold that could freeze your account.",
+  "roles": ["on_call_engineer", "incident_commander", "ops_responder"],
+  "difficulties": ["production_like", "redline"],
+  "persona": {
+    "name": "Theo Brandt",
+    "role": "processor_partner_manager",
+    "voice_id": "aditya",
+    "base_emotion": "urgent",
+    "description": "A partner manager at the payment processor who is friendly but protecting his own risk team. Needs to hear that the bleeding has stopped and that you have a refund plan, or he must escalate to a hold on your account. Reassured by decisive action — stopping new charges first, then refunding — and rattled by anyone who wants to refund before stopping the bug."
+  },
+  "stakes": "Cross the processor's dispute-rate threshold and they freeze settlements for 48 hours, cutting off all incoming revenue and triggering a public trust crisis with customers already seeing double charges.",
+  "hidden_facts": [
+    "A deploy 70 minutes ago removed the idempotency key from the charge-retry path, so timeouts retried as fresh charges.",
+    "New double-charges are still being created every minute until the deploy is rolled back or the retry path is disabled.",
+    "The duplicate charges are cleanly identifiable by a shared original transaction id, so bulk refunds are straightforward.",
+    "Refunding before stopping the bug just creates more retries — the order of operations matters."
+  ],
+  "objectives": [
+    "Stop new duplicate charges first by rolling back or disabling the retry path",
+    "Quantify how many customers and what dollar amount were double-charged",
+    "Lay out a bulk-refund plan keyed on the original transaction id",
+    "Reassure the processor with a concrete sequence and an updated dispute-rate trajectory"
+  ],
+  "severity": { "start": 8, "max": 10, "win_below": 3, "lose_at": 10 },
+  "opening_line": "Your dispute rate is climbing toward our freeze threshold as we speak. Tell me you've stopped the double-charging — what's actually happening on your end?"
+}

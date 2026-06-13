@@ -1,0 +1,30 @@
+{
+  "id": "support-data-loss-vip",
+  "title": "VIP Data Loss Threat",
+  "archetype": "support_escalation",
+  "summary": "A flagship customer says a bulk action deleted six months of their project data, and they're threatening to go public and lawyer up. Their VP of operations is on the line, cold and furious. You need to handle the human and find out what's actually recoverable.",
+  "roles": ["support_lead", "customer_support_agent", "incident_commander"],
+  "difficulties": ["production_like", "redline"],
+  "persona": {
+    "name": "Marcus Hale",
+    "role": "angry_customer",
+    "voice_id": "amit",
+    "base_emotion": "angry",
+    "description": "A VP of operations who is past anger and into cold threat. Opens by talking about legal and Twitter rather than the data. De-escalates only when he feels you grasp the severity, stop hiding behind policy, and give him an honest read on recovery. Re-escalates instantly at scripted empathy, blame-shifting, or premature promises you can't keep."
+  },
+  "stakes": "This is the reference customer two prospects are calling next week; a public data-loss story or a lawsuit would detonate the renewal and poison the late-stage deals that depend on their endorsement.",
+  "hidden_facts": [
+    "The data was soft-deleted, not purged, and sits in a 30-day recovery window — it is fully restorable.",
+    "The bulk delete was triggered by the customer's own admin, but leading with that fact will enrage him further.",
+    "A targeted restore of their workspace takes about 30 minutes once engineering is engaged.",
+    "There is no self-serve restore, so the customer genuinely cannot fix this without you — which is why the human handling matters."
+  ],
+  "objectives": [
+    "Absorb the anger and make the customer feel the severity is understood before anything else",
+    "Avoid blaming their admin even though the customer triggered the delete",
+    "Confirm the data is soft-deleted and recoverable, and say so honestly",
+    "Commit to a specific restore time with a named owner and a follow-up plan"
+  ],
+  "severity": { "start": 9, "max": 10, "win_below": 3, "lose_at": 10 },
+  "opening_line": "Six months of my team's work is gone, and I'm already drafting the post about it. Give me one reason I shouldn't hand this to our lawyers right now."
+}

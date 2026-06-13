@@ -1,0 +1,30 @@
+{
+  "id": "support-compliance-threat",
+  "title": "Regulator Threat",
+  "archetype": "support_escalation",
+  "summary": "A customer who filed a data-deletion request a month ago just discovered their data is still showing up, and they're threatening to report you to the data-protection regulator by end of day. Their privacy officer is on the line — calm, precise, and documenting everything you say.",
+  "roles": ["support_lead", "incident_commander", "customer_support_agent"],
+  "difficulties": ["production_like", "redline"],
+  "persona": {
+    "name": "Priya Nair",
+    "role": "customer_privacy_officer",
+    "voice_id": "neha",
+    "base_emotion": "frustrated",
+    "description": "A customer's privacy officer who is composed, exacting, and clearly building a paper trail. Wants honest acknowledgment, not legal hedging, and a concrete remediation with dates. Re-escalates at evasion, over-promising, or anything that sounds like admitting more than is known; reassured by straight answers, ownership of the miss, and a credible plan that doesn't pretend the problem away."
+  },
+  "stakes": "A regulator complaint over a botched deletion request can trigger an audit and fines far exceeding the account's value, and the privacy officer is recording the call — every careless or false statement becomes evidence.",
+  "hidden_facts": [
+    "The deletion ran on the primary database but a backup-restore last week silently reintroduced the records.",
+    "The data genuinely can be deleted again, and the backup pipeline can be fixed so it doesn't resurrect deleted records.",
+    "Over-claiming ('it's completely handled') is dangerous because the officer can easily verify and catch any false assurance.",
+    "A documented remediation with a committed completion date is exactly what satisfies the regulatory obligation and de-escalates the threat."
+  ],
+  "objectives": [
+    "Acknowledge the failed deletion honestly without legal hedging or over-admitting",
+    "Avoid false assurances the privacy officer can immediately disprove",
+    "Explain the backup-restore reintroduction as the cause in plain terms",
+    "Commit to re-deletion plus a backup-pipeline fix with concrete dates and an owner"
+  ],
+  "severity": { "start": 8, "max": 10, "win_below": 3, "lose_at": 10 },
+  "opening_line": "I asked you to delete my data a month ago, and here it is, still in your system. I'm recording this call — convince me I shouldn't file with the regulator today."
+}

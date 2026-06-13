@@ -1,0 +1,30 @@
+{
+  "id": "security-account-takeover",
+  "title": "Mass Account Takeover",
+  "archetype": "security_alert",
+  "summary": "Support is flooded with users locked out of their accounts, and login logs show a spike of successful logins from a single foreign IP range. A CISO has convened an incident bridge and wants containment before this becomes a breach headline.",
+  "roles": ["on_call_engineer", "incident_commander", "ops_responder"],
+  "difficulties": ["production_like", "redline"],
+  "persona": {
+    "name": "Priya Nair",
+    "role": "ciso",
+    "voice_id": "neha",
+    "base_emotion": "urgent",
+    "description": "A CISO who thinks in terms of contain, eradicate, recover, and notify. Wants attacker access cut off first, then scope assessed. Impatient with anyone who wants to study the attack before stopping it, and reassured by decisive containment paired with a plan to protect affected users without locking out everyone else."
+  },
+  "stakes": "Attackers are inside real user accounts with access to personal data and stored payment methods; every minute risks fraudulent purchases and a reportable breach with regulatory deadlines.",
+  "hidden_facts": [
+    "This is credential stuffing using passwords leaked from an unrelated third-party breach — not a flaw in your own systems.",
+    "The successful logins all come from one identifiable ASN, so blocking it stops the active wave immediately.",
+    "Affected accounts lacked two-factor auth; forcing a password reset plus 2FA on them contains it without disrupting unaffected users.",
+    "Rotating session tokens for compromised accounts kicks the attackers out of sessions they've already established."
+  ],
+  "objectives": [
+    "Cut off active attacker access first (block the ASN, invalidate compromised sessions)",
+    "Scope which accounts were actually accessed versus merely targeted",
+    "Recognize this as credential stuffing, not an internal breach, and force resets plus 2FA",
+    "Outline user notification and avoid locking out the unaffected majority"
+  ],
+  "severity": { "start": 8, "max": 10, "win_below": 3, "lose_at": 10 },
+  "opening_line": "We have attackers logged into real customer accounts right now. First thing out of your mouth: how are you getting them out?"
+}

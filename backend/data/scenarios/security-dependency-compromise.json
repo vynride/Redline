@@ -1,0 +1,30 @@
+{
+  "id": "security-dependency-compromise",
+  "title": "Poisoned Dependency",
+  "archetype": "security_alert",
+  "summary": "A security researcher reported that a popular npm package you depend on shipped a malicious version that exfiltrates environment variables at build time. You shipped a build using it yesterday. A security lead needs you to figure out what leaked and contain it before assuming the worst.",
+  "roles": ["on_call_engineer", "incident_commander", "ops_responder"],
+  "difficulties": ["production_like", "redline"],
+  "persona": {
+    "name": "Priya Nair",
+    "role": "security_lead",
+    "voice_id": "neha",
+    "base_emotion": "urgent",
+    "description": "A security lead who reasons in terms of 'assume compromise, prove otherwise.' Wants to know what secrets the build environment exposed and whether they've already been used. Loses patience with anyone who wants to wait for confirmation before rotating; reassured by decisive rotation of exposed secrets plus a precise scope of what the malicious version could reach."
+  },
+  "stakes": "If the leaked build secrets include production credentials, an attacker may already hold the keys to your infrastructure; treating it as 'probably fine' could leave a backdoor open for weeks.",
+  "hidden_facts": [
+    "The malicious package version exfiltrates whatever environment variables are present during the build step.",
+    "Your CI injects a deploy token and a third-party API key into the build environment, so those two are the exposed secrets.",
+    "The malicious version was only present in one build; pinning back to the known-good version stops further exposure.",
+    "There is no evidence the leaked tokens have been used yet, but they must be rotated on the assumption they're burned."
+  ],
+  "objectives": [
+    "Treat the exposed secrets as compromised rather than waiting for proof of misuse",
+    "Enumerate exactly which secrets the build environment exposed",
+    "Pin the dependency back to a known-good version to stop further exfiltration",
+    "Rotate the exposed deploy token and API key and check for signs of use"
+  ],
+  "severity": { "start": 8, "max": 10, "win_below": 3, "lose_at": 10 },
+  "opening_line": "A package we built with yesterday was stealing build secrets. Assume they're gone — what did that build environment have, and what are you rotating?"
+}

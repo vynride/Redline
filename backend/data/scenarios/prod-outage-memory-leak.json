@@ -1,0 +1,30 @@
+{
+  "id": "prod-outage-memory-leak",
+  "title": "Cascading OOM Kills",
+  "archetype": "production_outage",
+  "summary": "API pods are being OOM-killed and restarting in a rolling wave — as each one dies, its traffic shifts to the survivors and kills them faster. The cluster is eating itself. A VP of engineering wants you to break the cascade before there's nothing left serving traffic.",
+  "roles": ["on_call_engineer", "incident_commander", "ops_responder"],
+  "difficulties": ["production_like", "redline"],
+  "persona": {
+    "name": "Dana Whitfield",
+    "role": "vp_engineering",
+    "voice_id": "priya",
+    "base_emotion": "urgent",
+    "description": "A VP of engineering who wants the cascade stopped first and the elegant fix second. Asks whether the problem is load or a leak. Impatient with anyone chasing the perfect root cause while pods keep dying; calmer once someone proposes a way to halt the death spiral even if it means temporarily shedding load."
+  },
+  "stakes": "Each lost pod accelerates the next failure; if the cascade isn't broken the entire API tier goes dark, turning a degradation into a total outage during peak traffic.",
+  "hidden_facts": [
+    "A deploy three hours ago introduced a per-request memory leak that only bites under sustained load, so pods slowly bloat until they OOM.",
+    "The cascade is a thundering-herd effect: each death concentrates load and speeds up the survivors' failure.",
+    "Rolling back the leaky deploy stops the leak, but the cascade must also be broken — temporarily shedding or rate-limiting traffic lets pods stabilize.",
+    "Simply raising the memory limit delays the OOM by minutes but does not stop it; it is not a fix."
+  ],
+  "objectives": [
+    "Distinguish a memory leak from genuine overload using the slow-bloat pattern",
+    "Break the cascade by shedding or rate-limiting load so survivors stabilize",
+    "Roll back the leaky deploy as the real fix rather than just raising limits",
+    "Give the VP a clear two-step plan: stop the cascade, then stop the leak"
+  ],
+  "severity": { "start": 8, "max": 10, "win_below": 3, "lose_at": 10 },
+  "opening_line": "Pods are dying faster than they come back and we're running out of cluster. Is this load or a leak — and how do we stop the spiral?"
+}

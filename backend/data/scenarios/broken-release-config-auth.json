@@ -1,0 +1,30 @@
+{
+  "id": "broken-release-config-auth",
+  "title": "Auth Config Lockout",
+  "archetype": "broken_release",
+  "summary": "A config change to the auth service rolled out a few minutes ago and now every login returns 'unauthorized' — including your own. Nobody can get into anything, including some of the dashboards you'd normally use to debug it. The incident commander needs you to claw the system back open.",
+  "roles": ["on_call_engineer", "incident_commander", "ops_responder"],
+  "difficulties": ["production_like", "redline"],
+  "persona": {
+    "name": "Sam Okafor",
+    "role": "incident_commander",
+    "voice_id": "amit",
+    "base_emotion": "urgent",
+    "description": "An incident commander who keeps the team from panicking when the tools themselves are down. Wants the fastest reversible path back to a working auth service. Frustrated by anyone who freezes because they're locked out of their usual dashboards; reassured by a responder who reaches for the deploy/rollback path that doesn't depend on the broken auth."
+  },
+  "stakes": "A total auth outage locks out every customer and every internal tool at once; the longer it lasts the more it looks like a breach to the outside world, and the harder it is to coordinate the fix.",
+  "hidden_facts": [
+    "The config change set the token-signing key to an empty value, so every token now fails validation.",
+    "The change was a single config push and can be rolled back through the deploy pipeline, which authenticates separately and still works.",
+    "Once the previous config is restored, existing sessions recover immediately without users needing to re-login.",
+    "Trying to log into the admin console to fix it is futile — it uses the same broken auth — so the fix must come through the pipeline."
+  ],
+  "objectives": [
+    "Recognize the fix can't go through tools that depend on the broken auth",
+    "Identify the empty signing key from the recent config change as the cause",
+    "Roll back the config via the independently-authenticated deploy pipeline",
+    "Confirm sessions recover and give the commander an all-clear criterion"
+  ],
+  "severity": { "start": 8, "max": 10, "win_below": 3, "lose_at": 10 },
+  "opening_line": "Nobody can log in, including us, and half our dashboards are dark. How do we fix auth when we're locked out of everything that fixes auth?"
+}

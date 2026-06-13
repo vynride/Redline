@@ -18,5 +18,5 @@ COPY . .
 
 EXPOSE 8000
 
-# Apply migrations, then serve.
-CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+# Apply migrations, validate/seed the scenario catalog, then serve.
+CMD ["sh", "-c", "alembic upgrade head && python -m scripts.seed_scenarios && uvicorn app.main:app --host 0.0.0.0 --port 8000"]

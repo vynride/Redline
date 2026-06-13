@@ -1,0 +1,30 @@
+{
+  "id": "prod-outage-queue-backlog",
+  "title": "Event Pipeline Stalled",
+  "archetype": "production_outage",
+  "summary": "The event queue that feeds order processing, notifications, and analytics has stopped draining. The backlog is at four million messages and climbing. Orders are accepted but never fulfilled, and the incident commander wants you to stop the bleeding before the backlog becomes unrecoverable.",
+  "roles": ["on_call_engineer", "incident_commander", "ops_responder"],
+  "difficulties": ["production_like", "redline"],
+  "persona": {
+    "name": "Sam Okafor",
+    "role": "incident_commander",
+    "voice_id": "amit",
+    "base_emotion": "urgent",
+    "description": "An incident commander who pushes for containment over root-cause in the first phase. Wants to know whether the backlog is still growing and whether messages are being lost or just delayed. Frustrated by anyone who dives into log archaeology while the queue keeps filling; reassured by a responder who stabilizes intake first and reasons about poison messages versus consumer failure."
+  },
+  "stakes": "Orders look successful to customers but silently never ship; if the backlog overruns retention, those messages are gone for good and reconstructing them means days of manual reconciliation and refunds.",
+  "hidden_facts": [
+    "A single malformed message is crashing every consumer that picks it up, so the whole consumer group is in a crash-restart loop and draining nothing.",
+    "Messages are delayed, not lost — they remain in the queue until retention expires, which is still hours away.",
+    "Moving the poison message to a dead-letter queue lets consumers resume and the backlog drains in roughly 30 minutes.",
+    "Scaling up more consumers without removing the poison message just multiplies the crash loop and makes it worse."
+  ],
+  "objectives": [
+    "Confirm whether messages are being lost or only delayed before acting",
+    "Recognize the consumer crash-loop pattern rather than blaming throughput",
+    "Identify and dead-letter the poison message to let consumers resume",
+    "Resist scaling consumers blindly and give the commander a drain ETA"
+  ],
+  "severity": { "start": 8, "max": 10, "win_below": 3, "lose_at": 10 },
+  "opening_line": "Four million messages and the queue is still growing. Are we losing orders or just delaying them — and what stops the bleeding right now?"
+}

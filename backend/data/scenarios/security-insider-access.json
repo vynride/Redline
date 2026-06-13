@@ -1,0 +1,30 @@
+{
+  "id": "security-insider-access",
+  "title": "Privileged Token Abuse",
+  "archetype": "security_alert",
+  "summary": "Anomaly detection flagged a service account pulling the entire customer table in bulk at 3am — far outside its normal pattern. It could be a compromised credential or a misbehaving job. A CISO wants containment now and an answer to the question everyone's afraid to ask: is this an active exfiltration?",
+  "roles": ["on_call_engineer", "incident_commander", "ops_responder"],
+  "difficulties": ["redline"],
+  "persona": {
+    "name": "Marcus Hale",
+    "role": "ciso",
+    "voice_id": "aditya",
+    "base_emotion": "urgent",
+    "description": "A CISO who treats a privileged-account anomaly as guilty until proven innocent. Wants the account's access cut and the egress checked before debating whether it's malicious. Frustrated by anyone who wants to 'confirm it's really an attacker' before containing; reassured by fast revocation paired with a clear read on whether data actually left the building."
+  },
+  "stakes": "If a real attacker holds this service account, they have read access to the entire customer database; every minute it stays live could mean another batch of personal data exfiltrated and a reportable breach.",
+  "hidden_facts": [
+    "The service account's key was committed to an internal wiki page months ago and was scraped by someone with internal access.",
+    "The bulk reads are real and ongoing, but egress logs show the data is being written to an internal staging bucket, not yet sent outside.",
+    "Disabling the service account immediately halts the active reads without breaking customer-facing systems, which use different credentials.",
+    "The staging bucket can be locked down and inspected to determine exactly what was copied before anything left the network."
+  ],
+  "objectives": [
+    "Contain first: disable the anomalous service account before investigating intent",
+    "Check egress to determine whether data has actually left the network",
+    "Confirm customer-facing systems use different credentials so containment is safe",
+    "Trace the credential exposure and scope exactly what was read"
+  ],
+  "severity": { "start": 9, "max": 10, "win_below": 3, "lose_at": 10 },
+  "opening_line": "A privileged account is pulling our entire customer table right now. I don't care yet whether it's a person or a script — how do you stop it this minute?"
+}

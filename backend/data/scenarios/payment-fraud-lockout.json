@@ -1,0 +1,30 @@
+{
+  "id": "payment-fraud-lockout",
+  "title": "Fraud Filter Lockout",
+  "archetype": "payment_failure",
+  "summary": "A tightened fraud rule shipped this morning and is now blocking a huge share of legitimate orders as 'high risk.' Real customers are being turned away at checkout and complaining loudly. The processor's risk partner is on the line, caught between fraud loss and blocking good revenue.",
+  "roles": ["on_call_engineer", "incident_commander", "ops_responder"],
+  "difficulties": ["production_like", "redline"],
+  "persona": {
+    "name": "Theo Brandt",
+    "role": "risk_partner_manager",
+    "voice_id": "aditya",
+    "base_emotion": "frustrated",
+    "description": "A risk partner who lives in the tradeoff between fraud and false positives. Wants to know the false-positive rate and whether you can loosen safely without opening a fraud hole. Frustrated by a blunt 'just turn the rule off' that exposes the business; reassured by a targeted rollback that restores good orders while keeping genuine fraud blocked."
+  },
+  "stakes": "Every minute the rule over-blocks, legitimate revenue is rejected and customers abandon for a competitor — but a careless full disable could let real fraud through and trigger chargebacks worse than the lost sales.",
+  "hidden_facts": [
+    "The new rule set a velocity threshold an order of magnitude too low, so normal repeat customers trip it.",
+    "Only the single new velocity rule is misfiring; the rest of the fraud model is working correctly.",
+    "Reverting just that one rule restores legitimate orders without disabling fraud protection broadly.",
+    "Genuine fraud attempts in the same window are a tiny fraction, so the over-blocking is almost entirely false positives."
+  ],
+  "objectives": [
+    "Quantify the false-positive rate rather than reacting to anecdotes",
+    "Resist a blunt full-disable that would expose the business to fraud",
+    "Isolate the single misconfigured velocity rule as the cause",
+    "Revert only that rule and confirm legitimate orders recover while fraud stays blocked"
+  ],
+  "severity": { "start": 7, "max": 10, "win_below": 3, "lose_at": 10 },
+  "opening_line": "You're blocking a third of good orders as fraud right now. I can't just have you switch protection off — so what's your surgical fix?"
+}

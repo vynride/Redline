@@ -97,6 +97,19 @@ async def drill_ws(websocket: WebSocket, session_id: str) -> None:
         # Send the current state up front so the client can render the HUD on connect.
         await websocket.send_json(dump(StateMsg(state=_state(session))))
 
+        # On a fresh session (no turns yet), generate and stream the persona's opening line.
+        if not session.turns:
+            opening_output = await engine_service.opening(db, session, llm)
+            await websocket.send_json(
+                dump(TranscriptMsg(role="persona", text=opening_output.utterance, emotion=opening_output.emotion))
+            )
+            await websocket.send_json(dump(StateMsg(state=_state(session))))
+            async for chunk in tts_service.synthesize(
+                opening_output.utterance, voice_id=_voice_id(session), emotion=opening_output.emotion
+            ):
+                await websocket.send_bytes(chunk)
+            await websocket.send_json(dump(TurnComplete(index=0)))
+
         stream = None
         while True:
             message = await websocket.receive()

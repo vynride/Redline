@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ServerCrash, CreditCard, ShieldAlert, AlertTriangle, PackageX, Gauge,
-  Plus, Search, Bell, Flame, Mic, LogOut, ArrowRight, X,
+  Search, Bell, Flame, Mic, LogOut, ArrowRight, X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Avatar } from "@/components/ui";
@@ -38,6 +38,9 @@ const ALL_DIFFICULTIES: Difficulty[] = ["warmup", "production_like", "redline"];
 const TABS = ["Recent", "By role", "Hardest", "Leaderboard"] as const;
 type Tab = (typeof TABS)[number];
 
+// Number of example-prompt chips shown in the Quick Start section (a random sample per load).
+const QUICKSTART_CHIPS = 5;
+
 function hash(id: string): number {
   let h = 0;
   for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
@@ -68,9 +71,9 @@ function QuickStart({ scenarios }: { scenarios: ScenarioSummary[] }) {
   const [busy,  setBusy]  = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Stable random shuffle once per mount — new order each page load
+  // A small random sample of example prompts, reshuffled once per page load.
   const [chips] = useState<ScenarioSummary[]>(() =>
-    [...scenarios].sort(() => Math.random() - 0.5),
+    [...scenarios].sort(() => Math.random() - 0.5).slice(0, QUICKSTART_CHIPS),
   );
 
   // Best match: starts-with title → summary includes → archetype label includes
@@ -132,7 +135,7 @@ function QuickStart({ scenarios }: { scenarios: ScenarioSummary[] }) {
   const availDiffs = scenario?.difficulties ?? ALL_DIFFICULTIES;
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-violet-500/22 bg-panel">
+    <div className="relative overflow-hidden rounded-2xl bg-panel">
       {/* Top gradient accent stripe */}
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-500/60 to-transparent" />
 
@@ -149,13 +152,11 @@ function QuickStart({ scenarios }: { scenarios: ScenarioSummary[] }) {
       <div className="relative px-6 pb-5 pt-6">
 
         {/* Header */}
-        <div className="mb-5 flex items-center gap-3">
-          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-violet-500 shadow-[0_0_20px_4px_rgba(124,58,237,0.45)]">
-            <Mic className="h-4 w-4 text-white" />
-          </span>
-          <div className="leading-none">
+        <div className="mb-5 flex items-center gap-2.5">
+          <img src="/logo.svg" alt="Redline" className="h-9 w-9 shrink-0" />
+          <div className="leading-tight">
             <p className="text-[14px] font-semibold text-white">Quick Start</p>
-            <p className="mt-0.5 text-[11px] text-muted">Type or click any scenario below</p>
+            <p className="text-[11px] text-muted">Type or click any scenario below</p>
           </div>
           {scenario && (
             <div className="ml-auto hidden items-center gap-2 rounded-full border border-panel-line bg-panel-2 px-3 py-1.5 text-[11px] sm:flex">
@@ -341,8 +342,6 @@ export function DashboardWindow({
     }
   }
 
-  const first = scenarios[0];
-
   return (
     <>
       {/* ── Sticky header ─────────────────────────────── */}
@@ -380,14 +379,6 @@ export function DashboardWindow({
                 <div className="text-[9px] text-muted">tier</div>
               </div>
             </div>
-            {first && (
-              <button
-                onClick={() => onSelect(first)}
-                className="inline-flex items-center gap-1 rounded-lg bg-violet-500 px-2.5 py-1.5 text-[12px] font-semibold text-white transition-colors hover:bg-violet-600"
-              >
-                <Plus className="h-3.5 w-3.5" /> Start drill
-              </button>
-            )}
             <div className="relative">
               <button onClick={() => setMenu((v) => !v)} aria-label="Account" className="block rounded-full ring-violet-400 focus:outline-none focus-visible:ring-2">
                 <Avatar src={user?.avatar_url} name={user?.display_name} size={32} />
