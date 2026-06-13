@@ -5,15 +5,15 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { DimensionScores } from "@/components/debrief/DimensionScores";
 import { Transcript, type TranscriptLine } from "@/components/drill/Transcript";
-import { Button, Card, Pill } from "@/components/ui";
+import { Button, Card, Pill, LoadingScreen } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import type { DebriefOut, SessionDetail } from "@shared/types";
 
 function gradeTone(grade: string): string {
-  if (grade.startsWith("A") || grade.startsWith("B")) return "text-positive";
-  if (grade.startsWith("C")) return "text-accent";
-  return "text-negative";
+  if (grade.startsWith("A") || grade.startsWith("B")) return "text-emerald-400";
+  if (grade.startsWith("C")) return "text-violet-400";
+  return "text-rose-400";
 }
 
 export default function DebriefPage() {
@@ -53,8 +53,8 @@ export default function DebriefPage() {
       </div>
     );
   }
-  if (error) return <p className="text-body text-negative">{error}</p>;
-  if (!debrief || !session) return <p className="text-body text-secondary">Loading debrief…</p>;
+  if (error) return <p className="text-body text-rose-400">{error}</p>;
+  if (!debrief || !session) return <LoadingScreen />;
 
   const c = debrief.content;
   const lines: TranscriptLine[] = session.turns.map((t) => ({
@@ -88,7 +88,7 @@ export default function DebriefPage() {
             <ul className="flex flex-col gap-2">
               {c.strengths.map((s, i) => (
                 <li key={i} className="flex items-start gap-2 text-body">
-                  <span className="leading-6 text-positive">✓</span>
+                  <span className="leading-6 text-emerald-400">✓</span>
                   <span className="text-primary">{s}</span>
                 </li>
               ))}
@@ -100,10 +100,10 @@ export default function DebriefPage() {
             <h2 className="text-h2">Where you lost control</h2>
             {c.lost_control.length === 0 && <p className="text-body text-secondary">No major slips — well held.</p>}
             {c.lost_control.map((m, i) => (
-              <div key={i} className="flex flex-col gap-2 rounded-md border border-line bg-surface-2 p-4">
-                <p className="border-l-2 border-negative pl-3 text-body italic text-secondary">“{m.quote}”</p>
-                <p className="text-body text-secondary"><span className="text-negative">Issue:</span> {m.issue}</p>
-                <p className="text-body text-primary"><span className="text-positive">Stronger:</span> {m.better}</p>
+              <div key={i} className="flex flex-col gap-2 rounded-xl border border-panel-line bg-panel-2 p-4">
+                <p className="border-l-2 border-rose-500 pl-3 text-body italic text-secondary">“{m.quote}”</p>
+                <p className="text-body text-secondary"><span className="text-rose-400">Issue:</span> {m.issue}</p>
+                <p className="text-body text-primary"><span className="text-emerald-400">Stronger:</span> {m.better}</p>
               </div>
             ))}
           </Card>
@@ -125,7 +125,7 @@ export default function DebriefPage() {
                 </ul>
               )}
             </div>
-            <div className="grid gap-4 border-t border-line pt-4 sm:grid-cols-2">
+            <div className="grid gap-4 border-t border-panel-line pt-4 sm:grid-cols-2">
               <div className="flex flex-col gap-1">
                 <span className="text-label text-secondary">Escalation</span>
                 <p className="text-body text-primary">{c.escalation_assessment}</p>

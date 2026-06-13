@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { MicButton, type MicState } from "@/components/drill/MicButton";
 import { Transcript, type TranscriptLine } from "@/components/drill/Transcript";
 import { DrillHud } from "@/components/drill/hud/DrillHud";
-import { Button, Card } from "@/components/ui";
+import { Button, Card, LoadingScreen } from "@/components/ui";
 import { api } from "@/lib/api";
 import { MicCapture, PcmPlayer } from "@/lib/audio";
 import { DrillSocket } from "@/lib/ws";
@@ -111,14 +111,14 @@ export default function DrillPage() {
     socketRef.current?.endSession();
   }
 
-  if (error) return <p className="text-body text-negative">{error}</p>;
-  if (!scenario || !state) return <p className="text-body text-secondary">Loading drill…</p>;
+  if (error) return <p className="text-body text-rose-400">{error}</p>;
+  if (!scenario || !state) return <LoadingScreen />;
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <h1 className="text-h1">{scenario.title}</h1>
+          <h1 className="text-h1 text-white">{scenario.title}</h1>
           <p className="text-body text-secondary">
             You are facing {scenario.persona.name} · {scenario.persona.role.replace(/_/g, " ")}
           </p>
@@ -137,8 +137,8 @@ export default function DrillPage() {
           <div ref={scrollRef} className="flex-1 overflow-y-auto pr-2">
             <Transcript lines={lines} personaName={scenario.persona.name} />
           </div>
-          <div className="mt-4 border-t border-line pt-4">
-            {notice && <p className="mb-3 text-center text-label text-negative">{notice}</p>}
+          <div className="mt-4 border-t border-panel-line pt-4">
+            {notice && <p className="mb-3 text-center text-label text-rose-400">{notice}</p>}
             <MicButton state={ended ? "ended" : mic} onToggle={toggleMic} />
           </div>
         </Card>
