@@ -86,7 +86,9 @@ class BulbulTTSService:
     async def _stream(self, text: str, speaker: str, pace: float) -> AsyncIterator[bytes]:
         import websockets
 
-        url = f"{settings.sarvam_tts_ws_url}?model={settings.sarvam_tts_model}"
+        # send_completion_event makes the socket emit a terminal "event" after the last
+        # audio chunk; without it the socket just idles until a timeout error.
+        url = f"{settings.sarvam_tts_ws_url}?model={settings.sarvam_tts_model}&send_completion_event=true"
         headers = {"api-subscription-key": settings.sarvam_api_key}
         config = {
             "type": "config",
@@ -97,7 +99,7 @@ class BulbulTTSService:
                 "pace": pace,
                 "temperature": _TEMPERATURE,
                 "speech_sample_rate": str(settings.sarvam_tts_sample_rate),
-                "output_audio_codec": "pcm",
+                "output_audio_codec": "linear16",
             },
         }
         async with websockets.connect(url, additional_headers=headers, max_size=None) as ws:
@@ -116,8 +118,11 @@ class BulbulTTSService:
                         first = False
                         if audio:
                             yield audio
-                elif msg.get("type") in ("flush", "complete", "end"):
-                    break
+                elif msg.get("type") == "error":
+                    # surface the WS error so synthesize() degrades to the REST endpoint
+                    raise RuntimeError(f"Bulbul WS error: {(msg.get('data') or {}).get('message')}")
+                elif msg.get("type") in ("event", "flush", "complete", "end"):
+                    break  # terminal completion event — all audio received
 
     async def _generate(self, text: str, speaker: str, pace: float) -> AsyncIterator[bytes]:
         import httpx
