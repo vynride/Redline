@@ -44,7 +44,7 @@ export function Hero() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: EASE }}
-          className="flex items-center gap-2.5 rounded-full border border-white/30 px-5 py-2 text-white shadow-[0_8px_24px_-12px_rgba(0,0,0,0.5)]"
+          className="flex items-center gap-2.5 rounded-full bg-[#0E0E10] px-5 py-2 text-white shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6)] ring-1 ring-white/10"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.svg" alt="Redline" width={32} height={32} className="h-7 w-7" />
