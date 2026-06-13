@@ -8,7 +8,7 @@
   "persona": {
     "name": "Sam Okafor",
     "role": "incident_commander",
-    "voice_id": "amit",
+    "voice_id": "rahul",
     "base_emotion": "urgent",
     "description": "An incident commander who keeps the team from panicking when the tools themselves are down. Wants the fastest reversible path back to a working auth service. Frustrated by anyone who freezes because they're locked out of their usual dashboards; reassured by a responder who reaches for the deploy/rollback path that doesn't depend on the broken auth."
   },

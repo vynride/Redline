@@ -8,7 +8,7 @@
   "persona": {
     "name": "Naomi Cho",
     "role": "product_eng_manager",
-    "voice_id": "priya",
+    "voice_id": "kavya",
     "base_emotion": "frustrated",
     "description": "A product engineering manager who feels the business pressure and wants a hypothesis fast, but respects rigor. Dislikes guess-and-restart debugging. Pushes for correlation with recent changes and rewards a responder who narrows the search cluster as the culprit with evidence rather than vibes."
   },

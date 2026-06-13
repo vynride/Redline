@@ -68,7 +68,7 @@ export function Reveal({ children, className, variant = "up", delay = 0, as = "d
   );
 }
 
-/** Staggered container — children using `RevealChild` cascade in. */
+/** Staggered container, children using `RevealChild` cascade in. */
 export function RevealGroup({
   children,
   className,
@@ -206,7 +206,7 @@ type MagneticButtonProps = {
   className?: string;
 };
 
-/** Button that leans toward the cursor — the signature premium micro-interaction. */
+/** Button that leans toward the cursor, the signature premium micro-interaction. */
 export function MagneticButton({ children, href, variant = "primary", className }: MagneticButtonProps) {
   const ref = useRef<HTMLAnchorElement>(null);
   const x = useMotionValue(0);

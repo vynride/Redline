@@ -10,12 +10,12 @@ export function LoadingScreen() {
         }}
       />
 
-      {/* Content — fades up on mount */}
+      {/* Content, fades up on mount */}
       <div
         className="flex flex-col items-center gap-10"
         style={{ animation: "redline-fade-up 0.65s ease-out forwards" }}
       >
-        {/* Brand — glow breathes slowly */}
+        {/* Brand, glow breathes slowly */}
         <div
           className="flex items-center gap-2.5"
           style={{ animation: "redline-glow-breathe 3s ease-in-out infinite 0.65s" }}

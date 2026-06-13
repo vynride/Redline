@@ -8,7 +8,7 @@
   "persona": {
     "name": "Priya Nair",
     "role": "security_lead",
-    "voice_id": "neha",
+    "voice_id": "shreya",
     "base_emotion": "urgent",
     "description": "A calm but relentless security lead running containment. Expects you to think in terms of revoke, rotate, scope-of-access, and evidence. Loses patience with anyone who wants to 'investigate first' before revoking. Reassured by decisive containment and a clear blast-radius assessment."
   },

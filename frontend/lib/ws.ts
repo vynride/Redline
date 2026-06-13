@@ -9,7 +9,7 @@ export interface DrillHandlers {
   onClose?: () => void;
 }
 
-/** Thin wrapper over the drill WebSocket — JSON control in/out, binary audio both ways. */
+/** Thin wrapper over the drill WebSocket, JSON control in/out, binary audio both ways. */
 export class DrillSocket {
   private ws: WebSocket | null = null;
 

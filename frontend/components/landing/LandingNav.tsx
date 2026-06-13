@@ -6,8 +6,10 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 
 const LINKS = [
+  { href: "#top", label: "Home" },
   { href: "#product", label: "Product" },
   { href: "#faq", label: "FAQ" },
+  { href: "#get-started", label: "Get started" },
 ];
 
 export function LandingNav() {

@@ -2,7 +2,7 @@ import { cn } from "@/lib/cn";
 
 export type MeterTone = "accent" | "positive" | "negative" | "warning";
 
-// Flat, solid fills — the color itself is the signal, no decorative glow.
+// Flat, solid fills, the color itself is the signal, no decorative glow.
 const FILLS: Record<MeterTone, string> = {
   accent: "bg-violet-500",
   positive: "bg-emerald-400",

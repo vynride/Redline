@@ -6,9 +6,10 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.debrief import Debrief
-from app.models.session import DrillSession
+from app.models.session import DrillSession, SessionStatus
 from app.models.turn import Speaker, Turn
-from app.schemas.debrief import DebriefContent
+from app.schemas.debrief import DebriefContent, DimensionScores
+from app.schemas.scenario import Scenario
 from app.schemas.common import Difficulty, Role
 from app.services.llm import ChatMessage, LLMClient
 from app.services import scenarios as catalog
@@ -23,8 +24,13 @@ information gathering, correct escalation, and clear status communication. Do no
 
 Return the structured fields: a short overall summary, strengths, lost-control moments \
 (quote / issue / better), missed information, an escalation assessment, a status-communication \
-assessment, and dimension scores (0-100) for clarity, deescalation, info_gathering, escalation, \
-and status_communication."""
+assessment, and dimension scores for clarity, deescalation, info_gathering, escalation, and \
+status_communication.
+
+Score each dimension 0-100 on this calibration: 85-100 excellent, 70-84 a solid pass, \
+55-69 shaky but acceptable, below 55 genuinely poor. A competent responder who handles the \
+incident reasonably should land in the 70s, not the 40s — reserve sub-55 scores for real \
+mistakes, not for anything short of perfect."""
 
 
 class _DebriefDraft(BaseModel):
@@ -32,16 +38,57 @@ class _DebriefDraft(BaseModel):
     content: DebriefContent
 
 
-def _grade(avg: float) -> str:
-    if avg >= 90:
+def _grade(score: float) -> str:
+    if score >= 82:
         return "A"
-    if avg >= 80:
+    if score >= 68:
         return "B"
-    if avg >= 70:
+    if score >= 54:
         return "C"
-    if avg >= 60:
+    if score >= 40:
         return "D"
     return "F"
+
+
+def _dims_avg(d: DimensionScores) -> float:
+    return (
+        d.clarity + d.deescalation + d.info_gathering + d.escalation + d.status_communication
+    ) / 5.0
+
+
+def _overall_score(session: DrillSession, scenario: Scenario | None, dims: DimensionScores) -> int:
+    """Grounded 0-100 score: measured per-turn quality + objectives met + outcome.
+
+    The LLM's dimension scores alone are a harsh, middling signal that buries even a
+    clean win at an F. We anchor the grade in what actually happened — how well each
+    turn scored, how many objectives were met, and whether the incident was won or
+    lost — so the grade tracks real performance, not the model's grading mood.
+    """
+    # Three grounded signals, blended so the grade spreads across the range instead
+    # of collapsing onto F: measured per-turn quality, objectives met, and how far
+    # the responder drove severity down toward the win line.
+    perf = session.score if session.score is not None else _dims_avg(dims)
+
+    total = len(scenario.objectives) if scenario else 0
+    obj_pct = (len(session.objectives_met) / total * 100.0) if total else 0.0
+
+    if scenario is not None:
+        denom = max(1, session.severity_start - scenario.severity.win_below)
+        progress = (session.severity_start - session.severity) / denom
+        sev_pct = max(0.0, min(1.0, progress)) * 100.0
+    else:
+        sev_pct = 0.0
+
+    base = 0.40 * perf + 0.30 * obj_pct + 0.30 * sev_pct
+
+    # Outcome nudges the grade at the edges: a clean win lifts it, a blow-up sinks it.
+    if scenario is not None:
+        if session.status == SessionStatus.completed and session.severity < scenario.severity.win_below:
+            base += 6.0
+        elif session.severity >= scenario.severity.lose_at:
+            base -= 10.0
+
+    return max(0, min(100, round(base)))
 
 
 def _transcript_block(turns: list[Turn]) -> str:
@@ -93,18 +140,18 @@ async def get_or_create_debrief(db: Session, session: DrillSession, llm: LLMClie
     system, messages = _build_messages(session, list(turns))
     draft = await llm.generate(system=system, messages=messages, response_schema=_DebriefDraft)
 
-    scores = draft.content.dimension_scores
-    avg = (
-        scores.clarity + scores.deescalation + scores.info_gathering
-        + scores.escalation + scores.status_communication
-    ) / 5.0
+    scenario = catalog.scenario_for_session(session)
+    overall = _overall_score(session, scenario, draft.content.dimension_scores)
 
     debrief = Debrief(
         session_id=session.id,
         summary=draft.summary,
-        overall_grade=_grade(avg),
+        overall_grade=_grade(overall),
         content=draft.content.model_dump(),
     )
+    # Persist the composite as the session's headline score so the debrief's grade
+    # and "x / 100" agree and the dashboard history reflects real performance.
+    session.score = float(overall)
     db.add(debrief)
     db.commit()
     db.refresh(debrief)

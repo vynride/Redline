@@ -4,7 +4,8 @@ The persona's utterance is synthesised to raw PCM (24 kHz, mono, 16-bit) and str
 back to the browser chunk by chunk. The streaming path uses Sarvam's Bulbul WebSocket
 (``type: config`` → ``type: text`` → ``type: flush``); if the socket fails we degrade to
 the non-streaming ``/text-to-speech`` endpoint. Emotion is mapped to a speaking ``pace``
-(and a little sampling ``temperature``) here so callers stay emotion-oriented.
+(and a little sampling ``temperature``) here so callers stay emotion-oriented — Bulbul v3
+does not expose pitch/loudness, so the mapping degrades gracefully.
 """
 from __future__ import annotations
 
@@ -21,6 +22,13 @@ from app.schemas.common import Emotion
 log = get_logger("redline.tts")
 
 SARVAM_TTS_REST_URL = "https://api.sarvam.ai/text-to-speech"
+
+# Bulbul v3 speakers we draw on, so an unknown/legacy voice id degrades to a real one.
+KNOWN_SPEAKERS: set[str] = {
+    "aditya", "rahul", "rohan", "amit", "dev", "varun", "kabir", "advait", "vijay", "soham",
+    "priya", "neha", "kavya", "shreya", "ritu", "pooja", "simran", "ishita", "shruti", "kavitha",
+    "shubh",
+}
 
 # Desired speaking pace per emotion (Bulbul accepts ~0.5–2.0; 1.0 is the default cadence).
 # A stressed stakeholder talks a touch faster; a calm one slows down.
@@ -39,6 +47,11 @@ _TEMPERATURE = 0.6
 def pace_for(emotion: Emotion) -> float:
     """Map emotion → Bulbul speaking pace."""
     return _EMOTION_PACE.get(emotion, _DEFAULT_PACE)
+
+
+def _resolve_speaker(voice_id: str) -> str:
+    """Use the persona's speaker if it's a real Bulbul voice, else the configured default."""
+    return voice_id if voice_id in KNOWN_SPEAKERS else settings.sarvam_tts_default_speaker
 
 
 def _strip_wav_header(audio: bytes) -> bytes:
@@ -60,13 +73,14 @@ class BulbulTTSService:
             raise RuntimeError("Sarvam is not configured (set SARVAM_API_KEY).")
 
     async def synthesize(self, text: str, *, voice_id: str, emotion: Emotion) -> AsyncIterator[bytes]:
+        speaker = _resolve_speaker(voice_id)
         pace = pace_for(emotion)
         try:
-            async for chunk in self._stream(text, voice_id, pace):
+            async for chunk in self._stream(text, speaker, pace):
                 yield chunk
         except Exception as exc:  # noqa: BLE001 — any socket failure degrades to REST
             log.warning("Bulbul streaming failed (%s); falling back to /text-to-speech", exc)
-            async for chunk in self._generate(text, voice_id, pace):
+            async for chunk in self._generate(text, speaker, pace):
                 yield chunk
 
     async def _stream(self, text: str, speaker: str, pace: float) -> AsyncIterator[bytes]:

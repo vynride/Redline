@@ -8,7 +8,7 @@
   "persona": {
     "name": "Raj Patel",
     "role": "database_lead",
-    "voice_id": "aditya",
+    "voice_id": "rahul",
     "base_emotion": "calm",
     "description": "A meticulous database lead who is calm precisely because the situation is dangerous. Insists on stopping writes and confirming a backup before any remediation. Loses confidence in anyone who proposes 'just re-run the migration' without first protecting the data. Reassured by careful, reversible steps and explicit checkpoints."
   },

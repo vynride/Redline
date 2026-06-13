@@ -1,5 +1,5 @@
 /**
- * Inline brand glyphs — lucide-react dropped its brand icons, so we carry the
+ * Inline brand glyphs, lucide-react dropped its brand icons, so we carry the
  * marks we need as tiny single-path SVGs. `currentColor` keeps them themeable.
  */
 import type { SVGProps } from "react";

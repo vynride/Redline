@@ -3,23 +3,25 @@
 import { useEffect, useState } from "react";
 
 /**
- * Seconds elapsed between `startedAt` and now, ticking once a second while the
- * drill is live. Once `endedAt` is set the value freezes at the final duration —
- * a closed incident shows the time it took, not a clock that keeps running.
+ * Seconds on the live clock, ticking once a second. A live drill counts up from the
+ * moment the page is opened (this hook mounts), so landing on the drill always starts
+ * at 00:00 rather than reflecting how long ago the session row was created. Once
+ * `endedAt` is set the value freezes at the call's true duration (end − start).
  */
 function useElapsed(startedAt: string, endedAt: string | null): number {
   const start = new Date(startedAt).getTime();
   const frozen = endedAt ? Math.max(0, (new Date(endedAt).getTime() - start) / 1000) : null;
 
+  const [mountedAt] = useState(() => Date.now());
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
-    if (frozen !== null) return; // ended — nothing to tick
+    if (frozen !== null) return; // ended, nothing to tick
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, [frozen]);
 
   if (frozen !== null) return Math.floor(frozen);
-  return Math.max(0, Math.floor((now - start) / 1000));
+  return Math.max(0, Math.floor((now - mountedAt) / 1000));
 }
 
 /** mm:ss, rolling to h:mm:ss once the call passes an hour. */
@@ -32,7 +34,7 @@ function format(total: number): string {
 }
 
 /**
- * The live incident clock — a mono/tabular chip styled like the dashboard's
+ * The live incident clock, a mono/tabular chip styled like the dashboard's
  * readiness tile. Ticks from session start and freezes when the call ends.
  */
 export function IncidentClock({

@@ -1,6 +1,8 @@
 """Scenario definition schemas (authored data loaded from data/scenarios)."""
 from __future__ import annotations
 
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 from app.schemas.common import Archetype, Difficulty, Emotion, Role
@@ -41,6 +43,9 @@ class PersonaDraft(BaseModel):
 
     name: str = Field(description="The persona's full name.")
     role: str = Field(description="Short snake_case role, e.g. 'angry_customer', 'database_lead'.")
+    gender: Literal["female", "male", "neutral"] = Field(
+        description="The persona's voice gender, consistent with their name — drives voice selection."
+    )
     base_emotion: Emotion = Field(description="The emotion the persona opens the call in.")
     description: str = Field(description="One or two sentences on how they behave under pressure.")
 

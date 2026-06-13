@@ -18,8 +18,14 @@ from app.services.llm import ChatMessage, LLMClient
 
 log = get_logger("redline.scenario_gen")
 
-# Bulbul voices reused from the authored catalog; picked deterministically per persona.
-_VOICE_POOL = ["priya", "neha", "aditya", "amit"]
+# Bulbul speakers reused from the authored catalog, split by gender so a persona always
+# sounds the way their name reads. One is picked deterministically per persona name.
+_VOICES_BY_GENDER = {
+    "female": ["priya", "neha", "kavya", "shreya"],
+    "male": ["aditya", "rahul", "rohan", "amit"],
+}
+# Neutral / unspecified personas draw from the whole pool.
+_VOICE_POOL_NEUTRAL = _VOICES_BY_GENDER["female"] + _VOICES_BY_GENDER["male"]
 
 _SYSTEM = """You are a scenario designer for Redline, a voice-based crisis-drill trainer. \
 A user describes an incident they want to practise handling; you author ONE realistic, \
@@ -32,7 +38,9 @@ or teammate the responder must calm, inform, and satisfy under pressure.
 Make it concrete and tense, not generic:
 - Pick the archetype that best fits the prompt.
 - Write a persona with a real name, a snake_case role, an opening emotion, and a short \
-behaviour note. Their opening_line should drop the responder straight into the moment.
+behaviour note. Their opening_line should drop the responder straight into the moment. \
+Set the persona's gender ("female", "male", or "neutral") so it reads consistently with \
+their name — this picks the voice they're heard in.
 - Give 3-5 sharp, checkable objectives (e.g. "Acknowledge impact within the first reply", \
 "Commit to a concrete next update time").
 - Add a few hidden_facts the responder can only learn by asking good questions.
@@ -45,8 +53,10 @@ Stay grounded and professional. Do not invent the responder's lines — only the
 the persona's opening line."""
 
 
-def _pick_voice(name: str) -> str:
-    return _VOICE_POOL[sum(map(ord, name or "x")) % len(_VOICE_POOL)]
+def _pick_voice(name: str, gender: str) -> str:
+    """Deterministically pick a Bulbul voice matching the persona's gender."""
+    pool = _VOICES_BY_GENDER.get(gender, _VOICE_POOL_NEUTRAL)
+    return pool[sum(map(ord, name or "x")) % len(pool)]
 
 
 def _sane_severity(s: SeverityModel) -> SeverityModel:
@@ -72,7 +82,7 @@ def _assemble(draft: ScenarioDraft) -> Scenario:
         persona=Persona(
             name=draft.persona.name.strip(),
             role=draft.persona.role.strip(),
-            voice_id=_pick_voice(draft.persona.name),
+            voice_id=_pick_voice(draft.persona.name, draft.persona.gender),
             base_emotion=draft.persona.base_emotion,
             description=draft.persona.description.strip(),
         ),

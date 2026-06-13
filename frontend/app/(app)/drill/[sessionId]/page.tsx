@@ -5,15 +5,17 @@ import { useParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowRight, PhoneOff } from "lucide-react";
 import { MicButton, type MicState } from "@/components/drill/MicButton";
+import { PersonaAvatar } from "@/components/drill/PersonaAvatar";
 import { Transcript, type TranscriptLine } from "@/components/drill/Transcript";
 import { IncidentClock } from "@/components/drill/IncidentClock";
 import { DrillHud, type Trend } from "@/components/drill/hud/DrillHud";
 import { Button, LoadingScreen } from "@/components/ui";
 import { api } from "@/lib/api";
 import { MicCapture, PcmPlayer } from "@/lib/audio";
-import { ARCHETYPE_LABELS, ROLE_LABELS } from "@/lib/labels";
+import { ARCHETYPE_LABELS, ROLE_LABELS, humanizeRole } from "@/lib/labels";
 import { ARCHETYPE_ICONS, SEV, hardest } from "@/lib/scenarioMeta";
 import { cn } from "@/lib/cn";
+import { clean } from "@/lib/text";
 import { DrillSocket } from "@/lib/ws";
 import type { Difficulty, Role, Scenario, SessionState } from "@shared/types";
 
@@ -72,7 +74,7 @@ export default function DrillPage() {
       const socket = new DrillSocket(sessionId, {
         onMessage: (msg) => {
           if (msg.type === "transcript") {
-            setLines((prev) => [...prev, { role: msg.role, text: msg.text, emotion: msg.emotion }]);
+            setLines((prev) => [...prev, { role: msg.role, text: clean(msg.text), emotion: msg.emotion }]);
           } else if (msg.type === "state") {
             // Severity vs. the previous turn drives the momentum arrow.
             const prev = prevSeverityRef.current;
@@ -106,7 +108,7 @@ export default function DrillPage() {
     };
   }, [sessionId, stampEnded]);
 
-  // Keep the latest turn in view — also when the "typing" indicator appears so it
+  // Keep the latest turn in view, also when the "typing" indicator appears so it
   // isn't stranded below the fold.
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -143,19 +145,19 @@ export default function DrillPage() {
 
   const Icon = ARCHETYPE_ICONS[scenario.archetype];
   const sev = SEV[meta.difficulty ?? hardest(scenario.difficulties)];
-  const personaRole = scenario.persona.role.replace(/_/g, " ");
+  const personaRole = humanizeRole(scenario.persona.role);
   const turns = lines.filter((l) => l.role === "user").length;
 
   return (
     <div className="flex flex-col gap-4 px-5 py-5 sm:px-8 lg:h-[calc(100dvh-4rem)]">
-      {/* ── Command bar — title, badges, live clock, end ───── */}
+      {/* ── Command bar, title, badges, live clock, end ───── */}
       <header
-        className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-panel-line bg-panel px-4 py-3 sm:px-5"
+        className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-panel-line bg-panel px-4 py-2.5 sm:px-5"
         style={{ animation: "redline-fade-up 0.4s ease-out both" }}
       >
-        <div className="flex min-w-0 items-center gap-3.5">
-          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-panel-2 text-violet-300">
-            <Icon className="h-5 w-5" />
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-panel-2 text-violet-300">
+            <Icon className="h-4 w-4" />
           </span>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
@@ -169,16 +171,19 @@ export default function DrillPage() {
                 {ROLE_LABELS[meta.role]}
               </span>
             </div>
-            <h1 className="mt-0.5 truncate text-h2 text-white">{scenario.title}</h1>
+            <h1 className="truncate text-[20px] font-semibold leading-tight text-white">{scenario.title}</h1>
           </div>
         </div>
 
         <div className="flex items-center gap-2.5">
           {times && <IncidentClock startedAt={times.startedAt} endedAt={times.endedAt} />}
           {!ended ? (
-            <Button variant="secondary" onClick={endDrill} className="gap-2">
+            <button
+              onClick={endDrill}
+              className="inline-flex h-11 items-center gap-2 rounded-full border border-rose-500/50 bg-rose-500/15 px-6 text-button font-semibold text-rose-200 transition hover:border-rose-500/70 hover:bg-rose-500/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
+            >
               <PhoneOff className="h-4 w-4" /> End drill
-            </Button>
+            </button>
           ) : (
             <Link href={`/debrief/${sessionId}`}>
               <Button className="gap-2">
@@ -190,21 +195,19 @@ export default function DrillPage() {
       </header>
 
       {/* ── Console: transcript + live HUD, equal-height ───── */}
-      <div className="grid min-h-0 flex-1 gap-5 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-stretch">
+      <div className="grid min-h-0 flex-1 gap-5 lg:grid-cols-[minmax(0,1fr)_400px] lg:items-stretch">
         {/* Transcript / call console */}
         <section
           className="relative flex h-[62vh] min-h-0 flex-col overflow-hidden rounded-2xl border border-panel-line bg-panel lg:h-full"
           style={{ animation: "redline-fade-up 0.45s ease-out both", animationDelay: "0.05s" }}
         >
-          {/* Call header — who you're on the line with + live status */}
+          {/* Call header, who you're on the line with + live status */}
           <div className="flex items-center justify-between gap-3 border-b border-panel-line px-5 py-3.5 sm:px-6">
             <div className="flex min-w-0 items-center gap-3">
-              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-panel-2 text-violet-300">
-                <Icon className="h-4 w-4" />
-              </span>
+              <PersonaAvatar name={scenario.persona.name} size={40} />
               <div className="min-w-0">
                 <p className="truncate text-body-strong text-white">{scenario.persona.name}</p>
-                <p className="truncate text-label capitalize text-muted">{personaRole}</p>
+                <p className="truncate text-label text-muted">{personaRole}</p>
               </div>
             </div>
             <span
@@ -223,23 +226,27 @@ export default function DrillPage() {
             </span>
           </div>
 
-          {/* Scrollback — conversation kept in a readable centred column */}
+          {/* Scrollback, conversation fills the full panel width so left/right
+              alignment reads clearly: persona hugs the left, you hug the right. */}
           <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
-            <div className="mx-auto flex min-h-full w-full max-w-3xl flex-col px-5 py-6 sm:px-6">
+            <div className="flex min-h-full w-full flex-col px-6 py-6 sm:px-10">
               <Transcript
                 lines={lines}
                 personaName={scenario.persona.name}
-                personaIcon={Icon}
                 thinking={!ended && mic === "thinking"}
               />
             </div>
           </div>
 
           {/* Composer */}
-          <div className="border-t border-panel-line bg-ink-2/40 px-5 py-5">
-            <div className="mx-auto w-full max-w-3xl">
-              {notice && <p className="mb-3 text-center text-label text-rose-400">{notice}</p>}
-              <MicButton state={ended ? "ended" : mic} onToggle={toggleMic} />
+          <div className="border-t border-panel-line bg-ink-2/40 px-5 py-3.5">
+            <div className="mx-auto w-full max-w-4xl">
+              {notice && <p className="mb-2 text-center text-label text-rose-400">{notice}</p>}
+              <MicButton
+                state={ended ? "ended" : mic}
+                onToggle={toggleMic}
+                personaName={scenario.persona.name.split(/\s+/)[0]}
+              />
             </div>
           </div>
         </section>

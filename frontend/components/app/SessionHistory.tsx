@@ -22,7 +22,7 @@ export function SessionHistory({
 }) {
   if (!sessions.length) {
     return (
-      <Card className="text-body text-secondary">No drills yet — start one above to see your history here.</Card>
+      <Card className="text-body text-secondary">No drills yet, start one above to see your history here.</Card>
     );
   }
   return (
@@ -43,7 +43,7 @@ export function SessionHistory({
             </div>
             <StatusPill tone={STATUS_TONE[s.status]}>{s.status}</StatusPill>
             <span className="w-16 text-right font-mono text-body-strong tabular text-primary">
-              {s.score != null ? s.score : "—"}
+              {s.score != null ? s.score : ", "}
             </span>
           </Link>
         );

@@ -8,7 +8,7 @@
   "persona": {
     "name": "Priya Nair",
     "role": "security_lead",
-    "voice_id": "neha",
+    "voice_id": "shreya",
     "base_emotion": "urgent",
     "description": "A security lead who reasons in terms of 'assume compromise, prove otherwise.' Wants to know what secrets the build environment exposed and whether they've already been used. Loses patience with anyone who wants to wait for confirmation before rotating; reassured by decisive rotation of exposed secrets plus a precise scope of what the malicious version could reach."
   },

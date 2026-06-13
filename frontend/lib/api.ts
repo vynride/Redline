@@ -1,5 +1,6 @@
 import { API_BASE } from "./config";
 import { getToken } from "./storage";
+import { deepClean } from "./text";
 import type {
   DebriefOut,
   Scenario,
@@ -29,7 +30,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   if (!resp.ok) {
     throw new ApiError(resp.status, (data && data.detail) || resp.statusText);
   }
-  return data as T;
+  // Strip em dashes from every string before it reaches the UI.
+  return deepClean(data as T);
 }
 
 export const api = {

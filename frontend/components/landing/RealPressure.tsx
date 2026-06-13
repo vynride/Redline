@@ -10,7 +10,7 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 function PersonaMock() {
   const lines = [
     { who: "persona", text: "You said five minutes. It's been twenty.", tone: "left" },
-    { who: "you", text: "You're right. Here's exactly where we are —", tone: "right" },
+    { who: "you", text: "You're right. Here's exactly where we are, ", tone: "right" },
     { who: "persona", text: "Don't manage me. Is it fixed or not?", tone: "left" },
   ];
   return (
@@ -45,7 +45,7 @@ function PersonaMock() {
 /** Every-scenario category mock. */
 function ScenarioListMock() {
   const items = [
-    { icon: ServerCrash, t: "Production outage", v: "SEV-1", vol: "$—" },
+    { icon: ServerCrash, t: "Production outage", v: "SEV-1", vol: "$, " },
     { icon: CreditCard, t: "Payment failure", v: "SEV-2", vol: "" },
     { icon: ShieldAlert, t: "Security alert", v: "SEV-1", vol: "" },
     { icon: AlertTriangle, t: "Support escalation", v: "SEV-3", vol: "" },
@@ -87,7 +87,7 @@ export function RealPressure() {
           <TwoTone lead="Real Pressure," accent="Real Reps." />
           <Reveal variant="up">
             <p className="mt-5 max-w-xl text-body-lg text-secondary">
-              Redline is where the outcome depends on what you actually say — not the runbook you
+              Redline is where the outcome depends on what you actually say, not the runbook you
               skimmed once.
             </p>
           </Reveal>
@@ -111,7 +111,7 @@ export function RealPressure() {
             <div className="flex h-full flex-col rounded-2xl border border-panel-line bg-panel-2/40 p-7">
               <h3 className="text-h2 text-white">Every scenario</h3>
               <p className="mt-2 text-body text-secondary">
-                Outages, payments, security, support, releases, latency — each archetype carries its own
+                Outages, payments, security, support, releases, latency, each archetype carries its own
                 stakes, hidden facts, and a severity model that fights back.
               </p>
               <div className="mt-6 rounded-2xl border border-panel-line bg-ink/60 p-4">

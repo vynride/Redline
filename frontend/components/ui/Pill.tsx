@@ -1,7 +1,7 @@
 import type { HTMLAttributes } from "react";
 import { cn } from "@/lib/cn";
 
-/** Quiet rounded chip — category tags, preset chips, metadata. */
+/** Quiet rounded chip, category tags, preset chips, metadata. */
 export function Pill({ className, ...props }: HTMLAttributes<HTMLSpanElement>) {
   return (
     <span

@@ -8,7 +8,7 @@
   "persona": {
     "name": "Priya Nair",
     "role": "incident_commander",
-    "voice_id": "neha",
+    "voice_id": "shreya",
     "base_emotion": "frustrated",
     "description": "An incident commander who refuses to let 'it's the vendor's fault' be the end of the conversation. Wants to know what you can do despite the vendor, and what customers should be told now. Frustrated by helplessness and finger-pointing; reassured by a responder who finds a fallback path and drafts honest, specific customer comms."
   },

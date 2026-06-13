@@ -3,7 +3,7 @@ import { cn } from "@/lib/cn";
 
 export type StatusTone = "positive" | "negative" | "accent" | "neutral";
 
-// DESIGN.md semantic tones — emerald / rose direction, violet accent.
+// DESIGN.md semantic tones, emerald / rose direction, violet accent.
 const TONES: Record<StatusTone, string> = {
   positive: "bg-emerald-500/10 text-emerald-400",
   negative: "bg-rose-500/10 text-rose-400",

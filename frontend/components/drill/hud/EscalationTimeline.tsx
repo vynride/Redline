@@ -2,7 +2,7 @@ import type { EscalationEvent } from "@shared/types";
 
 export function EscalationTimeline({ events }: { events: EscalationEvent[] }) {
   if (!events.length) {
-    return <p className="text-body text-muted">No escalations yet — keep it that way.</p>;
+    return <p className="text-body text-muted">No escalations yet, keep it that way.</p>;
   }
   return (
     <ol className="flex flex-col gap-3">

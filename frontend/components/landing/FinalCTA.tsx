@@ -5,7 +5,7 @@ import { Reveal } from "./primitives";
 
 export function FinalCTA() {
   return (
-    <section className="relative overflow-hidden bg-ink py-20">
+    <section id="get-started" className="relative overflow-hidden bg-ink py-20">
       <div className="mx-auto max-w-[1180px] px-6">
         <Reveal variant="scale">
           <div className="relative overflow-hidden rounded-[32px] bg-sky-card px-6 py-16 text-center sm:py-24">
@@ -22,7 +22,7 @@ export function FinalCTA() {
                 your next incident is a drill away
               </h2>
               <p className="mx-auto mt-5 max-w-md font-mono text-[13px] uppercase tracking-[0.06em] text-white/80">
-                Run your first crisis in under five minutes. No setup — just a mic.
+                Run your first crisis in under five minutes. No setup, just a mic.
               </p>
               <div className="mt-9 flex items-center justify-center">
                 <Link

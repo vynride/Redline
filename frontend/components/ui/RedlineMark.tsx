@@ -1,7 +1,6 @@
 /**
  * The Redline distress-flake glyph as a single-colour mark (inherits `currentColor`),
- * so it can be tinted white / rose / violet wherever the brand icon is needed —
- * e.g. inside the live drill's call button. The full-colour wordmark lives in
+ * so it can be tinted white / rose / violet wherever the brand icon is needed, * e.g. inside the live drill's call button. The full-colour wordmark lives in
  * /public/logo.svg; this is the recolourable inline version.
  */
 export function RedlineMark({ className }: { className?: string }) {

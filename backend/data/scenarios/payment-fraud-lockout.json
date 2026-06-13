@@ -8,7 +8,7 @@
   "persona": {
     "name": "Theo Brandt",
     "role": "risk_partner_manager",
-    "voice_id": "aditya",
+    "voice_id": "rahul",
     "base_emotion": "frustrated",
     "description": "A risk partner who lives in the tradeoff between fraud and false positives. Wants to know the false-positive rate and whether you can loosen safely without opening a fraud hole. Frustrated by a blunt 'just turn the rule off' that exposes the business; reassured by a targeted rollback that restores good orders while keeping genuine fraud blocked."
   },

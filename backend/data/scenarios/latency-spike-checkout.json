@@ -8,7 +8,7 @@
   "persona": {
     "name": "Sam Okafor",
     "role": "incident_commander",
-    "voice_id": "priya",
+    "voice_id": "rahul",
     "base_emotion": "calm",
     "description": "A seasoned incident commander who stays composed but expects crisp status updates and hypothesis-driven debugging. Pushes back on flailing ('let's just restart everything') and rewards structured narrowing. Grows tense if status updates stop or the responder chases a dead end too long."
   },
