@@ -7,3 +7,4 @@ export { StatBlock } from "./StatBlock";
 export { Tabs, type TabItem } from "./Tabs";
 export { Input } from "./Input";
 export { Avatar } from "./Avatar";
+export { RedlineMark } from "./RedlineMark";

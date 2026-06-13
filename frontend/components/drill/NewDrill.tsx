@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ServerCrash, CreditCard, ShieldAlert, AlertTriangle, PackageX, Gauge, ArrowRight, X } from "lucide-react";
@@ -90,7 +91,14 @@ export function DrillConfig({
   const [difficulty, setDifficulty] = useState<Difficulty>(scenario.difficulties[0]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
   const Icon = ICONS[scenario.archetype];
+
+  // Render into <body> so the overlay's `fixed inset-0` anchors to the viewport.
+  // The app is wrapped in an element that holds a lingering `transform` (the
+  // AuthGuard fade-up animation), which would otherwise become the containing
+  // block for fixed descendants and throw the modal off-screen.
+  useEffect(() => setMounted(true), []);
 
   async function start() {
     setBusy(true);
@@ -104,7 +112,9 @@ export function DrillConfig({
     }
   }
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <div
       className="fixed inset-0 z-50 overflow-y-auto bg-ink/80 backdrop-blur-sm"
       onClick={onClose}
@@ -190,7 +200,8 @@ export function DrillConfig({
         </div>
       </motion.div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
