@@ -5,7 +5,8 @@ import { useParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { MicButton, type MicState } from "@/components/drill/MicButton";
 import { Transcript, type TranscriptLine } from "@/components/drill/Transcript";
-import { Button, Card, StatBlock, StatusPill } from "@/components/ui";
+import { DrillHud } from "@/components/drill/hud/DrillHud";
+import { Button, Card } from "@/components/ui";
 import { api } from "@/lib/api";
 import { MicCapture, PcmPlayer } from "@/lib/audio";
 import { DrillSocket } from "@/lib/ws";
@@ -142,30 +143,7 @@ export default function DrillPage() {
           </div>
         </Card>
 
-        <Card widget className="flex flex-col gap-5">
-          <div className="flex items-center justify-between">
-            <span className="text-label text-secondary">Status</span>
-            <StatusPill tone={state.status === "active" ? "positive" : "neutral"}>{state.status}</StatusPill>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <StatBlock label="Severity" value={`${state.severity}/${scenario.severity.max}`}
-                       tone={state.severity >= scenario.severity.lose_at - 1 ? "negative" : "default"} mono />
-            <StatBlock label="Confidence" value={`${state.confidence}%`} mono
-                       tone={state.confidence >= 60 ? "positive" : "default"} />
-          </div>
-          <div className="flex flex-col gap-2">
-            <span className="text-label text-secondary">Objectives</span>
-            {scenario.objectives.map((o) => {
-              const met = state.objectives_met.includes(o);
-              return (
-                <div key={o} className="flex items-start gap-2 text-body">
-                  <span className={met ? "text-positive" : "text-muted"}>{met ? "✓" : "○"}</span>
-                  <span className={met ? "text-primary" : "text-secondary"}>{o}</span>
-                </div>
-              );
-            })}
-          </div>
-        </Card>
+        <DrillHud scenario={scenario} state={state} />
       </div>
     </div>
   );
