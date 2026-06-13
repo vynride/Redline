@@ -59,15 +59,21 @@ function statsFor(s: ScenarioSummary, sessions: SessionListItem[]) {
 // ─── Quick Start ─────────────────────────────────────────────────────────────
 
 function QuickStart({ scenarios }: { scenarios: ScenarioSummary[] }) {
-  const router    = useRouter();
-  const inputRef  = useRef<HTMLInputElement>(null);
+  const router   = useRouter();
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const [query,      setQuery]      = useState("");
   const [role,       setRole]       = useState<Role>(scenarios[0]?.roles[0] ?? "on_call_engineer");
   const [difficulty, setDifficulty] = useState<Difficulty>(scenarios[0]?.difficulties[0] ?? "warmup");
   const [busy,  setBusy]  = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Best-matching scenario: starts-with title > includes summary > includes archetype label
+  // Stable random shuffle once per mount — new order each page load
+  const [chips] = useState<ScenarioSummary[]>(() =>
+    [...scenarios].sort(() => Math.random() - 0.5),
+  );
+
+  // Best match: starts-with title → summary includes → archetype label includes
   const matched = useMemo<ScenarioSummary | null>(() => {
     if (!query.trim()) return null;
     const q = query.toLowerCase();
@@ -81,23 +87,28 @@ function QuickStart({ scenarios }: { scenarios: ScenarioSummary[] }) {
 
   const scenario = matched ?? scenarios[0] ?? null;
 
-  // Ghost suffix — only for starts-with title matches
+  // Ghost suffix — only when query is a starts-with prefix of the matched title
   const ghost =
     matched && query && matched.title.toLowerCase().startsWith(query.toLowerCase())
       ? matched.title.slice(query.length)
       : "";
 
-  // When the active scenario changes, reset role/difficulty if no longer available
+  // Keep role/difficulty valid when the active scenario changes
   useEffect(() => {
     if (!scenario) return;
-    if (!scenario.roles.includes(role))               setRole(scenario.roles[0]);
-    if (!scenario.difficulties.includes(difficulty))  setDifficulty(scenario.difficulties[0]);
+    if (!scenario.roles.includes(role))              setRole(scenario.roles[0]);
+    if (!scenario.difficulties.includes(difficulty)) setDifficulty(scenario.difficulties[0]);
   }, [scenario?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function accept(title: string) {
+    setQuery(title);
+    inputRef.current?.focus();
+  }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if ((e.key === "Tab" || e.key === "ArrowRight") && ghost) {
       e.preventDefault();
-      setQuery(matched!.title);
+      accept(matched!.title);
     }
     if (e.key === "Enter") void handleLaunch();
     if (e.key === "Escape") setQuery("");
@@ -116,138 +127,169 @@ function QuickStart({ scenarios }: { scenarios: ScenarioSummary[] }) {
     }
   }
 
-  const Icon = scenario ? META[scenario.archetype].icon : Mic;
+  const ScenIcon   = scenario ? META[scenario.archetype].icon : Mic;
+  const availRoles = scenario?.roles ?? ALL_ROLES;
+  const availDiffs = scenario?.difficulties ?? ALL_DIFFICULTIES;
 
   return (
-    <div className="rounded-xl border border-violet-500/20 bg-panel">
-      <div className="flex flex-col gap-5 p-5 lg:flex-row lg:items-start lg:gap-0 lg:p-6">
+    <div className="relative overflow-hidden rounded-2xl border border-violet-500/22 bg-panel">
+      {/* Top gradient accent stripe */}
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-500/60 to-transparent" />
 
-        {/* ── Scenario search ──────────────────────────────────── */}
-        <div className="flex min-w-0 flex-col gap-2.5 lg:flex-1 lg:pr-7">
-          <div className="flex items-center gap-2">
-            <span className="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-violet-500">
-              <Mic className="h-3.5 w-3.5 text-white" />
-            </span>
-            <span className="text-[12px] font-semibold text-white">Quick Start</span>
-            {scenario && (
-              <span className="ml-auto flex shrink-0 items-center gap-1.5 rounded-full bg-panel-2 px-2 py-0.5 text-[10px] text-secondary">
-                <Icon className="h-3 w-3" />
-                {META[scenario.archetype].short}
-              </span>
-            )}
+      {/* Ambient violet glow centred behind the input */}
+      <div
+        className="pointer-events-none absolute -top-16 left-1/2 h-48 w-[560px] -translate-x-1/2"
+        style={{
+          background: "radial-gradient(ellipse, rgba(124,58,237,0.18) 0%, transparent 68%)",
+          filter: "blur(28px)",
+        }}
+      />
+
+      {/* ── Top section ─────────────────────────────────────── */}
+      <div className="relative px-6 pb-5 pt-6">
+
+        {/* Header */}
+        <div className="mb-5 flex items-center gap-3">
+          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-violet-500 shadow-[0_0_20px_4px_rgba(124,58,237,0.45)]">
+            <Mic className="h-4 w-4 text-white" />
+          </span>
+          <div className="leading-none">
+            <p className="text-[14px] font-semibold text-white">Quick Start</p>
+            <p className="mt-0.5 text-[11px] text-muted">Type or click any scenario below</p>
           </div>
-
-          {/* Input + ghost text */}
-          <div className="relative rounded-lg border border-panel-line bg-ink-2 transition-colors focus-within:border-violet-500/50">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted" />
-
-            {/* Ghost completion — aligned via invisible spacer span */}
-            {ghost && (
-              <div
-                className="pointer-events-none absolute inset-0 flex items-center overflow-hidden rounded-lg pl-9 pr-9 font-sans text-[13px]"
-                aria-hidden
-              >
-                <span className="invisible whitespace-pre">{query}</span>
-                <span className="whitespace-pre text-muted/40">{ghost}</span>
-              </div>
-            )}
-
-            <input
-              ref={inputRef}
-              type="text"
-              aria-label="Search or describe a scenario"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder={scenarios[0] ? `e.g. "${scenarios[0].title}"` : "Describe a scenario…"}
-              className="relative z-10 w-full bg-transparent py-2.5 pl-9 pr-9 text-[13px] text-white placeholder:text-muted/40 focus:outline-none"
-            />
-
-            {query && (
-              <button
-                aria-label="Clear search"
-                onClick={() => { setQuery(""); inputRef.current?.focus(); }}
-                className="absolute right-2.5 top-1/2 z-10 -translate-y-1/2 rounded p-0.5 text-muted transition-colors hover:text-primary"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
-            )}
-          </div>
-
-          <p className="line-clamp-2 min-h-[2.6em] text-[11px] leading-relaxed text-muted">
-            {scenario?.summary ?? "Start typing to find a scenario."}
-          </p>
+          {scenario && (
+            <div className="ml-auto hidden items-center gap-2 rounded-full border border-panel-line bg-panel-2 px-3 py-1.5 text-[11px] sm:flex">
+              <ScenIcon className="h-3.5 w-3.5 text-violet-300" />
+              <span className="text-secondary">{META[scenario.archetype].short}</span>
+              <span className="h-3 w-px bg-panel-line" />
+              <span className="max-w-[180px] truncate font-medium text-white">{scenario.title}</span>
+            </div>
+          )}
         </div>
 
-        <div className="hidden w-px self-stretch bg-panel-line lg:block" />
+        {/* ── Large search / command input ── */}
+        <div className="relative rounded-xl border border-panel-line bg-ink-2 transition-all duration-200 focus-within:border-violet-500/55 focus-within:shadow-[0_0_0_3px_rgba(124,58,237,0.08)]">
+          {/* Ghost completion — invisible spacer ensures alignment with typed text */}
+          {ghost && (
+            <div
+              className="pointer-events-none absolute inset-0 flex items-center overflow-hidden rounded-xl px-5 font-sans text-[18px] font-normal leading-none"
+              aria-hidden
+            >
+              <span className="invisible whitespace-pre">{query}</span>
+              <span className="whitespace-pre" style={{ color: "rgba(111,103,137,0.45)" }}>{ghost}</span>
+            </div>
+          )}
+          <input
+            ref={inputRef}
+            type="text"
+            aria-label="Search or describe a scenario"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder='e.g. "database is down" or "payment failures"…'
+            className="relative z-10 w-full bg-transparent py-4 pl-5 pr-14 text-[18px] font-normal text-white placeholder:text-muted/35 focus:outline-none"
+          />
+          {query ? (
+            <button
+              aria-label="Clear"
+              onClick={() => { setQuery(""); inputRef.current?.focus(); }}
+              className="absolute right-4 top-1/2 z-10 -translate-y-1/2 rounded-lg p-1.5 text-muted transition-colors hover:bg-panel-2 hover:text-white"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          ) : (
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1">
+              <kbd className="rounded border border-panel-line px-1.5 py-0.5 font-mono text-[10px] text-muted/50">↵</kbd>
+            </div>
+          )}
+        </div>
 
-        {/* ── Role selector ────────────────────────────────────── */}
-        <div className="flex flex-col gap-2.5 lg:px-7">
-          <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
-            Your role
-          </span>
-          <div className="flex flex-col gap-1.5">
-            {(scenario?.roles ?? ALL_ROLES).map((r) => (
+        {/* ── Scenario chips ── */}
+        <div className="mt-4 flex flex-wrap gap-2">
+          {chips.map((s) => {
+            const CIcon    = META[s.archetype].icon;
+            const isActive = scenario?.id === s.id && query.trim() !== "";
+            return (
               <button
-                key={r}
-                aria-pressed={r === role}
-                onClick={() => setRole(r)}
+                key={s.id}
+                onClick={() => accept(s.title)}
                 className={cn(
-                  "rounded-lg px-3 py-1.5 text-left text-[11px] font-medium transition-colors",
-                  r === role
-                    ? "bg-violet-500/20 text-violet-200 ring-1 ring-inset ring-violet-500/40"
-                    : "bg-panel-2 text-secondary hover:text-white",
+                  "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[12px] font-medium transition-all duration-150",
+                  isActive
+                    ? "border-violet-500/60 bg-violet-500/18 text-violet-200 shadow-[0_0_12px_-2px_rgba(124,58,237,0.35)]"
+                    : "border-panel-line bg-panel-2 text-secondary hover:border-violet-500/35 hover:bg-violet-500/10 hover:text-white",
                 )}
               >
-                {ROLE_LABELS[r]}
+                <CIcon className="h-3.5 w-3.5 shrink-0 opacity-70" />
+                {s.title}
               </button>
-            ))}
-          </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── Bottom bar: role · difficulty · launch ──────────── */}
+      <div className="relative flex flex-wrap items-center gap-x-4 gap-y-3 border-t border-panel-line bg-ink-2/50 px-6 py-4">
+
+        {/* Role pills */}
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="shrink-0 font-mono text-[10px] uppercase tracking-[0.14em] text-muted">Role</span>
+          {availRoles.map((r) => (
+            <button
+              key={r}
+              aria-pressed={r === role}
+              onClick={() => setRole(r)}
+              className={cn(
+                "rounded-full px-3 py-1 text-[11px] font-medium transition-all duration-150",
+                r === role
+                  ? "bg-violet-500/22 text-violet-200 ring-1 ring-inset ring-violet-500/45"
+                  : "bg-panel-2 text-secondary hover:bg-panel-2 hover:text-white",
+              )}
+            >
+              {ROLE_LABELS[r]}
+            </button>
+          ))}
         </div>
 
-        <div className="hidden w-px self-stretch bg-panel-line lg:block" />
+        <div className="hidden h-4 w-px shrink-0 bg-panel-line sm:block" />
 
-        {/* ── Difficulty + Launch ──────────────────────────────── */}
-        <div className="flex flex-col gap-2.5 lg:pl-7">
-          <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
-            Difficulty
-          </span>
-          <div className="flex gap-2">
-            {(scenario?.difficulties ?? ALL_DIFFICULTIES).map((d) => {
-              const sev         = SEV[d];
-              const [txt, bg]   = sev.tone.split(" ");
-              return (
-                <button
-                  key={d}
-                  aria-pressed={d === difficulty}
-                  onClick={() => setDifficulty(d)}
-                  className={cn(
-                    "flex flex-1 flex-col items-center gap-1 rounded-lg border px-2.5 py-2 transition-colors",
-                    d === difficulty
-                      ? "border-violet-500/50 bg-violet-500/10"
-                      : "border-panel-line bg-panel-2 hover:border-violet-500/30",
-                  )}
-                >
-                  <span className={cn("rounded px-1 py-px font-mono text-[9px] font-bold", txt, bg)}>
-                    {sev.label}
-                  </span>
-                  <span className={cn("text-[10px]", d === difficulty ? "text-violet-200" : "text-secondary")}>
-                    {DIFFICULTY_LABELS[d]}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+        {/* Difficulty pills */}
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="shrink-0 font-mono text-[10px] uppercase tracking-[0.14em] text-muted">Difficulty</span>
+          {availDiffs.map((d) => {
+            const sev   = SEV[d];
+            const [txt] = sev.tone.split(" ");
+            return (
+              <button
+                key={d}
+                aria-pressed={d === difficulty}
+                onClick={() => setDifficulty(d)}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-medium transition-all duration-150",
+                  d === difficulty
+                    ? "border-violet-500/50 bg-violet-500/15 text-violet-200"
+                    : "border-panel-line bg-panel-2 text-secondary hover:border-violet-500/30 hover:text-white",
+                )}
+              >
+                <span className={cn("font-mono text-[9px] font-bold", txt)}>{sev.label}</span>
+                {DIFFICULTY_LABELS[d]}
+              </button>
+            );
+          })}
+        </div>
 
+        {/* Push launch to the far right */}
+        <div className="flex-1" />
+
+        <div className="flex flex-col items-end gap-1.5">
           <button
             onClick={() => void handleLaunch()}
             disabled={busy || !scenario}
-            className="mt-auto flex items-center justify-center gap-1.5 rounded-xl bg-white px-5 py-2.5 text-[13px] font-semibold text-ink transition-all hover:scale-[1.02] disabled:opacity-60 disabled:hover:scale-100"
+            className="flex items-center gap-2 rounded-xl bg-white px-6 py-2.5 text-[13px] font-semibold text-ink shadow-[0_2px_20px_-4px_rgba(255,255,255,0.2)] transition-all duration-150 hover:scale-[1.03] hover:shadow-[0_4px_28px_-4px_rgba(255,255,255,0.3)] disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-none"
           >
             {busy ? "Starting…" : <><span>Launch Drill</span><ArrowRight className="h-4 w-4" /></>}
           </button>
-
-          {error && <p className="mt-1 text-[11px] text-rose-400">{error}</p>}
+          {error && <p className="text-[11px] text-rose-400">{error}</p>}
         </div>
       </div>
     </div>
@@ -455,9 +497,11 @@ function ScenarioCard({
         </span>
       </div>
 
-      <p className="min-h-[40px] text-[13px] font-medium leading-snug text-primary">{s.summary}</p>
+      <p className="line-clamp-3 min-h-[40px] text-[13px] font-medium leading-snug text-primary">{s.summary}</p>
 
-      <div className="flex items-center gap-2">
+      {/* mt-auto pushes the bars + labels + footer to the card's bottom so every
+          "Run drill" button aligns on the same baseline regardless of summary length. */}
+      <div className="mt-auto flex items-center gap-2">
         <div className="flex flex-1 overflow-hidden rounded-full">
           <div className="h-1.5 rounded-l-full bg-emerald-400/80" style={{ width: `${calm}%` }} />
           <div className="h-1.5 rounded-r-full bg-rose-500/70"    style={{ width: `${escalate}%` }} />
