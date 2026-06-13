@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Card, Pill, StatusPill } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
@@ -8,18 +8,9 @@ import { ARCHETYPE_LABELS, DIFFICULTY_LABELS, ROLE_LABELS } from "@/lib/labels";
 import { cn } from "@/lib/cn";
 import type { Difficulty, Role, ScenarioSummary } from "@shared/types";
 
-export function NewDrill() {
+export function NewDrill({ scenarios }: { scenarios: ScenarioSummary[] }) {
   const router = useRouter();
-  const [scenarios, setScenarios] = useState<ScenarioSummary[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<ScenarioSummary | null>(null);
-
-  useEffect(() => {
-    api.listScenarios().then(setScenarios).catch((e) => setError(e.message));
-  }, []);
-
-  if (error) return <p className="text-body text-negative">{error}</p>;
-  if (!scenarios) return <p className="text-body text-secondary">Loading scenarios…</p>;
 
   return (
     <>
