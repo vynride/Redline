@@ -7,11 +7,14 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.db import get_db
-from app.models.session import DrillSession
+from app.models.session import DrillSession, SessionStatus
 from app.models.turn import Speaker, Turn
 from app.models.user import User
+from app.schemas.debrief import DebriefOut
 from app.schemas.session import SessionCreate, SessionDetail, SessionListItem, SessionOut
 from app.services import scenarios as catalog
+from app.services.debrief import get_or_create_debrief
+from app.services.llm import LLMClient, get_llm_client
 
 router = APIRouter(prefix="/api/sessions", tags=["sessions"])
 
@@ -87,3 +90,17 @@ def get_session(
     user: User = Depends(get_current_user),
 ) -> DrillSession:
     return load_owned_session(db, session_id, user)
+
+
+@router.get("/{session_id}/debrief", response_model=DebriefOut)
+async def get_debrief(
+    session_id: str,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+    llm: LLMClient = Depends(get_llm_client),
+):
+    drill = load_owned_session(db, session_id, user)
+    if drill.status == SessionStatus.active:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT,
+                            detail="The drill is still active; finish it before requesting a debrief.")
+    return await get_or_create_debrief(db, drill, llm)
