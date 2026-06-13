@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
+// Fonts are bundled from npm (@fontsource) rather than fetched from Google Fonts at
+// build time, so the image builds in network-restricted environments. The CSS imports
+// register the @font-face rules; the families are wired to --font-inter / --font-jetbrains
+// (the variables Tailwind's font-sans / font-mono resolve to) in globals.css.
+import "@fontsource-variable/plus-jakarta-sans";
+import "@fontsource-variable/jetbrains-mono";
 import "./globals.css";
 import { Providers } from "./providers";
-
-// Plus Jakarta Sans is the app-wide sans. It's bound to `--font-inter` (the variable
-// Tailwind's `font-sans` resolves to) so the whole product, marketing pages, and any
-// portaled overlays switch over without touching the design tokens.
-const sans = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
-const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains", display: "swap" });
 
 export const metadata: Metadata = {
   title: "Redline :: Crisis-drill voice trainer",
@@ -20,7 +19,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${sans.variable} ${jetbrains.variable}`}>
+    <html lang="en">
       <body>
         <Providers>{children}</Providers>
       </body>

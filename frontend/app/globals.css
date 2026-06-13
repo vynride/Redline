@@ -3,6 +3,13 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    /* Font families bundled via @fontsource (imported in layout.tsx). Tailwind's
+       font-sans / font-mono resolve to these variables. */
+    --font-inter: "Plus Jakarta Sans Variable";
+    --font-jetbrains: "JetBrains Mono Variable";
+  }
+
   html,
   body {
     @apply bg-ink text-primary font-sans antialiased;
