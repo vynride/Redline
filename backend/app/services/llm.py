@@ -94,10 +94,26 @@ def _strip_fence(text: str) -> str:
     return t.strip()
 
 
+class _LazySarvamLLM:
+    """Defers Sarvam client construction until the first call.
+
+    Lets routes declare ``Depends(get_llm_client)`` cheaply — a request that
+    short-circuits before generating (e.g. a 409) never touches Sarvam config.
+    """
+
+    def __init__(self) -> None:
+        self._impl: SarvamLLM | None = None
+
+    async def generate(self, *, system: str, messages: list[ChatMessage], response_schema: type[T]) -> T:
+        if self._impl is None:
+            self._impl = SarvamLLM()
+        return await self._impl.generate(system=system, messages=messages, response_schema=response_schema)
+
+
 @lru_cache(maxsize=1)
 def get_llm_client() -> LLMClient:
-    """FastAPI dependency — the process-wide Sarvam client.
+    """FastAPI dependency — the process-wide Sarvam client (lazily constructed).
 
     Overridden with a fake in tests via ``app.dependency_overrides``.
     """
-    return SarvamLLM()
+    return _LazySarvamLLM()
