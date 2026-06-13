@@ -35,11 +35,13 @@ export class MicCapture {
       audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true },
     });
     this.ctx = new AudioContext();
+    const inRate = this.ctx.sampleRate; // capture now; the node may outlive this.ctx on stop
     this.source = this.ctx.createMediaStreamSource(this.stream);
     const node = this.ctx.createScriptProcessor(4096, 1, 1);
     node.onaudioprocess = (e: AudioProcessingEvent) => {
+      if (!this.ctx) return; // a buffered event can fire after stop() tears things down
       const input = e.inputBuffer.getChannelData(0);
-      const pcm = downsampleToInt16(input, this.ctx!.sampleRate, STT_RATE);
+      const pcm = downsampleToInt16(input, inRate, STT_RATE);
       if (pcm.byteLength) this.onChunk(pcm);
     };
     this.source.connect(node);
@@ -48,6 +50,7 @@ export class MicCapture {
   }
 
   stop(): void {
+    if (this.node) this.node.onaudioprocess = null; // stop callbacks before teardown
     this.node?.disconnect();
     this.source?.disconnect();
     this.stream?.getTracks().forEach((t) => t.stop());
