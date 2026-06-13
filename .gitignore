@@ -39,3 +39,6 @@ htmlcov/
 
 # --- Internal working notes (never commit) ---
 HANDOVER.md
+
+# Next.js generated type shim
+frontend/next-env.d.ts
