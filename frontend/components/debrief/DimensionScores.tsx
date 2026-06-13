@@ -17,11 +17,11 @@ function tone(v: number): MeterTone {
 
 export function DimensionScores({ scores }: { scores: Scores }) {
   return (
-    <div className="flex flex-col gap-4">
+    <div className="grid gap-x-8 gap-y-4 sm:grid-cols-2">
       {LABELS.map(([key, label]) => (
         <div key={key} className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
-            <span className="text-body text-secondary">{label}</span>
+            <span className="text-[13.5px] text-secondary">{label}</span>
             <span className="font-mono text-body-strong tabular text-primary">{scores[key]}</span>
           </div>
           <Meter value={scores[key]} max={100} tone={tone(scores[key])} />

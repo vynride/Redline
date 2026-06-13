@@ -91,7 +91,7 @@ function QuickStart({ scenarios }: { scenarios: ScenarioSummary[] }) {
 
   const scenario = matched ?? scenarios[0] ?? null;
 
-  // Ghost suffix — only when query is a starts-with prefix of the matched title
+  // Ghost suffix, only when query is a starts-with prefix of the matched title
   const ghost =
     matched && query && matched.title.toLowerCase().startsWith(query.toLowerCase())
       ? matched.title.slice(query.length)
@@ -191,7 +191,7 @@ function QuickStart({ scenarios }: { scenarios: ScenarioSummary[] }) {
 
         {/* ── Large search / command input ── */}
         <div className="relative rounded-xl border border-panel-line bg-ink-2 transition-all duration-200 focus-within:border-violet-500/55 focus-within:shadow-[0_0_0_3px_rgba(124,58,237,0.08)]">
-          {/* Ghost completion — invisible spacer ensures alignment with typed text */}
+          {/* Ghost completion, invisible spacer ensures alignment with typed text */}
           {ghost && (
             <div
               className="pointer-events-none absolute inset-0 flex items-center overflow-hidden rounded-xl px-5 font-sans text-[18px] font-normal leading-none"
@@ -469,7 +469,7 @@ export function DashboardWindow({
 
       {/* ── Content ───────────────────────────────────── */}
       <div className="flex flex-col gap-4 px-6 py-6 sm:px-8">
-        {/* Quick Start — full-width banner above the grid */}
+        {/* Quick Start, full-width banner above the grid */}
         <QuickStart scenarios={scenarios} />
 
         {/* Scenario grid */}

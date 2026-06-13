@@ -8,7 +8,7 @@ import { ServerCrash, CreditCard, ShieldAlert, AlertTriangle, PackageX, Gauge, A
 import type { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
-import { ARCHETYPE_LABELS, DIFFICULTY_LABELS, ROLE_LABELS } from "@/lib/labels";
+import { ARCHETYPE_LABELS, DIFFICULTY_LABELS, ROLE_LABELS, humanizeRole } from "@/lib/labels";
 import { cn } from "@/lib/cn";
 import type { Archetype, Difficulty, Role, ScenarioSummary } from "@shared/types";
 
@@ -64,7 +64,7 @@ export function NewDrill({ scenarios }: { scenarios: ScenarioSummary[] }) {
               <p className="min-h-[40px] text-body text-secondary">{s.summary}</p>
 
               <div className="mt-1 flex items-center justify-between border-t border-panel-line pt-3">
-                <span className="text-label text-muted">vs. {s.persona_role.replace(/_/g, " ")}</span>
+                <span className="text-label text-muted">vs. {humanizeRole(s.persona_role)}</span>
                 <span className="inline-flex items-center gap-1 rounded-md bg-violet-500/15 px-2.5 py-1 text-[12px] font-semibold text-violet-200 transition-colors group-hover:bg-violet-500 group-hover:text-white">
                   Run drill <ArrowRight className="h-3.5 w-3.5" />
                 </span>
@@ -132,7 +132,7 @@ export function DrillConfig({
           aria-modal="true"
           aria-label={`Configure drill: ${scenario.title}`}
         >
-        {/* Header — app-window chrome: icon tile + mono eyebrow + severity */}
+        {/* Header, app-window chrome: icon tile + mono eyebrow + severity */}
         <div className="flex items-start gap-3 border-b border-panel-line px-7 pb-5 pt-6">
           <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-panel-2 text-violet-300">
             <Icon className="h-5 w-5" />
@@ -155,7 +155,7 @@ export function DrillConfig({
         <div className="px-7 py-6">
           <p className="text-body text-secondary">{scenario.summary}</p>
 
-          {/* Role — selector tiles */}
+          {/* Role, selector tiles */}
           <div className="mt-6 flex flex-col gap-2.5">
             <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">Your role</span>
             <div className="grid grid-cols-2 gap-2">
@@ -165,7 +165,7 @@ export function DrillConfig({
             </div>
           </div>
 
-          {/* Difficulty — selector rows with severity badge */}
+          {/* Difficulty, selector rows with severity badge */}
           <div className="mt-5 flex flex-col gap-2.5">
             <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">Difficulty</span>
             <div className="flex flex-col gap-2">

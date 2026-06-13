@@ -8,7 +8,7 @@ import { Reveal } from "./primitives";
 const FAQS = [
   {
     q: "Why is Redline different?",
-    a: "Most training rehearses the runbook. Redline makes you say the words out loud to a persona that reacts to your tone — under live, rising pressure — then coaches you on the recording.",
+    a: "Most training rehearses the runbook. Redline makes you say the words out loud to a persona that reacts to your tone, under live, rising pressure, then coaches you on the recording.",
   },
   {
     q: "Do I actually have to talk?",
@@ -20,11 +20,11 @@ const FAQS = [
   },
   {
     q: "What do I get scored on?",
-    a: "Five dimensions — clarity, de-escalation, info-gathering, escalation, and status comms — graded against the transcript, with the exact moments you slipped and stronger phrasing you could have used.",
+    a: "Five dimensions, clarity, de-escalation, info-gathering, escalation, and status comms, graded against the transcript, with the exact moments you slipped and stronger phrasing you could have used.",
   },
   {
     q: "Which scenarios are covered?",
-    a: "Six archetypes — outages, payments, security, support, releases, and latency — playable across roles like on-call engineer, incident commander, and support lead, at three intensity tiers.",
+    a: "Six archetypes, outages, payments, security, support, releases, and latency, playable across roles like on-call engineer, incident commander, and support lead, at three intensity tiers.",
   },
   {
     q: "Is my voice data private?",

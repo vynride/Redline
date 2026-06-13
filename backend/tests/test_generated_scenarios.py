@@ -29,7 +29,7 @@ def _draft(**over) -> ScenarioDraft:
         roles=[Role.on_call_engineer, Role.incident_commander],
         difficulties=[Difficulty.production_like, Difficulty.redline],
         persona=PersonaDraft(
-            name="Dana Reyes", role="head_of_payments",
+            name="Dana Reyes", role="head_of_payments", gender="female",
             base_emotion=Emotion.urgent, description="Anxious, wants concrete ETAs.",
         ),
         stakes="Revenue is dropping every minute the queue is stuck.",

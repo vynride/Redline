@@ -195,7 +195,7 @@ export function Features() {
           TagIcon={Wand2}
           title="Build your own"
           accent="drills."
-          body="Turn last quarter's real outage into a repeatable drill. Set the role, the stakes, and the hidden facts — then make the whole team rehearse it."
+          body="Turn last quarter's real outage into a repeatable drill. Set the role, the stakes, and the hidden facts, then make the whole team rehearse it."
           mock={<BuildMock />}
         />
         <Block
@@ -204,7 +204,7 @@ export function Features() {
           TagIcon={Flame}
           title="Keep the"
           accent="streak."
-          body="String together clean drills to unlock multipliers and harder tiers. Readiness compounds — and so does the muscle memory."
+          body="String together clean drills to unlock multipliers and harder tiers. Readiness compounds, and so does the muscle memory."
           mock={<StreakMock />}
         />
         <Block
@@ -212,7 +212,7 @@ export function Features() {
           TagIcon={Trophy}
           title="Climb the"
           accent="ranks."
-          body="Compete with responders worldwide. Showcase that you stay calm when it counts — and watch yourself move up the board, drill by drill."
+          body="Compete with responders worldwide. Showcase that you stay calm when it counts, and watch yourself move up the board, drill by drill."
           mock={<LeaderboardMock />}
         />
         <Block

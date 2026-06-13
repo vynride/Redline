@@ -8,7 +8,7 @@
   "persona": {
     "name": "Priya Nair",
     "role": "ciso",
-    "voice_id": "neha",
+    "voice_id": "shreya",
     "base_emotion": "urgent",
     "description": "A CISO who thinks in terms of contain, eradicate, recover, and notify. Wants attacker access cut off first, then scope assessed. Impatient with anyone who wants to study the attack before stopping it, and reassured by decisive containment paired with a plan to protect affected users without locking out everyone else."
   },

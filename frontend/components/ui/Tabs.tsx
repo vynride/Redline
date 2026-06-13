@@ -14,7 +14,7 @@ interface TabsProps {
   className?: string;
 }
 
-/** Segmented pill control — active tab lifts one surface notch. */
+/** Segmented pill control, active tab lifts one surface notch. */
 export function Tabs({ tabs, value, onValueChange, className }: TabsProps) {
   return (
     <div className={cn("inline-flex flex-wrap gap-1", className)} role="tablist">

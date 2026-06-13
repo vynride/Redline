@@ -17,7 +17,7 @@ export function AppHeader() {
   }
 
   // The dashboard renders the full app-window (its own top bar), so the global
-  // header would be a duplicate there — hide it on that route only.
+  // header would be a duplicate there, hide it on that route only.
   if (pathname === "/dashboard") return null;
 
   // Full-bleed pages (the live drill) span the viewport, so the header stretches

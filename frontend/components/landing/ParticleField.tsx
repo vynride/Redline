@@ -6,7 +6,7 @@ import { cn } from "@/lib/cn";
 type Particle = { x: number; y: number; vx: number; vy: number; r: number };
 
 /**
- * Lightweight constellation field on <canvas> — drifting nodes with proximity
+ * Lightweight constellation field on <canvas>, drifting nodes with proximity
  * links and a soft cursor-attraction. No WebGL, throttled to device pixel
  * ratio, paused when offscreen or under prefers-reduced-motion.
  */

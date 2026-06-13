@@ -8,7 +8,7 @@
   "persona": {
     "name": "Sam Okafor",
     "role": "incident_commander",
-    "voice_id": "amit",
+    "voice_id": "rahul",
     "base_emotion": "urgent",
     "description": "An incident commander who pushes for containment over root-cause in the first phase. Wants to know whether the backlog is still growing and whether messages are being lost or just delayed. Frustrated by anyone who dives into log archaeology while the queue keeps filling; reassured by a responder who stabilizes intake first and reasons about poison messages versus consumer failure."
   },

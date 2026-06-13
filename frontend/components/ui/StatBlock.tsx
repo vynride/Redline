@@ -3,7 +3,7 @@ import { cn } from "@/lib/cn";
 interface StatBlockProps {
   label: string;
   value: string | number;
-  /** Render the value in JetBrains Mono — for IDs, scores, and fixed-width values. */
+  /** Render the value in JetBrains Mono, for IDs, scores, and fixed-width values. */
   mono?: boolean;
   /** Directional tint for the value. */
   tone?: "default" | "positive" | "negative";

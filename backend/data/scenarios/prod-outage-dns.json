@@ -8,7 +8,7 @@
   "persona": {
     "name": "Sam Okafor",
     "role": "incident_commander",
-    "voice_id": "amit",
+    "voice_id": "rahul",
     "base_emotion": "calm",
     "description": "A composed incident commander who guards against tunnel vision. Pushes responders to confirm the layer the problem lives in before touching anything, and rewards anyone who reasons from 'nothing was deployed' to an external or infrastructure cause. Grows tense if the responder starts restarting application services that aren't the problem."
   },

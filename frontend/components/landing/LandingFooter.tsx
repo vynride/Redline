@@ -1,19 +1,66 @@
 "use client";
 
 import Link from "next/link";
-import { GithubIcon, XIcon, LinkedinIcon } from "./BrandIcons";
+import { Mail } from "lucide-react";
+import { GithubIcon, XIcon } from "./BrandIcons";
 
-const COLUMNS = [
-  { title: "Platform", links: ["Start a drill", "How it works", "Scenarios", "Compare"] },
-  { title: "Reach out", links: ["X / Twitter", "Discord", "Email us", "Report a bug"] },
-  { title: "Company", links: ["About", "Careers", "Security", "Privacy"] },
+type FooterLink = { label: string; href: string };
+
+const COLUMNS: { title: string; links: FooterLink[] }[] = [
+  {
+    title: "Platform",
+    links: [
+      { label: "Start a drill", href: "/login" },
+      { label: "How it works", href: "#product" },
+      { label: "FAQ", href: "#faq" },
+      { label: "Get started", href: "#get-started" },
+    ],
+  },
+  {
+    title: "Reach out",
+    links: [
+      { label: "X / Twitter", href: "https://x.com/vynride" },
+      { label: "Email us", href: "mailto:vynride@gmail.com" },
+      { label: "GitHub", href: "https://github.com/vynride" },
+    ],
+  },
+  {
+    title: "Company",
+    links: [
+      { label: "About", href: "/about" },
+      { label: "Security", href: "/security" },
+      { label: "Privacy", href: "/privacy" },
+    ],
+  },
 ];
 
 const SOCIALS = [
-  { icon: GithubIcon, label: "GitHub" },
-  { icon: XIcon, label: "X" },
-  { icon: LinkedinIcon, label: "LinkedIn" },
+  { icon: GithubIcon, label: "GitHub", href: "https://github.com/vynride" },
+  { icon: XIcon, label: "X", href: "https://x.com/vynride" },
+  { icon: Mail, label: "Email", href: "mailto:vynride@gmail.com" },
 ];
+
+/** Render an internal route as a <Link>, anchors/external/mailto as a plain <a>. */
+function FooterLinkEl({ link, className }: { link: FooterLink; className?: string }) {
+  const isInternal = link.href.startsWith("/");
+  const isExternal = link.href.startsWith("http");
+  if (isInternal) {
+    return (
+      <Link href={link.href} className={className}>
+        {link.label}
+      </Link>
+    );
+  }
+  return (
+    <a
+      href={link.href}
+      className={className}
+      {...(isExternal ? { target: "_blank", rel: "noreferrer noopener" } : {})}
+    >
+      {link.label}
+    </a>
+  );
+}
 
 export function LandingFooter() {
   return (
@@ -35,8 +82,10 @@ export function LandingFooter() {
                 return (
                   <a
                     key={s.label}
-                    href="#"
+                    href={s.href}
                     aria-label={s.label}
+                    target={s.href.startsWith("http") ? "_blank" : undefined}
+                    rel={s.href.startsWith("http") ? "noreferrer noopener" : undefined}
                     className="grid h-9 w-9 place-items-center rounded-full border border-panel-line bg-panel text-secondary transition-colors hover:text-white"
                   >
                     <Icon className="h-4 w-4" />
@@ -53,10 +102,11 @@ export function LandingFooter() {
               </span>
               <ul className="flex flex-col gap-2.5">
                 {col.links.map((link) => (
-                  <li key={link}>
-                    <a href="#" className="text-body text-secondary transition-colors hover:text-white">
-                      {link}
-                    </a>
+                  <li key={link.label}>
+                    <FooterLinkEl
+                      link={link}
+                      className="text-body text-secondary transition-colors hover:text-white"
+                    />
                   </li>
                 ))}
               </ul>
@@ -65,8 +115,25 @@ export function LandingFooter() {
         </div>
 
         <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-panel-line pt-6 text-label text-muted sm:flex-row">
-          <span>© 2026 Redline Labs — practice meets pressure.</span>
-          <span className="font-mono">redline.training</span>
+          <span>
+            © 2026 Vivian Demello -{" "}
+            <a
+              href="https://vynride.dev"
+              target="_blank"
+              rel="noreferrer noopener"
+              className="text-secondary transition-colors hover:text-white"
+            >
+              vynride
+            </a>
+          </span>
+          <a
+            href="https://redline.vynride.dev"
+            target="_blank"
+            rel="noreferrer noopener"
+            className="font-mono transition-colors hover:text-white"
+          >
+            redline.vynride.dev
+          </a>
         </div>
       </div>
     </footer>

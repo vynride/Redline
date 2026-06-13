@@ -3,7 +3,7 @@ import type { Scenario, SessionState } from "@shared/types";
 
 export type PressureTone = "positive" | "accent" | "warning" | "negative";
 
-/** Solid track fills — the step in hue is the signal, not a gradient. */
+/** Solid track fills, the step in hue is the signal, not a gradient. */
 const FILL: Record<PressureTone, string> = {
   positive: "bg-emerald-400",
   accent: "bg-violet-500",
@@ -43,16 +43,24 @@ const pct = (n: number, max: number) => `${Math.max(0, Math.min(100, (n / max) *
  * threshold track. The fill steps color as the call heats up; the track shades the
  * lose zone and ticks the win/lose lines so the stakes are legible at a glance.
  */
-export function SeverityReadout({ state, scenario }: { state: SessionState; scenario: Scenario }) {
+export function SeverityReadout({
+  state,
+  scenario,
+  compact = false,
+}: {
+  state: SessionState;
+  scenario: Scenario;
+  compact?: boolean;
+}) {
   const { max, win_below, lose_at } = scenario.severity;
   const tone = pressureTone(state.severity, scenario);
   const danger = tone === "negative";
 
   return (
-    <div className="flex flex-col gap-2.5 px-5 py-4">
+    <div className={cn("flex flex-col px-5", compact ? "gap-1.5 py-3" : "gap-2.5 py-4")}>
       <div className="flex items-center justify-between">
-        <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">Severity</span>
-        <span className={cn("font-mono text-[10px] font-semibold uppercase tracking-[0.16em]", TEXT[tone])}>
+        <span className="font-mono text-[12px] uppercase tracking-[0.12em] text-secondary">Severity</span>
+        <span className={cn("font-mono text-[11px] font-semibold uppercase tracking-[0.14em]", TEXT[tone])}>
           {WORD[tone]}
         </span>
       </div>
@@ -60,18 +68,19 @@ export function SeverityReadout({ state, scenario }: { state: SessionState; scen
       <div className="flex items-baseline gap-1.5">
         <span
           className={cn(
-            "font-mono text-[38px] font-semibold leading-none tabular",
+            "font-mono font-semibold leading-none tabular",
+            compact ? "text-[28px]" : "text-[38px]",
             TEXT[tone],
             danger && "animate-pulse",
           )}
         >
           {state.severity}
         </span>
-        <span className="font-mono text-h2 text-muted">/{max}</span>
+        <span className={cn("font-mono text-muted", compact ? "text-body-strong" : "text-h2")}>/{max}</span>
       </div>
 
-      {/* Threshold track — shaded lose zone, solid fill, win/lose ticks. */}
-      <div className="relative mt-1 h-2.5 w-full">
+      {/* Threshold track, shaded lose zone, solid fill, win/lose ticks. */}
+      <div className={cn("relative w-full", compact ? "mt-0.5 h-2" : "mt-1 h-2.5")}>
         <div className="absolute inset-0 overflow-hidden rounded-full bg-panel-2">
           <div className="absolute inset-y-0 right-0 bg-rose-500/15" style={{ left: pct(lose_at, max) }} />
           <div
@@ -89,7 +98,7 @@ export function SeverityReadout({ state, scenario }: { state: SessionState; scen
         />
       </div>
 
-      <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.1em] text-muted">
+      <div className="flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.08em] text-muted">
         <span>Win below {win_below}</span>
         <span>Lose at {lose_at}</span>
       </div>

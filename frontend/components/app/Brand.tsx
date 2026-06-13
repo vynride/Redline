@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { cn } from "@/lib/cn";
 
-/** The Redline wordmark used across the app + auth — white logo glyph + REDLINE. */
+/** The Redline wordmark used across the app + auth, white logo glyph + REDLINE. */
 export function Brand({ href = "/dashboard", className }: { href?: string; className?: string }) {
   return (
     <Link href={href} className={cn("inline-flex items-center gap-2.5 text-white", className)}>

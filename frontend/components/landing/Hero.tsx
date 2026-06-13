@@ -29,7 +29,7 @@ function Sparkles() {
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden bg-hero-lav">
+    <section id="top" className="relative overflow-hidden bg-hero-lav">
       {/* soft cloud blooms in the lower corners, like the reference */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <div className="absolute -left-[6%] bottom-[22%] h-[40vh] w-[40vh] rounded-full bg-white/25 blur-[90px]" />
@@ -80,7 +80,7 @@ export function Hero() {
           transition={{ duration: 0.7, ease: EASE, delay: 0.28 }}
           className="mt-6 max-w-xl font-mono text-[13px] uppercase leading-relaxed tracking-[0.08em] text-white/80 sm:text-[14px]"
         >
-          Voice-first crisis drills on a live incident — talk it down out loud, and get
+          Voice-first crisis drills on a live incident, talk it down out loud, and get
           coached on every word once it&apos;s over.
         </motion.p>
 

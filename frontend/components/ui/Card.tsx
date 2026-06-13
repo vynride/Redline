@@ -8,7 +8,7 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
   widget?: boolean;
 }
 
-/** Flat dark panel card — DESIGN.md `card-panel`: bg-panel + hairline border. */
+/** Flat dark panel card, DESIGN.md `card-panel`: bg-panel + hairline border. */
 export function Card({ interactive, widget, className, ...props }: CardProps) {
   return (
     <div
