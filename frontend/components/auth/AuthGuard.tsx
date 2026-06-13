@@ -17,5 +17,9 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   if (loading || !user) {
     return <LoadingScreen />;
   }
-  return <>{children}</>;
+  return (
+    <div style={{ animation: "redline-fade-up 0.4s ease-out forwards" }}>
+      {children}
+    </div>
+  );
 }
