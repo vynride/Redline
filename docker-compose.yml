@@ -1,0 +1,24 @@
+# Redline — local orchestration.
+# Fleshed out incrementally; finalized in the May 27 stage.
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: redline
+      POSTGRES_PASSWORD: redline
+      POSTGRES_DB: redline
+    ports:
+      - "5432:5432"
+    volumes:
+      - redline_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U redline"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # backend service added in the May 4+ stages
+  # frontend service added in the May 17+ stages
+
+volumes:
+  redline_pgdata:

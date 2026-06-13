@@ -1,0 +1,38 @@
+# --- Secrets / env ---
+.env
+.env.*
+!.env.example
+*.pem
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.sqlite3
+*.db
+
+# --- Node / Next.js ---
+node_modules/
+.next/
+out/
+dist/
+npm-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# --- Editor / OS ---
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# --- Tooling noise ---
+.specstory/
+coverage/
+.coverage
+htmlcov/
