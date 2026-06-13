@@ -81,9 +81,9 @@ export function Transcript({
               )}
               <div
                 className={cn(
-                  "rounded-2xl px-4 py-2.5 text-body leading-relaxed shadow-sm",
+                  "rounded-2xl px-4 py-2.5 text-body leading-relaxed",
                   isUser
-                    ? "rounded-br-md bg-neon-duo text-white"
+                    ? "rounded-br-md bg-violet-600 text-white"
                     : "rounded-bl-md border border-panel-line bg-panel-2 text-primary",
                 )}
               >

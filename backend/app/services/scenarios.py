@@ -9,9 +9,13 @@ from __future__ import annotations
 import json
 from functools import lru_cache
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from app.core.logging import get_logger
 from app.schemas.scenario import Scenario, ScenarioSummary
+
+if TYPE_CHECKING:
+    from app.models.session import DrillSession
 
 log = get_logger("redline.scenarios")
 
@@ -38,3 +42,16 @@ def list_scenarios() -> list[ScenarioSummary]:
 
 def get_scenario(scenario_id: str) -> Scenario | None:
     return _catalog().get(scenario_id)
+
+
+def scenario_for_session(session: "DrillSession") -> Scenario | None:
+    """Resolve the scenario a drill is running on.
+
+    Generated scenarios are snapshotted onto the session at creation, so a live
+    drill never depends on the catalog (or on the generated row still existing).
+    Static scenarios carry no snapshot and resolve by id from the catalog.
+    """
+    snapshot = session.scenario_json
+    if snapshot:
+        return Scenario.model_validate(snapshot)
+    return get_scenario(session.scenario_id)

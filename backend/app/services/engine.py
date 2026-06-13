@@ -55,7 +55,7 @@ async def opening(db: Session, session: DrillSession, llm: LLMClient) -> EngineT
     if session.status != SessionStatus.active:
         raise ValueError("Cannot open a drill that is not active.")
 
-    scenario: Scenario | None = catalog.get_scenario(session.scenario_id)
+    scenario: Scenario | None = catalog.scenario_for_session(session)
     if scenario is None:
         raise ValueError(f"Scenario '{session.scenario_id}' no longer exists.")
 
@@ -83,7 +83,7 @@ async def step(db: Session, session: DrillSession, user_text: str, llm: LLMClien
     if session.status != SessionStatus.active:
         raise ValueError("Cannot advance a drill that is not active.")
 
-    scenario: Scenario | None = catalog.get_scenario(session.scenario_id)
+    scenario: Scenario | None = catalog.scenario_for_session(session)
     if scenario is None:
         raise ValueError(f"Scenario '{session.scenario_id}' no longer exists.")
 

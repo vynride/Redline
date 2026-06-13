@@ -187,5 +187,5 @@ def _voice_id(session: DrillSession) -> str:
     """Resolve the persona voice for the session's scenario (fallback to a default)."""
     from app.services import scenarios as catalog
 
-    scenario = catalog.get_scenario(session.scenario_id)
+    scenario = catalog.scenario_for_session(session)
     return scenario.persona.voice_id if scenario else settings.sarvam_tts_default_speaker

@@ -29,6 +29,10 @@ class DrillSession(UUIDMixin, TimestampMixin, Base):
     user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False)
 
     scenario_id: Mapped[str] = mapped_column(String(80), nullable=False)
+    # Snapshot of a generated scenario's full definition, frozen at session start
+    # so the live drill is reproducible and independent of the catalog. Null for
+    # static (catalog) scenarios, which resolve by ``scenario_id``.
+    scenario_json: Mapped[Optional[dict[str, Any]]] = mapped_column(JSON, nullable=True)
     role: Mapped[str] = mapped_column(String(60), nullable=False)
     difficulty: Mapped[str] = mapped_column(String(40), nullable=False)
 

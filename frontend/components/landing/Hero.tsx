@@ -44,11 +44,11 @@ export function Hero() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: EASE }}
-          className="flex items-center gap-2.5 text-white"
+          className="flex items-center gap-2.5 rounded-full border border-white/30 px-5 py-2 text-white shadow-[0_8px_24px_-12px_rgba(0,0,0,0.5)]"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.svg" alt="Redline" width={32} height={32} className="h-8 w-8" />
-          <span className="text-[1.6rem] font-semibold tracking-[0.14em]">REDLINE</span>
+          <img src="/logo.svg" alt="Redline" width={32} height={32} className="h-7 w-7" />
+          <span className="text-[1.35rem] font-semibold tracking-[0.14em]">REDLINE</span>
         </motion.div>
 
         {/* Joined tech pills */}
