@@ -1,26 +1,46 @@
-# Production overrides for redline.vynride.dev.
-# Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+# Production — standalone compose for redline.vynride.dev.
+# Run with: docker compose -f docker-compose.prod.yml up -d --build
 #
 # nginx on the host reverse-proxies:
-#   /api/*  → localhost:8002 (backend)
-#   /ws/*   → localhost:8002 (backend, WS upgrade)
-#   /*      → localhost:3002 (frontend)
+#   /api/*  → 127.0.0.1:8002 (backend)
+#   /ws/*   → 127.0.0.1:8002 (backend, WS upgrade)
+#   /*      → 127.0.0.1:3002 (frontend)
 #
 # Secrets go in backend/.env on the server (never committed).
 services:
   db:
-    ports: []  # not exposed to host; backend reaches it via docker network
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: redline
+      POSTGRES_PASSWORD: redline
+      POSTGRES_DB: redline
+    volumes:
+      - redline_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U redline"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
   backend:
-    ports:
-      - "127.0.0.1:8002:8000"
+    build: ./backend
+    depends_on:
+      db:
+        condition: service_healthy
     environment:
       DATABASE_URL: postgresql+psycopg2://redline:redline@db:5432/redline
       CORS_ORIGINS: https://redline.vynride.dev
+      JWT_SECRET: change-me-in-production
       FRONTEND_URL: https://redline.vynride.dev
       OAUTH_REDIRECT_BASE: https://redline.vynride.dev
       ENVIRONMENT: production
       DEBUG: "false"
+    env_file:
+      - path: ./backend/.env
+        required: false
+    ports:
+      - "127.0.0.1:8002:8000"
     restart: unless-stopped
 
   frontend:
@@ -29,6 +49,11 @@ services:
       dockerfile: frontend/Dockerfile
       args:
         NEXT_PUBLIC_API_BASE: https://redline.vynride.dev
+    depends_on:
+      - backend
     ports:
       - "127.0.0.1:3002:3000"
     restart: unless-stopped
+
+volumes:
+  redline_pgdata:
