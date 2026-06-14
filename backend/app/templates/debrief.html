@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Redline · Drill Debrief</title>
+<style>
+  :root {
+    --ink: #0A0A0A;
+    --panel: #141416;
+    --panel-2: #1A1A1D;
+    --line: #242428;
+    --primary: #F5F3FF;
+    --secondary: #A9A2C4;
+    --muted: #6F6789;
+    --violet: #8B5CF6;
+    --violet-300: #C4B5FD;
+    --accent: #A78BFA;
+    --emerald: #34D399;
+    --rose: #FB7185;
+  }
+
+  @page {
+    size: A4;
+    margin: 16mm 15mm 15mm;
+    background: var(--ink);
+    @bottom-center {
+      content: "Redline · Drill Debrief";
+      color: #4A4560;
+      font-family: "DejaVu Sans", sans-serif;
+      font-size: 7.5pt;
+      letter-spacing: 0.06em;
+    }
+    @bottom-right {
+      content: counter(page) " / " counter(pages);
+      color: #4A4560;
+      font-family: "DejaVu Sans Mono", monospace;
+      font-size: 7.5pt;
+    }
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { background: var(--ink); }
+  body {
+    font-family: "DejaVu Sans", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--primary);
+    font-size: 10pt;
+    line-height: 1.5;
+    background: var(--ink);
+  }
+
+  .mono { font-family: "DejaVu Sans Mono", monospace; }
+  .eyebrow {
+    font-family: "DejaVu Sans Mono", monospace;
+    font-size: 7.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--secondary);
+  }
+
+  /* ── Brand bar ─────────────────────────────────────────── */
+  .brandbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 10px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--line);
+  }
+  .wordmark { white-space: nowrap; font-weight: 700; font-size: 13pt; letter-spacing: 0.02em; }
+  .wordmark .tick {
+    display: inline-block; width: 4px; height: 14px; border-radius: 2px; vertical-align: middle;
+    margin-right: 8px; background: linear-gradient(180deg, var(--accent), #7C5CFC);
+  }
+  .wordmark .name { color: var(--primary); vertical-align: middle; }
+  .wordmark .kind { color: var(--secondary); font-weight: 500; font-size: 9.5pt; vertical-align: middle; margin-left: 8px; }
+  .brandbar .meta { font-size: 8pt; color: var(--muted); }
+
+  /* ── Cards ─────────────────────────────────────────────── */
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 15px 17px;
+    margin-bottom: 12px;
+    break-inside: avoid;
+  }
+  .card > .eyebrow { display: block; margin-bottom: 11px; }
+
+  /* ── Header card ───────────────────────────────────────── */
+  .head { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; }
+  .head .tags { margin-bottom: 5px; white-space: nowrap; }
+  .head .arch { font-family: "DejaVu Sans Mono", monospace; font-size: 7.5pt; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); vertical-align: middle; margin-right: 8px; }
+  .head h1 { font-size: 17pt; font-weight: 700; line-height: 1.15; color: #FFFFFF; }
+  .badge {
+    font-family: "DejaVu Sans Mono", monospace; font-size: 7pt; font-weight: 700;
+    padding: 2px 6px; border-radius: 5px; vertical-align: middle;
+  }
+  .pill {
+    font-size: 8pt; font-weight: 600; padding: 3px 10px; border-radius: 999px;
+    border: 1px solid currentColor; white-space: nowrap;
+  }
+  .head .roleline { font-size: 8.5pt; color: var(--muted); text-align: right; }
+  .head .roleline .sep { margin: 0 5px; }
+
+  /* ── Verdict ───────────────────────────────────────────── */
+  .verdict { display: flex; gap: 12px; align-items: stretch; margin-bottom: 12px; }
+  .grade-card {
+    width: 150px; flex: none; text-align: center;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+    padding: 16px 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    break-inside: avoid;
+  }
+  .grade-card .grade { font-size: 46pt; font-weight: 700; line-height: 0.95; }
+  .grade-card .score { font-family: "DejaVu Sans Mono", monospace; font-size: 10pt; color: var(--secondary); }
+  .grade-card .score .of { color: var(--muted); }
+  .summary-card { flex: 1; }
+  .summary-card .text { font-size: 11pt; line-height: 1.55; color: var(--primary); margin-bottom: 12px; }
+
+  /* stat strip */
+  .stats { display: flex; border: 1px solid var(--line); border-radius: 11px; overflow: hidden; }
+  .stats .stat { flex: 1; padding: 8px 11px; background: var(--panel); border-right: 1px solid var(--line); }
+  .stats .stat:last-child { border-right: none; }
+  .stats .stat .k { font-size: 7pt; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 3px; }
+  .stats .stat .v { font-family: "DejaVu Sans Mono", monospace; font-size: 10pt; font-weight: 600; }
+
+  /* ── Dimensions ────────────────────────────────────────── */
+  .dim { display: flex; align-items: center; gap: 11px; margin-bottom: 9px; }
+  .dim:last-child { margin-bottom: 0; }
+  .dim .label { width: 95px; flex: none; font-size: 9pt; color: var(--secondary); }
+  .dim .track { flex: 1; height: 7px; background: #2A2A30; border-radius: 999px; overflow: hidden; }
+  .dim .fill { height: 100%; border-radius: 999px; }
+  .dim .num { width: 26px; flex: none; text-align: right; font-family: "DejaVu Sans Mono", monospace; font-size: 9pt; font-weight: 600; }
+
+  /* ── Lists (absolute bullets — robust under WeasyPrint) ──── */
+  ul.clean { list-style: none; }
+  ul.clean li { position: relative; padding-left: 24px; margin-bottom: 7px; line-height: 1.45; }
+  ul.clean li:last-child { margin-bottom: 0; }
+  .dot { position: absolute; left: 0; top: 1px; width: 15px; height: 15px; border-radius: 999px; text-align: center; line-height: 15px; font-size: 8pt; }
+  .dot.ok { background: rgba(52,211,153,0.16); color: var(--emerald); }
+  .dot.miss { border: 1px solid var(--line); color: var(--muted); line-height: 13px; }
+  .strength-text { color: var(--primary); }
+  .miss-text { color: var(--secondary); }
+  .empty { color: var(--secondary); font-size: 9.5pt; }
+
+  /* ── Lost control ──────────────────────────────────────── */
+  .moment {
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 11px;
+    padding: 11px 13px; margin-bottom: 9px; break-inside: avoid;
+  }
+  .moment:last-child { margin-bottom: 0; }
+  .moment .quote { font-style: italic; color: var(--secondary); margin-bottom: 6px; line-height: 1.4; }
+  .moment .quote::before { content: "\201C"; color: var(--rose); font-size: 13pt; margin-right: 2px; }
+  .moment .row { font-size: 9pt; line-height: 1.4; margin-bottom: 3px; }
+  .moment .row:last-child { margin-bottom: 0; }
+  .moment .lbl-issue { color: var(--rose); font-weight: 600; }
+  .moment .lbl-better { color: var(--emerald); font-weight: 600; }
+  .moment .row.better { color: var(--primary); }
+  .moment .row.issue { color: var(--secondary); }
+
+  /* ── Escalation & status ───────────────────────────────── */
+  .split { display: flex; gap: 18px; }
+  .split .col { flex: 1; }
+  .split .col + .col { border-left: 1px solid var(--line); padding-left: 18px; }
+  .split .col .k { display: block; font-size: 8.5pt; color: var(--secondary); margin-bottom: 5px; }
+  .split .col .v { color: var(--primary); line-height: 1.45; font-size: 9.5pt; }
+
+  /* ── Transcript ────────────────────────────────────────── */
+  .transcript .turn { margin-bottom: 9px; line-height: 1.45; break-inside: avoid; }
+  .transcript .turn:last-child { margin-bottom: 0; }
+  .transcript .who { font-family: "DejaVu Sans Mono", monospace; font-size: 7.5pt; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 2px; }
+  .transcript .who.user { color: var(--accent); }
+  .transcript .who.persona { color: var(--muted); }
+  .transcript .turn .text { font-size: 9.5pt; }
+  .transcript .turn.user .text { color: var(--primary); }
+  .transcript .turn.persona .text { color: var(--secondary); }
+</style>
+</head>
+<body>
+
+  <div class="brandbar">
+    <span class="wordmark"><span class="tick"></span><span class="name">REDLINE</span><span class="kind">Drill Debrief</span></span>
+    <span class="meta">Generated {{ generated_at }}</span>
+  </div>
+
+  {# ── Header ─────────────────────────────────────────────── #}
+  <div class="card">
+    <div class="head">
+      <div>
+        <div class="tags">
+          <span class="arch">{{ archetype_label }}</span>
+          <span class="badge" style="color: {{ sev.color }}; background: {{ sev.bg }};">{{ sev.label }}</span>
+        </div>
+        <h1>{{ scenario_title }}</h1>
+      </div>
+      <div class="roleline">
+        {{ role_label }}<span class="sep">·</span>{{ difficulty_label }}<br/>
+        <span class="pill" style="color: {{ outcome.color }};">{{ outcome.label }}</span>
+      </div>
+    </div>
+  </div>
+
+  {# ── Verdict ────────────────────────────────────────────── #}
+  <div class="verdict">
+    <div class="grade-card">
+      <span class="eyebrow">Overall grade</span>
+      <span class="grade" style="color: {{ grade_color }};">{{ grade }}</span>
+      {% if score is not none %}
+      <span class="score">{{ score }}<span class="of"> / 100</span></span>
+      {% endif %}
+    </div>
+    <div class="summary-card card" style="margin-bottom: 0;">
+      <span class="eyebrow">Coach's summary</span>
+      <p class="text">{{ summary }}</p>
+      <div class="stats">
+        {% for s in stats %}
+        <div class="stat">
+          <div class="k">{{ s.label }}</div>
+          <div class="v" style="color: {{ s.color }};">{{ s.value }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  {# ── Performance by dimension ───────────────────────────── #}
+  <div class="card">
+    <span class="eyebrow">Performance by dimension</span>
+    {% for d in dimensions %}
+    <div class="dim">
+      <div class="label">{{ d.label }}</div>
+      <div class="track"><div class="fill" style="width: {{ d.score }}%; background: {{ d.color }};"></div></div>
+      <div class="num" style="color: {{ d.color }};">{{ d.score }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {# ── What went well ─────────────────────────────────────── #}
+  <div class="card">
+    <span class="eyebrow">What went well</span>
+    {% if strengths %}
+    <ul class="clean">
+      {% for s in strengths %}
+      <li><span class="dot ok">✓</span><span class="strength-text">{{ s }}</span></li>
+      {% endfor %}
+    </ul>
+    {# strengths use absolute-positioned dots; text flows in the padded li #}
+    {% else %}
+    <p class="empty">No standout strengths recorded.</p>
+    {% endif %}
+  </div>
+
+  {# ── Where you lost control ─────────────────────────────── #}
+  <div class="card">
+    <span class="eyebrow">Where you lost control</span>
+    {% if lost_control %}
+    {% for m in lost_control %}
+    <div class="moment">
+      <p class="quote">{{ m.quote }}</p>
+      <p class="row issue"><span class="lbl-issue">Issue · </span>{{ m.issue }}</p>
+      <p class="row better"><span class="lbl-better">Stronger · </span>{{ m.better }}</p>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p class="empty">No major slips, well held.</p>
+    {% endif %}
+  </div>
+
+  {# ── Missed information ─────────────────────────────────── #}
+  <div class="card">
+    <span class="eyebrow">Missed information</span>
+    {% if missed_information %}
+    <ul class="clean">
+      {% for m in missed_information %}
+      <li><span class="dot miss">○</span><span class="miss-text">{{ m }}</span></li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="empty">You gathered what mattered.</p>
+    {% endif %}
+  </div>
+
+  {# ── Escalation & status ────────────────────────────────── #}
+  <div class="card">
+    <span class="eyebrow">Escalation &amp; status</span>
+    <div class="split">
+      <div class="col">
+        <span class="k">Escalation</span>
+        <span class="v">{{ escalation_assessment }}</span>
+      </div>
+      <div class="col">
+        <span class="k">Status communication</span>
+        <span class="v">{{ status_communication_assessment }}</span>
+      </div>
+    </div>
+  </div>
+
+  {# ── Transcript ─────────────────────────────────────────── #}
+  <div class="card transcript">
+    <span class="eyebrow">Transcript</span>
+    {% for t in transcript %}
+    <div class="turn {{ 'user' if t.is_user else 'persona' }}">
+      <div class="who {{ 'user' if t.is_user else 'persona' }}">{{ t.who }}</div>
+      <div class="text">{{ t.text }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+</body>
+</html>
