@@ -149,6 +149,11 @@ export default function DrillPage() {
   const sev = SEV[meta.difficulty ?? hardest(scenario.difficulties)];
   const personaRole = humanizeRole(scenario.persona.role);
   const turns = lines.filter((l) => l.role === "user").length;
+  // Show the "typing" bubble only while the persona is actually composing a reply —
+  // i.e. after the user's turn and before the persona's. mic stays "thinking" through
+  // TTS streaming until turn_complete, so gating on this avoids a phantom second
+  // bubble flashing under the persona's message.
+  const awaitingPersona = lines.length > 0 && lines[lines.length - 1].role === "user";
 
   return (
     <div className="flex flex-col gap-4 px-5 py-5 sm:px-8 lg:h-[calc(100dvh-4rem)]">
@@ -235,7 +240,7 @@ export default function DrillPage() {
               <Transcript
                 lines={lines}
                 personaName={scenario.persona.name}
-                thinking={!ended && mic === "thinking"}
+                thinking={!ended && mic === "thinking" && awaitingPersona}
               />
             </div>
           </div>
