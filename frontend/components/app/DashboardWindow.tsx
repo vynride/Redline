@@ -376,12 +376,12 @@ export function DashboardWindow({
   }, [scenarios, cat, tab]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function onTab(t: Tab) {
-    setTab(t);
     if (t === "Leaderboard") {
-      document.getElementById("leaderboard")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    } else {
-      sortRef.current = t;
+      router.push("/leaderboard");
+      return;
     }
+    setTab(t);
+    sortRef.current = t;
   }
 
   return (
