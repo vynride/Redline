@@ -107,6 +107,24 @@ def get_session(
     return load_owned_session(db, session_id, user)
 
 
+@router.get("/{session_id}/scenario", response_model=Scenario)
+def get_session_scenario(
+    session_id: str,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> Scenario:
+    """Resolve the scenario a drill is running on.
+
+    Unlike ``/api/scenarios/{id}`` (static catalog only), this honours the
+    per-session snapshot, so generated drills resolve correctly.
+    """
+    drill = load_owned_session(db, session_id, user)
+    scenario = catalog.scenario_for_session(drill)
+    if scenario is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Scenario not found.")
+    return scenario
+
+
 @router.get("/{session_id}/debrief", response_model=DebriefOut)
 async def get_debrief(
     session_id: str,

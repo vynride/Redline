@@ -41,13 +41,13 @@ class Scenario(BaseModel):
 class PersonaDraft(BaseModel):
     """Persona fields an LLM authors — excludes the server-assigned voice id."""
 
-    name: str = Field(description="The persona's full name.")
-    role: str = Field(description="Short snake_case role, e.g. 'angry_customer', 'database_lead'.")
+    name: str = Field(max_length=60, description="The persona's full human name as it would be spoken, e.g. 'Alex Chen' — never snake_case.")
+    role: str = Field(max_length=40, description="Short snake_case role, e.g. 'angry_customer', 'database_lead'.")
     gender: Literal["female", "male", "neutral"] = Field(
         description="The persona's voice gender, consistent with their name — drives voice selection."
     )
     base_emotion: Emotion = Field(description="The emotion the persona opens the call in.")
-    description: str = Field(description="One or two sentences on how they behave under pressure.")
+    description: str = Field(max_length=240, description="One or two sentences on how they behave under pressure.")
 
 
 class ScenarioDraft(BaseModel):
@@ -57,17 +57,26 @@ class ScenarioDraft(BaseModel):
     assigned in ``scenario_gen`` before the full ``Scenario`` is assembled.
     """
 
-    title: str = Field(description="A short, punchy incident title.")
+    title: str = Field(max_length=80, description="A short, punchy incident title.")
     archetype: Archetype
-    summary: str = Field(description="One or two sentences framing the incident.")
-    roles: list[Role] = Field(description="Responder roles this drill supports (1-3).")
-    difficulties: list[Difficulty] = Field(description="Difficulty tiers offered (1-3).")
+    summary: str = Field(max_length=320, description="One or two sentences framing the incident.")
+    roles: list[Role] = Field(min_length=1, max_length=3, description="Responder roles this drill supports (1-3).")
+    difficulties: list[Difficulty] = Field(min_length=1, max_length=3, description="Difficulty tiers offered (1-3).")
     persona: PersonaDraft
-    stakes: str = Field(description="What is at risk — money, trust, safety, deadlines.")
-    hidden_facts: list[str] = Field(description="Facts the responder must uncover by asking (may be empty).")
-    objectives: list[str] = Field(description="3-5 concrete things a strong responder accomplishes.")
+    stakes: str = Field(max_length=320, description="What is at risk — money, trust, safety, deadlines.")
+    hidden_facts: list[str] = Field(
+        max_length=4, description="Up to 4 facts the responder must uncover by asking; one short sentence each (may be empty)."
+    )
+    objectives: list[str] = Field(
+        min_length=3, max_length=5, description="3-5 concrete things a strong responder accomplishes; one short sentence each."
+    )
     severity: SeverityModel
-    opening_line: str = Field(description="The persona's first spoken line — tense and in character.")
+    opening_line: str = Field(
+        max_length=400,
+        description="The persona's first spoken line — the exact words they say aloud, first person, "
+        "tense and in character. No stage directions, no narration (e.g. \"Alex's voice is strained\"), "
+        "no surrounding quotation marks, and no name for the responder.",
+    )
 
 
 class ScenarioSummary(BaseModel):

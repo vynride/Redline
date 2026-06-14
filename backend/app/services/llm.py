@@ -26,6 +26,10 @@ log = get_logger("redline.llm")
 
 T = TypeVar("T", bound=BaseModel)
 
+# A truncated/empty reasoning roll is independent of the next, so retry a few times
+# before surfacing an error (see SarvamLLM.generate).
+_MAX_GENERATE_ATTEMPTS = 3
+
 
 class ChatMessage(TypedDict):
     role: str  # "user" | "assistant"
@@ -55,33 +59,47 @@ class SarvamLLM:
         self._model = settings.sarvam_chat_model
 
     async def generate(self, *, system: str, messages: list[ChatMessage], response_schema: type[T]) -> T:
-        completion = await self._client.chat.completions.create(
-            model=self._model,
-            messages=[{"role": "system", "content": system}, *messages],
-            response_format={
-                "type": "json_schema",
-                "json_schema": {
-                    "name": response_schema.__name__,
-                    "schema": response_schema.model_json_schema(),
+        # Cap reasoning so "thinking" doesn't consume the whole max_tokens budget and
+        # truncate the JSON answer (finish_reason="length"). See settings docstring.
+        extra = {"reasoning_effort": settings.sarvam_reasoning_effort} if settings.sarvam_reasoning_effort else {}
+
+        # Reasoning length is stochastic, so a roll occasionally overruns the budget even
+        # at low effort. Those truncations are independent — retry a couple of times before
+        # giving up rather than failing the whole request on one unlucky roll.
+        for attempt in range(_MAX_GENERATE_ATTEMPTS):
+            completion = await self._client.chat.completions.create(
+                model=self._model,
+                messages=[{"role": "system", "content": system}, *messages],
+                response_format={
+                    "type": "json_schema",
+                    "json_schema": {
+                        "name": response_schema.__name__,
+                        "schema": response_schema.model_json_schema(),
+                    },
                 },
-            },
-            temperature=0.8,
-            max_tokens=settings.sarvam_max_tokens,
-        )
-        choice = completion.choices[0]
-        if choice.finish_reason == "length":
-            raise RuntimeError(
-                "Sarvam hit the output-token limit before completing the response "
-                f"(max_tokens={settings.sarvam_max_tokens}). Raise SARVAM_MAX_TOKENS "
-                "(requires a higher Sarvam plan) or shorten the input."
+                temperature=0.8,
+                max_tokens=settings.sarvam_max_tokens,
+                **extra,
             )
-        content = choice.message.content
-        if not content:
-            raise RuntimeError("Sarvam returned an empty structured response.")
-        try:
-            return response_schema.model_validate_json(content)
-        except ValueError:  # tolerate the odd code-fenced payload
-            return response_schema.model_validate(json.loads(_strip_fence(content)))
+            choice = completion.choices[0]
+            content = choice.message.content
+            if choice.finish_reason == "length" or not content:
+                log.warning(
+                    "Sarvam response unusable (finish_reason=%s, empty=%s) on attempt %d/%d",
+                    choice.finish_reason, not content, attempt + 1, _MAX_GENERATE_ATTEMPTS,
+                )
+                continue
+            try:
+                return response_schema.model_validate_json(content)
+            except ValueError:  # tolerate the odd code-fenced payload
+                return response_schema.model_validate(json.loads(_strip_fence(content)))
+
+        raise RuntimeError(
+            "Sarvam could not return a complete response within the output-token budget "
+            f"(max_tokens={settings.sarvam_max_tokens}) after {_MAX_GENERATE_ATTEMPTS} attempts. "
+            "Lower SARVAM_REASONING_EFFORT, raise SARVAM_MAX_TOKENS (needs a higher Sarvam plan), "
+            "or shorten the input."
+        )
 
 
 def _strip_fence(text: str) -> str:
