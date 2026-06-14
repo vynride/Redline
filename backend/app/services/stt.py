@@ -27,6 +27,14 @@ SAMPLE_RATE = 16000
 BITS_PER_SAMPLE = 16
 CHANNELS = 1
 
+# Saaras emits one "data" message per detected utterance and segments on pauses, so a
+# single turn can produce several. There is no end-of-stream marker and the socket stays
+# open after the flush, so segments are drained until a short idle gap. FIRST waits out the
+# server's processing latency before the first segment; GAP waits for any further segments
+# (which arrive back-to-back once processing finishes) before declaring the turn complete.
+STT_FIRST_SEGMENT_TIMEOUT = 15.0
+STT_SEGMENT_GAP_TIMEOUT = 2.0
+
 
 class STTStream(Protocol):
     """A single recognition session for one responder turn."""
@@ -56,6 +64,32 @@ def _pcm_to_wav(pcm: bytes) -> bytes:
     return buf.getvalue()
 
 
+async def _drain_segments(ws) -> list[str]:
+    """Collect every transcript segment Saaras returns for a flushed turn.
+
+    Saaras sends one ``data`` message per utterance (it splits on pauses) and gives no
+    end-of-stream signal, so read until the socket goes quiet: wait out processing latency
+    for the first segment, then a short gap for any that follow. Without this, a turn with a
+    mid-sentence pause loses everything after the first segment.
+    """
+    import websockets
+
+    segments: list[str] = []
+    timeout = STT_FIRST_SEGMENT_TIMEOUT
+    while True:
+        try:
+            raw = await asyncio.wait_for(ws.recv(), timeout=timeout)
+        except (asyncio.TimeoutError, websockets.ConnectionClosed):
+            break  # idle gap or socket close — the turn is fully drained
+        msg = json.loads(raw)
+        if msg.get("type") == "data":
+            transcript = (msg.get("data") or {}).get("transcript")
+            if transcript:
+                segments.append(transcript)
+            timeout = STT_SEGMENT_GAP_TIMEOUT  # further segments arrive back-to-back
+    return segments
+
+
 class _SaarasSTTStream:
     """Buffers a turn's PCM and transcribes it over the Saaras streaming socket."""
 
@@ -81,19 +115,12 @@ class _SaarasSTTStream:
         headers = {"api-subscription-key": settings.sarvam_api_key}
         wav_b64 = base64.b64encode(_pcm_to_wav(bytes(self._buffer))).decode("ascii")
 
-        segments: list[str] = []
         async with websockets.connect(url, additional_headers=headers, max_size=None) as ws:
             await ws.send(json.dumps({
                 "audio": {"data": wav_b64, "sample_rate": str(SAMPLE_RATE), "encoding": "audio/wav"}
             }))
             await ws.send(json.dumps({"type": "flush"}))
-            async for raw in ws:
-                msg = json.loads(raw)
-                if msg.get("type") == "data":
-                    transcript = (msg.get("data") or {}).get("transcript")
-                    if transcript:
-                        segments.append(transcript)
-                    break  # one utterance per turn; the flush response is final
+            segments = await _drain_segments(ws)
         return " ".join(segments).strip()
 
 
