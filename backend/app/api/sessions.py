@@ -1,9 +1,12 @@
 """Drill session routes — create a run, list history, read detail + transcript."""
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from datetime import datetime
+
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from starlette.concurrency import run_in_threadpool
 
 from app.api.deps import get_current_user
 from app.db import get_db
@@ -16,6 +19,7 @@ from app.schemas.scenario import Scenario
 from app.schemas.session import SessionCreate, SessionDetail, SessionListItem, SessionOut
 from app.services import scenarios as catalog
 from app.services.debrief import get_or_create_debrief
+from app.services.debrief_pdf import pdf_filename, render_debrief_pdf
 from app.services.llm import LLMClient, get_llm_client
 
 router = APIRouter(prefix="/api/sessions", tags=["sessions"])
@@ -115,3 +119,33 @@ async def get_debrief(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT,
                             detail="The drill is still active; finish it before requesting a debrief.")
     return await get_or_create_debrief(db, drill, llm)
+
+
+@router.get("/{session_id}/debrief.pdf")
+async def export_debrief_pdf(
+    session_id: str,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+    llm: LLMClient = Depends(get_llm_client),
+) -> Response:
+    """Render the debrief as a polished, self-contained PDF for offline reference."""
+    drill = load_owned_session(db, session_id, user)
+    if drill.status == SessionStatus.active:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT,
+                            detail="The drill is still active; finish it before requesting a debrief.")
+    # Reuse the same generate-or-fetch path so an unopened debrief still exports.
+    debrief = await get_or_create_debrief(db, drill, llm)
+    turns = db.scalars(select(Turn).where(Turn.session_id == drill.id).order_by(Turn.index)).all()
+    scenario = catalog.scenario_for_session(drill)
+
+    generated_at = datetime.now()
+    # WeasyPrint is CPU-bound; render off the event loop so it doesn't stall other requests.
+    pdf_bytes = await run_in_threadpool(
+        render_debrief_pdf, drill, debrief, scenario, list(turns), generated_at=generated_at
+    )
+    filename = pdf_filename(drill, scenario, generated_at=generated_at)
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
