@@ -40,6 +40,7 @@ export const api = {
   getScenario: (id: string) => request<Scenario>(`/api/scenarios/${id}`),
   generateScenario: (prompt: string) =>
     request<Scenario>("/api/generated-scenarios", { method: "POST", body: JSON.stringify({ prompt }) }),
+  listGeneratedScenarios: () => request<ScenarioSummary[]>("/api/generated-scenarios"),
   createSession: (body: SessionCreate) =>
     request<SessionOut>("/api/sessions", { method: "POST", body: JSON.stringify(body) }),
   listSessions: () => request<SessionListItem[]>("/api/sessions"),
