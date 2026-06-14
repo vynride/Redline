@@ -85,7 +85,7 @@
 @layer components {
   /* Glassmorphic panel, frosted surface with hairline + soft inner light. */
   .glass {
-    background: linear-gradient(180deg, rgba(33, 27, 54, 0.55), rgba(23, 18, 38, 0.4));
+    background: linear-gradient(180deg, rgba(52, 27, 34, 0.55), rgba(36, 19, 24, 0.4));
     backdrop-filter: blur(18px) saturate(140%);
     -webkit-backdrop-filter: blur(18px) saturate(140%);
     border: 1px solid rgba(245, 243, 255, 0.08);
@@ -93,7 +93,7 @@
   }
 
   .glass-strong {
-    background: linear-gradient(180deg, rgba(42, 35, 66, 0.7), rgba(23, 18, 38, 0.55));
+    background: linear-gradient(180deg, rgba(66, 39, 46, 0.7), rgba(36, 19, 24, 0.55));
     backdrop-filter: blur(22px) saturate(150%);
     -webkit-backdrop-filter: blur(22px) saturate(150%);
     border: 1px solid rgba(245, 243, 255, 0.1);

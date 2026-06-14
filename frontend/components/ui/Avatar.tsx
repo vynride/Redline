@@ -23,7 +23,7 @@ export function Avatar({
       style={{
         width: size,
         height: size,
-        background: "linear-gradient(135deg, #38bdf8, #6366f1)",
+        background: "linear-gradient(135deg, #38bdf8, #2563eb)",
       }}
     />
   );

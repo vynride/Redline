@@ -21,9 +21,9 @@ const PODIUM_ORDER: Record<number, string> = { 1: "sm:order-2", 2: "sm:order-1",
 // Gradient palette for users without a real photo. A user always lands on the
 // same one (hashed from their id), so avatars are varied but stable per person.
 const GRADIENTS = [
-  ["#EF4444", "#6366F1"],
+  ["#EF4444", "#3B82F6"],
   ["#EC4899", "#EF4444"],
-  ["#38BDF8", "#6366F1"],
+  ["#38BDF8", "#2563EB"],
   ["#34D399", "#0EA5E9"],
   ["#F59E0B", "#EF4444"],
   ["#F87171", "#DC2626"],

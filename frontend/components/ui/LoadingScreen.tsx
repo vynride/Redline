@@ -28,7 +28,7 @@ export function LoadingScreen() {
         </div>
 
         {/* Shimmer bar */}
-        <div className="relative h-px w-44 overflow-hidden rounded-full bg-violet-950/50">
+        <div className="relative h-px w-44 overflow-hidden rounded-full bg-red-950/50">
           <div
             className="absolute inset-y-0 left-0 w-1/2 rounded-full"
             style={{
@@ -42,7 +42,7 @@ export function LoadingScreen() {
         {/* Status */}
         <span
           className="font-mono text-[10px] tracking-[0.3em] uppercase"
-          style={{ color: "rgba(111,103,137,0.55)" }}
+          style={{ color: "rgba(132,122,126,0.55)" }}
         >
           Stand By
         </span>
