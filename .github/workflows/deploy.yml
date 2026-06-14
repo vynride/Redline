@@ -8,9 +8,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Prepare SSH key
+        env:
+          SSH_KEY: ${{ secrets.SSH_KEY }}
         run: |
           install -m 700 -d "${{ github.workspace }}/.tmp_ssh"
-          printf '%s' "${{ secrets.SSH_KEY }}" | sed 's/\\n/\n/g' > "${{ github.workspace }}/.tmp_ssh/deploy_key"
+          printf '%s' "$SSH_KEY" | sed 's/\\n/\n/g' > "${{ github.workspace }}/.tmp_ssh/deploy_key"
           chmod 600 "${{ github.workspace }}/.tmp_ssh/deploy_key"
       - name: SSH and deploy
         uses: appleboy/ssh-action@v1.2.1
@@ -25,3 +27,6 @@ jobs:
             docker image prune -f
             docker container prune -f
             docker volume prune -f
+      - name: Cleanup SSH key
+        if: always()
+        run: rm -rf "${{ github.workspace }}/.tmp_ssh"
