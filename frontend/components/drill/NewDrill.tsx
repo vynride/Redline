@@ -187,7 +187,7 @@ export function DrillConfig({
             <Button variant="secondary" onClick={onClose} disabled={busy}>
               Cancel
             </Button>
-            <Button onClick={start} disabled={busy}>
+            <Button variant="accent" onClick={start} disabled={busy}>
               {busy ? (
                 "Starting…"
               ) : (
