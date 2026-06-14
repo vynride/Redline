@@ -3,6 +3,7 @@ import { getToken } from "./storage";
 import { deepClean } from "./text";
 import type {
   DebriefOut,
+  LeaderboardEntry,
   Scenario,
   ScenarioSummary,
   SessionCreate,
@@ -39,11 +40,13 @@ export const api = {
   getScenario: (id: string) => request<Scenario>(`/api/scenarios/${id}`),
   generateScenario: (prompt: string) =>
     request<Scenario>("/api/generated-scenarios", { method: "POST", body: JSON.stringify({ prompt }) }),
+  listGeneratedScenarios: () => request<ScenarioSummary[]>("/api/generated-scenarios"),
   createSession: (body: SessionCreate) =>
     request<SessionOut>("/api/sessions", { method: "POST", body: JSON.stringify(body) }),
   listSessions: () => request<SessionListItem[]>("/api/sessions"),
   getSession: (id: string) => request<SessionDetail>(`/api/sessions/${id}`),
   getDebrief: (id: string) => request<DebriefOut>(`/api/sessions/${id}/debrief`),
+  listLeaderboard: () => request<LeaderboardEntry[]>("/api/leaderboard"),
 
   /** Download the debrief as a server-rendered PDF and trigger a browser save. */
   downloadDebriefPdf: async (id: string): Promise<void> => {
