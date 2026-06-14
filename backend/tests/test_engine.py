@@ -88,3 +88,33 @@ def test_debrief_generated_after_completion(client, db_session, auth_headers):
     assert body["overall_grade"] in {"A", "B", "C", "D", "F"}
     assert body["content"]["dimension_scores"]["clarity"] == 80
     assert body["summary"]
+
+
+# ── Objective matching — the LLM paraphrases, so we snap to canonical text ──────────
+
+OBJECTIVES = [
+    "Acknowledge customer impact within the first reply",
+    "Commit to a concrete next-update time",
+    "Identify the failing payment provider",
+]
+
+
+def test_match_objectives_exact():
+    assert engine._match_objectives([OBJECTIVES[0]], OBJECTIVES) == [OBJECTIVES[0]]
+
+
+def test_match_objectives_paraphrase_and_punctuation():
+    # Different casing, trailing period, reordered/extra words — still the same objective.
+    reported = ["acknowledge the customer impact in your first reply.",
+                "Committed to a concrete next update time!"]
+    assert engine._match_objectives(reported, OBJECTIVES) == [OBJECTIVES[0], OBJECTIVES[1]]
+
+
+def test_match_objectives_substring():
+    assert engine._match_objectives(["identify the failing payment provider quickly"], OBJECTIVES) == [OBJECTIVES[2]]
+
+
+def test_match_objectives_drops_hallucinations_and_dedups():
+    reported = ["Made a sandwich", OBJECTIVES[0], "acknowledge customer impact within first reply"]
+    # Unrelated item dropped; the two phrasings of objective 0 collapse to one canonical entry.
+    assert engine._match_objectives(reported, OBJECTIVES) == [OBJECTIVES[0]]
