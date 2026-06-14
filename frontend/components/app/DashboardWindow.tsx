@@ -414,11 +414,18 @@ export function DashboardWindow({
           </div>
         )}
 
-        {/* Scenario grid */}
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {visible.map((s) => (
-            <ScenarioCard key={s.id} s={s} sessions={sessions} onSelect={onSelect} />
-          ))}
+        {/* Drill Zone — the preconfigured, authored scenario catalog */}
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center gap-2">
+            <Flame className="h-4 w-4 text-violet-300" />
+            <h2 className="text-[13px] font-semibold text-white">Drill Zone</h2>
+            <span className="text-[11px] text-muted">Preconfigured incident drills</span>
+          </div>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            {visible.map((s) => (
+              <ScenarioCard key={s.id} s={s} sessions={sessions} onSelect={onSelect} />
+            ))}
+          </div>
         </div>
       </div>
     </>
@@ -471,7 +478,10 @@ function ScenarioCard({
         </span>
       </div>
 
-      <p className="line-clamp-3 min-h-[40px] text-[13px] font-medium leading-snug text-primary">{s.summary}</p>
+      <div className="flex flex-col gap-1">
+        <h3 className="line-clamp-2 text-[14px] font-semibold leading-[1.45] text-white">{s.title}</h3>
+        <p className="line-clamp-4 h-[76px] text-[13px] font-medium leading-[1.45] text-secondary">{s.summary}</p>
+      </div>
 
       {/* mt-auto pushes the footer to the card's bottom so every "Run drill"
           button aligns on the same baseline regardless of summary length. */}

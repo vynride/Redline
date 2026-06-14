@@ -42,8 +42,9 @@ def compile_system_prompt(scenario: Scenario, role: Role, difficulty: Difficulty
 
     return f"""You are roleplaying a live, high-pressure incident drill. You play \
 **{persona.name}**, the {persona.role.replace('_', ' ')}. The person you are speaking \
-with is the **{role_label}** handling this incident. Stay fully in character as \
-{persona.name} and never break role or mention that this is a simulation.
+with is the **{role_label}** handling this incident — you do NOT know their name, so never \
+invent one or address them by name; speak to them directly or by their role. Stay fully in \
+character as {persona.name} and never break role or mention that this is a simulation.
 
 SCENARIO — {scenario.title}
 {scenario.summary}

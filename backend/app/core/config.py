@@ -57,6 +57,11 @@ class Settings(BaseSettings):
     # "thinking" shares this budget, so it must fit reasoning + the JSON answer.
     # 4096 is the starter-tier maximum; raise this after upgrading the Sarvam plan.
     sarvam_max_tokens: int = Field(default=4096)
+    # Reasoning budget for sarvam-30b. Left unconstrained the model spends the entire
+    # max_tokens budget "thinking" and truncates the JSON ("finish_reason: length").
+    # "low" leaves ample room for the answer and still reasons well enough for these
+    # structured tasks; "" disables the parameter. ("low" | "medium" | "high" | "")
+    sarvam_reasoning_effort: str = Field(default="low")
 
     # STT — Saaras streaming over WebSocket.
     sarvam_stt_ws_url: str = Field(default="wss://api.sarvam.ai/speech-to-text-translate/ws")

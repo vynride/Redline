@@ -89,6 +89,14 @@ def test_can_drill_on_generated_scenario(client, auth_headers, fake_llm):
     detail = client.get(f"/api/sessions/{sid}", headers=auth_headers).json()
     assert detail["turns"][0]["text"] == sc["opening_line"]  # snapshot drove the opening turn
 
+    # The drill page resolves the scenario via the session, not the static catalog —
+    # a generated id isn't in /api/scenarios, but the per-session snapshot resolves it.
+    assert client.get(f"/api/scenarios/{sc['id']}", headers=auth_headers).status_code == 404
+    resolved = client.get(f"/api/sessions/{sid}/scenario", headers=auth_headers)
+    assert resolved.status_code == 200, resolved.text
+    assert resolved.json()["id"] == sc["id"]
+    assert resolved.json()["opening_line"] == sc["opening_line"]
+
 
 def test_cannot_drill_on_someone_elses_generated_scenario(client, auth_headers, make_auth, fake_llm):
     fake_llm(_draft())

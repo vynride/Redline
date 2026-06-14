@@ -52,7 +52,9 @@ export default function DrillPage() {
     (async () => {
       try {
         const session = await api.getSession(sessionId);
-        const sc = await api.getScenario(session.scenario_id);
+        // Resolve via the session (not the static catalog) so generated drills,
+        // whose scenario lives only as a per-session snapshot, load correctly.
+        const sc = await api.getSessionScenario(sessionId);
         if (cancelled) return;
         setScenario(sc);
         setMeta({ role: session.role, difficulty: session.difficulty });
