@@ -83,10 +83,7 @@ export function DrillHud({
       <div className="shrink-0 border-b border-panel-line">
         <div className="flex items-center justify-between px-5 pb-1 pt-4">
           <Eyebrow>Incident status</Eyebrow>
-          <StatusPill tone={STATUS_TONE[state.status]} className="gap-1.5">
-            {state.status === "active" && (
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            )}
+          <StatusPill tone={STATUS_TONE[state.status]}>
             {STATUS_LABEL[state.status]}
           </StatusPill>
         </div>
