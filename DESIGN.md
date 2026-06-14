@@ -1,4 +1,4 @@
----
+---  
 version: beta
 name: Redline-design-system
 summary: A premium dark product aesthetic built on a near-black canvas (#0A0A0A) with frosted-glass panels, a single violet accent, and a lavender "spotlight" surface reserved for marketing moments (hero, calls-to-action). Headlines come in two voices — a thin, lowercase oversized display for hero statements and a tight, bold two-tone heading (white lead + violet emphasis) for section titles — while eyebrows and supporting captions run in uppercase JetBrains Mono. Cards are dark glassmorphic panels with hairline borders and gradient-edge glow; product UI is shown as realistic, data-dense mockups. Motion is rich but disciplined: scroll-reveals, parallax, magnetic buttons, drifting aurora, and Lenis smooth scrolling, all reduced-motion-safe.
