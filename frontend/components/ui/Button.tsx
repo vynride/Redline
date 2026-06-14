@@ -1,7 +1,7 @@
 import type { ButtonHTMLAttributes } from "react";
 import { cn } from "@/lib/cn";
 
-export type ButtonVariant = "primary" | "secondary" | "ghost" | "gradient";
+export type ButtonVariant = "primary" | "secondary" | "ghost" | "gradient" | "accent";
 
 const BASE =
   "inline-flex items-center justify-center gap-2 rounded-full font-semibold text-button transition " +
@@ -17,6 +17,8 @@ const VARIANTS: Record<ButtonVariant, string> = {
   ghost: "bg-transparent text-secondary px-4 h-10 hover:text-white",
   // High-emphasis accent, the single loudest action.
   gradient: "bg-neon-duo text-white px-6 h-11 shadow-[0_10px_40px_-12px_rgba(124,58,237,0.8)] hover:brightness-110",
+  // Solid violet pill, matches the "Run drill" call-to-action.
+  accent: "bg-violet-500/15 text-violet-200 px-6 h-11 hover:bg-violet-500 hover:text-white",
 };
 
 /** Class string for the Redline button, reuse on <Link> elements that look like buttons. */
