@@ -84,7 +84,9 @@ export default function DebriefPage() {
         if (cancelled) return;
         setDebrief(d);
         setSession(s);
-        const sc = await api.getScenario(s.scenario_id);
+        // Resolve via the session (not the static catalog) so generated drills,
+        // whose scenario lives only as a per-session snapshot, load correctly.
+        const sc = await api.getSessionScenario(sessionId);
         if (!cancelled) setScenario(sc);
       } catch (e) {
         if (cancelled) return;
