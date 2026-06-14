@@ -9,7 +9,8 @@ import { usePathname } from "next/navigation";
  */
 export function AppContainer({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const fullBleed = pathname === "/dashboard" || pathname.startsWith("/drill/");
+  const fullBleed =
+    pathname === "/dashboard" || pathname === "/leaderboard" || pathname.startsWith("/drill/");
   if (fullBleed) return <>{children}</>;
   return <div className="mx-auto max-w-[1180px] px-6 py-12">{children}</div>;
 }
