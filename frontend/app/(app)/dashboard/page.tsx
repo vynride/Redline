@@ -20,15 +20,22 @@ function readinessOf(sessions: SessionListItem[]) {
 export default function DashboardPage() {
   const router = useRouter();
   const [scenarios, setScenarios] = useState<ScenarioSummary[] | null>(null);
+  const [generated, setGenerated] = useState<ScenarioSummary[]>([]);
   const [sessions, setSessions] = useState<SessionListItem[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<ScenarioSummary | null>(null);
 
   useEffect(() => {
-    Promise.all([api.listScenarios(), api.listSessions()])
-      .then(([sc, se]) => {
+    Promise.all([
+      api.listScenarios(),
+      api.listSessions(),
+      // The user's own generated drills; a failure here shouldn't block the dashboard.
+      api.listGeneratedScenarios().catch(() => [] as ScenarioSummary[]),
+    ])
+      .then(([sc, se, gen]) => {
         setScenarios(sc);
         setSessions(se);
+        setGenerated(gen);
       })
       .catch((e) => setError(e instanceof Error ? e.message : "Could not load your dashboard."));
   }, []);
@@ -47,6 +54,7 @@ export default function DashboardPage() {
     <>
       <DashboardWindow
         scenarios={scenarios}
+        generated={generated}
         sessions={sessions}
         readiness={readiness}
         onSelect={setSelected}
