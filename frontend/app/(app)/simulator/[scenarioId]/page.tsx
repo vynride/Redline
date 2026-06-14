@@ -62,10 +62,6 @@ export default function SimulatorPage() {
         <div className="flex items-center gap-3">
           {/* "Provisioned by Floci" sandbox chrome */}
           <span className="hidden items-center gap-2 rounded-full border border-panel-line bg-panel px-3 py-1.5 sm:flex">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/60" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-            </span>
             <span className="font-mono text-[11px] text-secondary">
               floci sandbox · {lab.instanceId}
             </span>
@@ -78,10 +74,14 @@ export default function SimulatorPage() {
       </div>
 
       {/* Workspace: guide + status on the left, terminal on the right */}
-      <div className="mt-5 grid min-h-0 flex-1 gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)]">
-        <div className="flex min-h-0 flex-col gap-5 overflow-y-auto pr-1">
-          <RunbookGuide lab={lab} state={state} />
-          <ClusterStatus state={state} />
+      <div className="mt-5 grid min-h-0 flex-1 gap-5 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
+        <div className="flex min-h-0 flex-col gap-5">
+          <div className="min-h-0 flex-[3]">
+            <RunbookGuide lab={lab} state={state} />
+          </div>
+          <div className="min-h-0 flex-[2]">
+            <ClusterStatus state={state} />
+          </div>
         </div>
         <div className="min-h-[420px]">
           <SimTerminal lab={lab} state={state} onState={setState} resetNonce={resetNonce} />

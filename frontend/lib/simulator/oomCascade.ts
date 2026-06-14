@@ -230,21 +230,44 @@ function normalize(raw: string): string {
     .replace(/\s--namespace(=|\s)\S+/g, "");
 }
 
-const HELP_LINES: TermLine[] = [
-  { text: "Simulated kubectl — investigate the cluster, then stop the cascade.", tone: "sys" },
-  { text: "  kubectl get pods                 list the api pods and their status", tone: "out" },
-  { text: "  kubectl describe pod <name>      why a pod died (look at Last State)", tone: "out" },
-  { text: "  kubectl top pods                 live memory per pod", tone: "out" },
-  { text: "  kubectl get deployment api       deployment health", tone: "out" },
-  { text: "  kubectl rollout history deployment/api    recent deploys", tone: "out" },
-  { text: "  kubectl get hpa                  autoscaler state", tone: "out" },
-  { text: "  kubectl annotate ingress api nginx.ingress.kubernetes.io/limit-rps=50 --overwrite", tone: "out" },
-  { text: "                                   rate-limit / shed load to break the cascade", tone: "out" },
-  { text: "  kubectl rollout undo deployment/api        roll back the leaky deploy", tone: "out" },
-  { text: "  kubectl set resources deployment/api --limits=memory=1Gi", tone: "out" },
-  { text: "  kubectl scale deployment/api --replicas=N", tone: "out" },
-  { text: "  hint · status · clear · reset", tone: "sys" },
+// Two-column command reference. Commands are padded to a fixed column so the
+// descriptions line up; anything too long for the column drops its description
+// onto an indented continuation line instead of pushing the column out.
+const HELP_COL = 40;
+const HELP_ROWS: ReadonlyArray<readonly [string, string]> = [
+  ["kubectl get pods", "list the api pods and their status"],
+  ["kubectl describe pod <name>", "why a pod died (look at Last State)"],
+  ["kubectl top pods", "live memory per pod"],
+  ["kubectl get deployment api", "deployment health"],
+  ["kubectl rollout history deployment/api", "recent deploys"],
+  ["kubectl get hpa", "autoscaler state"],
+  [
+    "kubectl annotate ingress api nginx.ingress.kubernetes.io/limit-rps=50 --overwrite",
+    "rate-limit / shed load to break the cascade",
+  ],
+  ["kubectl rollout undo deployment/api", "roll back the leaky deploy (the real fix)"],
+  ["kubectl set resources deployment/api --limits=memory=1Gi", "add headroom — only buys minutes"],
+  ["kubectl scale deployment/api --replicas=N", "change the replica count"],
 ];
+
+function buildHelp(): TermLine[] {
+  const lines: TermLine[] = [
+    { text: "Simulated kubectl — investigate the cluster, then stop the cascade.", tone: "sys" },
+  ];
+  for (const [c, desc] of HELP_ROWS) {
+    if (c.length < HELP_COL) {
+      lines.push({ text: "  " + pad(c, HELP_COL) + desc, tone: "out" });
+    } else {
+      lines.push({ text: "  " + c, tone: "out" });
+      lines.push({ text: "      ↳ " + desc, tone: "sys" });
+    }
+  }
+  lines.push({ text: "", tone: "out" });
+  lines.push({ text: "  hint · status · clear · reset", tone: "sys" });
+  return lines;
+}
+
+const HELP_LINES: TermLine[] = buildHelp();
 
 // ── Command dispatch ────────────────────────────────────────────────────────
 
