@@ -7,6 +7,8 @@ LLM-agnostic: callers pass any ``LLMClient`` (real Sarvam adapter or a test fake
 """
 from __future__ import annotations
 
+import re
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -23,6 +25,51 @@ from app.services import scenarios as catalog
 
 def _clamp(value: int, low: int, high: int) -> int:
     return max(low, min(high, value))
+
+
+# Filler words that shouldn't count toward objective similarity (they inflate overlap).
+_OBJECTIVE_STOPWORDS = frozenset(
+    "a an the to of for and or in on at by with your you their our is are be that this".split()
+)
+
+
+def _normalize_objective(text: str) -> str:
+    return re.sub(r"[^a-z0-9]+", " ", text.lower()).strip()
+
+
+def _match_objectives(reported: list[str], canonical: list[str]) -> list[str]:
+    """Snap each model-reported objective to the canonical scenario objective it refers to.
+
+    The LLM is asked to echo objective wording verbatim but it paraphrases — different
+    casing, punctuation, or word order — so a literal match silently drops genuinely-met
+    objectives (the HUD row never turns green). Match on normalized text with substring and
+    content-token-overlap fallbacks, and return the *canonical* strings so the HUD checklist,
+    the met count, and the debrief all compare cleanly. Reported items that match no scenario
+    objective (hallucinations) are dropped.
+    """
+    norm_canon = [(c, set(_normalize_objective(c).split()) - _OBJECTIVE_STOPWORDS) for c in canonical]
+    matched: list[str] = []
+    for item in reported:
+        norm = _normalize_objective(item)
+        if not norm:
+            continue
+        tokens = set(norm.split()) - _OBJECTIVE_STOPWORDS
+        best: str | None = None
+        best_score = 0.0
+        for canon, canon_tokens in norm_canon:
+            canon_norm = _normalize_objective(canon)
+            # Substring either direction is a confident match.
+            if norm == canon_norm or norm in canon_norm or canon_norm in norm:
+                best, best_score = canon, 1.0
+                break
+            # Otherwise, fraction of the canonical objective's content words present.
+            if canon_tokens:
+                score = len(tokens & canon_tokens) / len(canon_tokens)
+                if score > best_score:
+                    best, best_score = canon, score
+        if best is not None and best_score >= 0.6 and best not in matched:
+            matched.append(best)
+    return matched
 
 
 def _build_messages(turns: list[Turn]) -> list[ChatMessage]:
@@ -106,7 +153,10 @@ async def step(db: Session, session: DrillSession, user_text: str, llm: LLMClien
     session.confidence = new_confidence
 
     if output.objectives_met:
-        session.objectives_met = list(dict.fromkeys([*session.objectives_met, *output.objectives_met]))
+        # Snap to canonical objective text so the HUD/debrief match exactly (the LLM paraphrases).
+        matched = _match_objectives(output.objectives_met, scenario.objectives)
+        if matched:
+            session.objectives_met = list(dict.fromkeys([*session.objectives_met, *matched]))
 
     persona_index = next_index + 1
     if output.escalation_event:
