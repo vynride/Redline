@@ -214,7 +214,7 @@ export function AppShowcase() {
               <div className="text-[9px] text-muted">tier</div>
             </div>
           </div>
-          <span className="h-8 w-8 rounded-full" style={{ background: "linear-gradient(135deg,#38bdf8,#6366f1)" }} />
+          <span className="h-8 w-8 rounded-full" style={{ background: "linear-gradient(135deg,#38bdf8,#2563eb)" }} />
         </div>
       </div>
 
