@@ -23,7 +23,8 @@ export function AppHeader() {
   // Full-bleed pages (the live drill, the leaderboard) span the viewport, so the
   // header stretches edge-to-edge to match instead of sitting in the centered
   // content container.
-  const fullBleed = pathname.startsWith("/drill/") || pathname === "/leaderboard";
+  const fullBleed =
+    pathname.startsWith("/drill/") || pathname.startsWith("/simulator/") || pathname === "/leaderboard";
 
   return (
     <header className="sticky top-0 z-40 border-b border-panel-line bg-ink/80 backdrop-blur">
