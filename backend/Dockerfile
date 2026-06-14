@@ -6,9 +6,13 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /app
 
-# TLS roots for the Sarvam HTTP/WebSocket calls (chat, STT, TTS).
+# TLS roots for the Sarvam HTTP/WebSocket calls (chat, STT, TTS), plus the
+# Pango/Cairo/GDK-PixBuf stack WeasyPrint needs to render the debrief PDF.
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends ca-certificates \
+    && apt-get install -y --no-install-recommends \
+        ca-certificates \
+        libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf-2.0-0 \
+        libffi8 libharfbuzz0b fonts-dejavu-core \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
