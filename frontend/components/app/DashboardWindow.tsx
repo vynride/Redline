@@ -1,17 +1,17 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ServerCrash, CreditCard, ShieldAlert, AlertTriangle, PackageX, Gauge,
-  Search, Bell, Flame, Mic, LogOut, ArrowRight, X, Sparkles,
+  Search, Bell, Flame, LogOut, X, Sparkles,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Avatar } from "@/components/ui";
 import { Brand } from "@/components/app/Brand";
 import { useAuth } from "@/lib/auth";
 import { api, ApiError } from "@/lib/api";
-import { ARCHETYPE_LABELS, DIFFICULTY_LABELS, ROLE_LABELS } from "@/lib/labels";
+import { DIFFICULTY_LABELS, ROLE_LABELS } from "@/lib/labels";
 import { cn } from "@/lib/cn";
 import type { Archetype, Difficulty, Role, ScenarioSummary, SessionListItem } from "@shared/types";
 
@@ -66,43 +66,16 @@ function QuickStart({ scenarios }: { scenarios: ScenarioSummary[] }) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [query,      setQuery]      = useState("");
-  const [role,       setRole]       = useState<Role>(scenarios[0]?.roles[0] ?? "on_call_engineer");
-  const [difficulty, setDifficulty] = useState<Difficulty>(scenarios[0]?.difficulties[0] ?? "warmup");
-  const [busy,  setBusy]  = useState(false);
+  const [role,       setRole]       = useState<Role>("on_call_engineer");
+  const [difficulty, setDifficulty] = useState<Difficulty>("warmup");
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // A small random sample of example prompts, reshuffled once per page load.
+  // A small random sample of example titles, reshuffled once per page load —
+  // quick prompt starters the user can drop into the input and edit.
   const [chips] = useState<ScenarioSummary[]>(() =>
     [...scenarios].sort(() => Math.random() - 0.5).slice(0, QUICKSTART_CHIPS),
   );
-
-  // Best match: starts-with title → summary includes → archetype label includes
-  const matched = useMemo<ScenarioSummary | null>(() => {
-    if (!query.trim()) return null;
-    const q = query.toLowerCase();
-    return (
-      scenarios.find((s) => s.title.toLowerCase().startsWith(q)) ??
-      scenarios.find((s) => s.summary.toLowerCase().includes(q)) ??
-      scenarios.find((s) => ARCHETYPE_LABELS[s.archetype].toLowerCase().includes(q)) ??
-      null
-    );
-  }, [query, scenarios]);
-
-  const scenario = matched ?? scenarios[0] ?? null;
-
-  // Ghost suffix, only when query is a starts-with prefix of the matched title
-  const ghost =
-    matched && query && matched.title.toLowerCase().startsWith(query.toLowerCase())
-      ? matched.title.slice(query.length)
-      : "";
-
-  // Keep role/difficulty valid when the active scenario changes
-  useEffect(() => {
-    if (!scenario) return;
-    if (!scenario.roles.includes(role))              setRole(scenario.roles[0]);
-    if (!scenario.difficulties.includes(difficulty)) setDifficulty(scenario.difficulties[0]);
-  }, [scenario?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function accept(title: string) {
     setQuery(title);
@@ -110,25 +83,8 @@ function QuickStart({ scenarios }: { scenarios: ScenarioSummary[] }) {
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if ((e.key === "Tab" || e.key === "ArrowRight") && ghost) {
-      e.preventDefault();
-      accept(matched!.title);
-    }
-    if (e.key === "Enter") void handleLaunch();
+    if (e.key === "Enter") void handleGenerate();
     if (e.key === "Escape") setQuery("");
-  }
-
-  async function handleLaunch() {
-    if (!scenario || busy) return;
-    setBusy(true);
-    setError(null);
-    try {
-      const session = await api.createSession({ scenario_id: scenario.id, role, difficulty });
-      router.push(`/drill/${session.id}`);
-    } catch (e) {
-      setError(e instanceof ApiError ? e.message : "Could not start the drill.");
-      setBusy(false);
-    }
   }
 
   // Author a brand-new scenario from the typed prompt via the LLM, then drop
@@ -136,7 +92,7 @@ function QuickStart({ scenarios }: { scenarios: ScenarioSummary[] }) {
   // scenario's own options when the current selection isn't offered.
   async function handleGenerate() {
     const prompt = query.trim();
-    if (!prompt || busy || generating) return;
+    if (!prompt || generating) return;
     setGenerating(true);
     setError(null);
     try {
@@ -150,10 +106,6 @@ function QuickStart({ scenarios }: { scenarios: ScenarioSummary[] }) {
       setGenerating(false);
     }
   }
-
-  const ScenIcon   = scenario ? META[scenario.archetype].icon : Mic;
-  const availRoles = scenario?.roles ?? ALL_ROLES;
-  const availDiffs = scenario?.difficulties ?? ALL_DIFFICULTIES;
 
   return (
     <div className="relative overflow-hidden rounded-2xl bg-panel">
@@ -177,38 +129,20 @@ function QuickStart({ scenarios }: { scenarios: ScenarioSummary[] }) {
           <img src="/logo.svg" alt="Redline" className="h-9 w-9 shrink-0" />
           <div className="leading-tight">
             <p className="text-[14px] font-semibold text-white">Quick Start</p>
-            <p className="text-[11px] text-muted">Pick a scenario below, or describe your own and hit Generate</p>
+            <p className="text-[11px] text-muted">Describe an incident you want to practise, then hit Generate</p>
           </div>
-          {scenario && (
-            <div className="ml-auto hidden items-center gap-2 rounded-full border border-panel-line bg-panel-2 px-3 py-1.5 text-[11px] sm:flex">
-              <ScenIcon className="h-3.5 w-3.5 text-violet-300" />
-              <span className="text-secondary">{META[scenario.archetype].short}</span>
-              <span className="h-3 w-px bg-panel-line" />
-              <span className="max-w-[180px] truncate font-medium text-white">{scenario.title}</span>
-            </div>
-          )}
         </div>
 
-        {/* ── Large search / command input ── */}
+        {/* ── Large prompt input ── */}
         <div className="relative rounded-xl border border-panel-line bg-ink-2 transition-all duration-200 focus-within:border-violet-500/55 focus-within:shadow-[0_0_0_3px_rgba(124,58,237,0.08)]">
-          {/* Ghost completion, invisible spacer ensures alignment with typed text */}
-          {ghost && (
-            <div
-              className="pointer-events-none absolute inset-0 flex items-center overflow-hidden rounded-xl px-5 font-sans text-[18px] font-normal leading-none"
-              aria-hidden
-            >
-              <span className="invisible whitespace-pre">{query}</span>
-              <span className="whitespace-pre" style={{ color: "rgba(111,103,137,0.45)" }}>{ghost}</span>
-            </div>
-          )}
           <input
             ref={inputRef}
             type="text"
-            aria-label="Search or describe a scenario"
+            aria-label="Describe a scenario to generate"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder='e.g. "database is down" or "payment failures"…'
+            placeholder='e.g. "Kafka cluster dropping messages" or "payment webhook failures"…'
             className="relative z-10 w-full bg-transparent py-4 pl-5 pr-14 text-[18px] font-normal text-white placeholder:text-muted/35 focus:outline-none"
           />
           {query ? (
@@ -226,11 +160,11 @@ function QuickStart({ scenarios }: { scenarios: ScenarioSummary[] }) {
           )}
         </div>
 
-        {/* ── Scenario chips ── */}
+        {/* ── Prompt-starter chips ── */}
         <div className="mt-4 flex flex-wrap gap-2">
           {chips.map((s) => {
             const CIcon    = META[s.archetype].icon;
-            const isActive = scenario?.id === s.id && query.trim() !== "";
+            const isActive = query.trim() === s.title;
             return (
               <button
                 key={s.id}
@@ -250,13 +184,13 @@ function QuickStart({ scenarios }: { scenarios: ScenarioSummary[] }) {
         </div>
       </div>
 
-      {/* ── Bottom bar: role · difficulty · launch ──────────── */}
+      {/* ── Bottom bar: role · difficulty · generate ──────────── */}
       <div className="relative flex flex-wrap items-center gap-x-4 gap-y-3 border-t border-panel-line bg-ink-2/50 px-6 py-4">
 
         {/* Role pills */}
         <div className="flex flex-wrap items-center gap-2">
           <span className="shrink-0 font-mono text-[10px] uppercase tracking-[0.14em] text-muted">Role</span>
-          {availRoles.map((r) => (
+          {ALL_ROLES.map((r) => (
             <button
               key={r}
               aria-pressed={r === role}
@@ -278,7 +212,7 @@ function QuickStart({ scenarios }: { scenarios: ScenarioSummary[] }) {
         {/* Difficulty pills */}
         <div className="flex flex-wrap items-center gap-2">
           <span className="shrink-0 font-mono text-[10px] uppercase tracking-[0.14em] text-muted">Difficulty</span>
-          {availDiffs.map((d) => {
+          {ALL_DIFFICULTIES.map((d) => {
             const sev   = SEV[d];
             const [txt] = sev.tone.split(" ");
             return (
@@ -300,38 +234,29 @@ function QuickStart({ scenarios }: { scenarios: ScenarioSummary[] }) {
           })}
         </div>
 
-        {/* Push launch to the far right */}
+        {/* Push generate to the far right */}
         <div className="flex-1" />
 
         <div className="flex flex-col items-end gap-1.5">
-          <div className="flex items-center gap-2">
-            {/* Generate a NEW scenario from the typed prompt (LLM), then launch it. */}
-            <button
-              onClick={() => void handleGenerate()}
-              disabled={generating || busy || !query.trim()}
-              title="Generate a brand-new scenario from your prompt"
-              className="flex items-center gap-2 rounded-xl border border-violet-500/45 bg-violet-500/15 px-4 py-2.5 text-[13px] font-semibold text-violet-200 transition-all duration-150 hover:bg-violet-500/25 disabled:opacity-50"
-            >
-              {generating ? (
-                <>
-                  <Sparkles className="h-4 w-4 animate-pulse" />
-                  <span>Generating…</span>
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-4 w-4" />
-                  <span>Generate</span>
-                </>
-              )}
-            </button>
-            <button
-              onClick={() => void handleLaunch()}
-              disabled={busy || generating || !scenario}
-              className="flex items-center gap-2 rounded-xl bg-white px-6 py-2.5 text-[13px] font-semibold text-ink shadow-[0_2px_20px_-4px_rgba(255,255,255,0.2)] transition-all duration-150 hover:scale-[1.03] hover:shadow-[0_4px_28px_-4px_rgba(255,255,255,0.3)] disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-none"
-            >
-              {busy ? "Starting…" : <><span>Launch Drill</span><ArrowRight className="h-4 w-4" /></>}
-            </button>
-          </div>
+          {/* Author a brand-new scenario from the typed prompt (LLM), then drop into the drill. */}
+          <button
+            onClick={() => void handleGenerate()}
+            disabled={generating || !query.trim()}
+            title="Generate a brand-new scenario from your prompt"
+            className="flex items-center gap-2 rounded-xl bg-white px-6 py-2.5 text-[13px] font-semibold text-ink shadow-[0_2px_20px_-4px_rgba(255,255,255,0.2)] transition-all duration-150 hover:scale-[1.03] hover:shadow-[0_4px_28px_-4px_rgba(255,255,255,0.3)] disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-none"
+          >
+            {generating ? (
+              <>
+                <Sparkles className="h-4 w-4 animate-pulse" />
+                <span>Generating…</span>
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4" />
+                <span>Generate Drill</span>
+              </>
+            )}
+          </button>
           {error && <p className="text-[11px] text-rose-400">{error}</p>}
         </div>
       </div>
@@ -343,11 +268,13 @@ function QuickStart({ scenarios }: { scenarios: ScenarioSummary[] }) {
 
 export function DashboardWindow({
   scenarios,
+  generated,
   sessions,
   readiness,
   onSelect,
 }: {
   scenarios: ScenarioSummary[];
+  generated: ScenarioSummary[];
   sessions: SessionListItem[];
   readiness: { points: number; tier: string };
   onSelect: (s: ScenarioSummary) => void;
@@ -376,12 +303,12 @@ export function DashboardWindow({
   }, [scenarios, cat, tab]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function onTab(t: Tab) {
-    setTab(t);
     if (t === "Leaderboard") {
-      document.getElementById("leaderboard")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    } else {
-      sortRef.current = t;
+      router.push("/leaderboard");
+      return;
     }
+    setTab(t);
+    sortRef.current = t;
   }
 
   return (
@@ -472,8 +399,23 @@ export function DashboardWindow({
         {/* Quick Start, full-width banner above the grid */}
         <QuickStart scenarios={scenarios} />
 
+        {/* Your custom drills — scenarios this user generated, newest first */}
+        {generated.length > 0 && (
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-violet-300" />
+              <h2 className="text-[13px] font-semibold text-white">Your custom drills</h2>
+            </div>
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+              {generated.map((s) => (
+                <ScenarioCard key={s.id} s={s} sessions={sessions} onSelect={onSelect} />
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Scenario grid */}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {visible.map((s) => (
             <ScenarioCard key={s.id} s={s} sessions={sessions} onSelect={onSelect} />
           ))}
@@ -510,8 +452,7 @@ function ScenarioCard({
 }) {
   const Icon     = META[s.archetype].icon;
   const sev      = SEV[hardest(s.difficulties)];
-  const { calm, drills } = statsFor(s, sessions);
-  const escalate = 100 - calm;
+  const { drills } = statsFor(s, sessions);
 
   return (
     <button
@@ -532,20 +473,9 @@ function ScenarioCard({
 
       <p className="line-clamp-3 min-h-[40px] text-[13px] font-medium leading-snug text-primary">{s.summary}</p>
 
-      {/* mt-auto pushes the bars + labels + footer to the card's bottom so every
-          "Run drill" button aligns on the same baseline regardless of summary length. */}
-      <div className="mt-auto flex items-center gap-2">
-        <div className="flex flex-1 overflow-hidden rounded-full">
-          <div className="h-1.5 rounded-l-full bg-emerald-400/80" style={{ width: `${calm}%` }} />
-          <div className="h-1.5 rounded-r-full bg-rose-500/70"    style={{ width: `${escalate}%` }} />
-        </div>
-      </div>
-      <div className="flex items-center justify-between text-[11px]">
-        <span className="text-emerald-400">De-escalated {calm}%</span>
-        <span className="text-rose-400">Blew up {escalate}%</span>
-      </div>
-
-      <div className="mt-1 flex items-center justify-between border-t border-panel-line pt-3">
+      {/* mt-auto pushes the footer to the card's bottom so every "Run drill"
+          button aligns on the same baseline regardless of summary length. */}
+      <div className="mt-auto flex items-center justify-between border-t border-panel-line pt-3">
         <span className="font-mono text-[11px] text-muted">{drills} drills</span>
         <span className="rounded-md bg-violet-500/15 px-3 py-1 text-[11px] font-semibold text-violet-200 transition-colors group-hover:bg-violet-500 group-hover:text-white">
           Run drill

@@ -6,6 +6,7 @@ import { DashboardWindow } from "@/components/app/DashboardWindow";
 import { DrillConfig } from "@/components/drill/NewDrill";
 import { api } from "@/lib/api";
 import { LoadingScreen } from "@/components/ui/LoadingScreen";
+import { tierFor } from "@/lib/score";
 import type { ScenarioSummary, SessionListItem } from "@shared/types";
 
 function readinessOf(sessions: SessionListItem[]) {
@@ -13,22 +14,28 @@ function readinessOf(sessions: SessionListItem[]) {
     .filter((s) => s.status === "completed" && s.score != null)
     .map((s) => s.score as number);
   const points = scored.reduce((a, b) => a + b, 0);
-  const tier = points >= 1500 ? "Gold" : points >= 500 ? "Silver" : "Bronze";
-  return { points, tier };
+  return { points, tier: tierFor(points) };
 }
 
 export default function DashboardPage() {
   const router = useRouter();
   const [scenarios, setScenarios] = useState<ScenarioSummary[] | null>(null);
+  const [generated, setGenerated] = useState<ScenarioSummary[]>([]);
   const [sessions, setSessions] = useState<SessionListItem[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<ScenarioSummary | null>(null);
 
   useEffect(() => {
-    Promise.all([api.listScenarios(), api.listSessions()])
-      .then(([sc, se]) => {
+    Promise.all([
+      api.listScenarios(),
+      api.listSessions(),
+      // The user's own generated drills; a failure here shouldn't block the dashboard.
+      api.listGeneratedScenarios().catch(() => [] as ScenarioSummary[]),
+    ])
+      .then(([sc, se, gen]) => {
         setScenarios(sc);
         setSessions(se);
+        setGenerated(gen);
       })
       .catch((e) => setError(e instanceof Error ? e.message : "Could not load your dashboard."));
   }, []);
@@ -47,6 +54,7 @@ export default function DashboardPage() {
     <>
       <DashboardWindow
         scenarios={scenarios}
+        generated={generated}
         sessions={sessions}
         readiness={readiness}
         onSelect={setSelected}
