@@ -35,12 +35,19 @@ The user plays a responder (on-call engineer, incident commander, support lead, 
 The persona you write is the OTHER side of the call — a stressed stakeholder, customer, \
 or teammate the responder must calm, inform, and satisfy under pressure.
 
+The responder is a real person whose name you do NOT know. Never invent a name for them \
+and never address them by name — not in the opening_line, not anywhere. Address them by \
+role if you must ("the on-call engineer"), or simply speak to them directly ("Hey, we're \
+getting flooded with errors…"). The only name you author is the persona's own.
+
 Make it concrete and tense, not generic:
 - Pick the archetype that best fits the prompt.
-- Write a persona with a real name, a snake_case role, an opening emotion, and a short \
-behaviour note. Their opening_line should drop the responder straight into the moment. \
-Set the persona's gender ("female", "male", or "neutral") so it reads consistently with \
-their name — this picks the voice they're heard in.
+- Write a persona with a real human name (e.g. "Alex Chen", never snake_case), a \
+snake_case role, an opening emotion, and a short behaviour note. The opening_line is the \
+exact words the persona speaks aloud — first person, in character, no stage directions or \
+narration ("Alex's voice is strained…"), no surrounding quotes — and it should drop the \
+responder straight into the moment. Set the persona's gender ("female", "male", or \
+"neutral") so it reads consistently with their name — this picks the voice they're heard in.
 - Give 3-5 sharp, checkable objectives (e.g. "Acknowledge impact within the first reply", \
 "Commit to a concrete next update time").
 - Add a few hidden_facts the responder can only learn by asking good questions.

@@ -45,6 +45,8 @@ export const api = {
     request<SessionOut>("/api/sessions", { method: "POST", body: JSON.stringify(body) }),
   listSessions: () => request<SessionListItem[]>("/api/sessions"),
   getSession: (id: string) => request<SessionDetail>(`/api/sessions/${id}`),
+  // Resolves the session's scenario (honours generated-drill snapshots, unlike getScenario).
+  getSessionScenario: (id: string) => request<Scenario>(`/api/sessions/${id}/scenario`),
   getDebrief: (id: string) => request<DebriefOut>(`/api/sessions/${id}/debrief`),
   listLeaderboard: () => request<LeaderboardEntry[]>("/api/leaderboard"),
 
