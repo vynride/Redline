@@ -29,4 +29,8 @@ jobs:
             docker volume prune -f
       - name: Cleanup SSH key
         if: always()
-        run: rm -rf "${{ github.workspace }}/.tmp_ssh"
+        run: |
+          if [ -f "${{ github.workspace }}/.tmp_ssh/deploy_key" ]; then
+            shred -u "${{ github.workspace }}/.tmp_ssh/deploy_key" || rm -f "${{ github.workspace }}/.tmp_ssh/deploy_key"
+          fi
+          rm -rf "${{ github.workspace }}/.tmp_ssh"
