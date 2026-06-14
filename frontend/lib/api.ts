@@ -44,4 +44,30 @@ export const api = {
   listSessions: () => request<SessionListItem[]>("/api/sessions"),
   getSession: (id: string) => request<SessionDetail>(`/api/sessions/${id}`),
   getDebrief: (id: string) => request<DebriefOut>(`/api/sessions/${id}/debrief`),
+
+  /** Download the debrief as a server-rendered PDF and trigger a browser save. */
+  downloadDebriefPdf: async (id: string): Promise<void> => {
+    const token = getToken();
+    const headers: Record<string, string> = {};
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const resp = await fetch(`${API_BASE}/api/sessions/${id}/debrief.pdf`, { headers });
+    if (!resp.ok) {
+      const data = await resp.json().catch(() => null);
+      throw new ApiError(resp.status, (data && data.detail) || resp.statusText);
+    }
+
+    const blob = await resp.blob();
+    const match = /filename="?([^";]+)"?/.exec(resp.headers.get("Content-Disposition") ?? "");
+    const filename = match?.[1] ?? `redline-debrief-${id}.pdf`;
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  },
 };

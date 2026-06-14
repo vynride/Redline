@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ArrowRight, RotateCcw, Quote } from "lucide-react";
+import { ArrowRight, RotateCcw, Quote, Download } from "lucide-react";
 import { DimensionScores } from "@/components/debrief/DimensionScores";
 import { Transcript, type TranscriptLine } from "@/components/drill/Transcript";
 import { Button, Card, LoadingScreen, StatusPill, type StatusTone } from "@/components/ui";
@@ -56,6 +56,20 @@ export default function DebriefPage() {
   const [scenario, setScenario] = useState<Scenario | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+
+  async function onDownload() {
+    setDownloading(true);
+    setDownloadError(null);
+    try {
+      await api.downloadDebriefPdf(sessionId);
+    } catch (e) {
+      setDownloadError(e instanceof Error ? e.message : "Could not export the PDF.");
+    } finally {
+      setDownloading(false);
+    }
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -266,17 +280,25 @@ export default function DebriefPage() {
       </Card>
 
       {/* ── Actions ───────────────────────────────────────── */}
-      <div className="flex flex-wrap justify-end gap-3">
-        <Link href="/dashboard">
-          <Button variant="secondary" className="gap-2">
-            <RotateCcw className="h-4 w-4" /> Run another drill
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-col gap-1">
+          <Button variant="secondary" className="gap-2" onClick={onDownload} disabled={downloading}>
+            <Download className="h-4 w-4" /> {downloading ? "Preparing PDF…" : "Download PDF"}
           </Button>
-        </Link>
-        <Link href="/dashboard">
-          <Button className="gap-2">
-            Back to dashboard <ArrowRight className="h-4 w-4" />
-          </Button>
-        </Link>
+          {downloadError && <span className="text-[12px] text-rose-400">{downloadError}</span>}
+        </div>
+        <div className="flex flex-wrap justify-end gap-3">
+          <Link href="/dashboard">
+            <Button variant="secondary" className="gap-2">
+              <RotateCcw className="h-4 w-4" /> Run another drill
+            </Button>
+          </Link>
+          <Link href="/dashboard">
+            <Button className="gap-2">
+              Back to dashboard <ArrowRight className="h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
       </div>
     </div>
   );
