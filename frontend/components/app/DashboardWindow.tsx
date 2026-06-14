@@ -473,7 +473,7 @@ export function DashboardWindow({
         <QuickStart scenarios={scenarios} />
 
         {/* Scenario grid */}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {visible.map((s) => (
             <ScenarioCard key={s.id} s={s} sessions={sessions} onSelect={onSelect} />
           ))}
@@ -510,8 +510,7 @@ function ScenarioCard({
 }) {
   const Icon     = META[s.archetype].icon;
   const sev      = SEV[hardest(s.difficulties)];
-  const { calm, drills } = statsFor(s, sessions);
-  const escalate = 100 - calm;
+  const { drills } = statsFor(s, sessions);
 
   return (
     <button
@@ -532,20 +531,9 @@ function ScenarioCard({
 
       <p className="line-clamp-3 min-h-[40px] text-[13px] font-medium leading-snug text-primary">{s.summary}</p>
 
-      {/* mt-auto pushes the bars + labels + footer to the card's bottom so every
-          "Run drill" button aligns on the same baseline regardless of summary length. */}
-      <div className="mt-auto flex items-center gap-2">
-        <div className="flex flex-1 overflow-hidden rounded-full">
-          <div className="h-1.5 rounded-l-full bg-emerald-400/80" style={{ width: `${calm}%` }} />
-          <div className="h-1.5 rounded-r-full bg-rose-500/70"    style={{ width: `${escalate}%` }} />
-        </div>
-      </div>
-      <div className="flex items-center justify-between text-[11px]">
-        <span className="text-emerald-400">De-escalated {calm}%</span>
-        <span className="text-rose-400">Blew up {escalate}%</span>
-      </div>
-
-      <div className="mt-1 flex items-center justify-between border-t border-panel-line pt-3">
+      {/* mt-auto pushes the footer to the card's bottom so every "Run drill"
+          button aligns on the same baseline regardless of summary length. */}
+      <div className="mt-auto flex items-center justify-between border-t border-panel-line pt-3">
         <span className="font-mono text-[11px] text-muted">{drills} drills</span>
         <span className="rounded-md bg-violet-500/15 px-3 py-1 text-[11px] font-semibold text-violet-200 transition-colors group-hover:bg-violet-500 group-hover:text-white">
           Run drill
