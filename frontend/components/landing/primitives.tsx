@@ -146,7 +146,7 @@ export function TwoTone({
           className,
         )}
       >
-        {lead} <span className="text-[#A78BFA]">{accent}</span>
+        {lead} <span className="text-[#F87171]">{accent}</span>
         {trail ? ` ${trail}` : ""}
       </h2>
     </Reveal>
@@ -230,7 +230,7 @@ export function MagneticButton({ children, href, variant = "primary", className 
     "group relative inline-flex h-12 items-center justify-center gap-2 rounded-full px-6 text-button transition-colors";
   const styles =
     variant === "primary"
-      ? "bg-neon-duo text-on-accent shadow-[0_10px_40px_-12px_rgba(124,58,237,0.8)]"
+      ? "bg-neon-duo text-on-accent shadow-[0_10px_40px_-12px_rgba(220,38,38,0.8)]"
       : "glass-strong text-primary hover:text-white";
 
   return (
@@ -270,7 +270,7 @@ export function MagneticLink({ children, href, variant = "primary", className }:
   };
   const styles =
     variant === "primary"
-      ? "bg-neon-duo text-on-accent shadow-[0_10px_40px_-12px_rgba(124,58,237,0.8)]"
+      ? "bg-neon-duo text-on-accent shadow-[0_10px_40px_-12px_rgba(220,38,38,0.8)]"
       : "glass-strong text-primary hover:text-white";
   return (
     <MotionLink

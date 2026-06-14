@@ -18,7 +18,7 @@
   body {
     min-height: 100vh;
     /* Faint vertical wash so the near-black canvas never reads flat. */
-    background-image: radial-gradient(120% 80% at 50% -10%, rgba(124, 58, 237, 0.1), transparent 55%);
+    background-image: radial-gradient(120% 80% at 50% -10%, rgba(220,38,38, 0.1), transparent 55%);
     background-attachment: fixed;
   }
 
@@ -40,27 +40,27 @@
   }
 
   ::selection {
-    background: rgba(124, 92, 252, 0.35);
+    background: rgba(239,68,68, 0.35);
     color: #f5f3ff;
   }
 
   /* Thin, on-brand scrollbar for the dark canvas. */
   * {
     scrollbar-width: thin;
-    scrollbar-color: #3a3158 transparent;
+    scrollbar-color: #4A2C2C transparent;
   }
   ::-webkit-scrollbar {
     width: 10px;
     height: 10px;
   }
   ::-webkit-scrollbar-thumb {
-    background: #2c2542;
+    background: #2C2020;
     border-radius: 9999px;
     border: 2px solid transparent;
     background-clip: content-box;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #3a3158;
+    background: #4A2C2C;
     background-clip: content-box;
   }
 }
@@ -72,8 +72,8 @@
   }
 
   @keyframes redline-glow-breathe {
-    0%, 100% { filter: drop-shadow(0 0 0px rgba(167,139,250,0)); }
-    50%       { filter: drop-shadow(0 0 14px rgba(167,139,250,0.45)); }
+    0%, 100% { filter: drop-shadow(0 0 0px rgba(248,113,113,0)); }
+    50%       { filter: drop-shadow(0 0 14px rgba(248,113,113,0.45)); }
   }
 
   @keyframes redline-shimmer {
@@ -110,7 +110,7 @@
     inset: 0;
     border-radius: inherit;
     padding: 1px;
-    background: linear-gradient(135deg, rgba(124, 58, 237, 0.6), rgba(34, 211, 238, 0.45), transparent 70%);
+    background: linear-gradient(135deg, rgba(220,38,38, 0.6), rgba(34, 211, 238, 0.45), transparent 70%);
     -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
@@ -120,7 +120,7 @@
 
   /* The duo-tone text gradient used on hero keywords. */
   .text-gradient {
-    background: linear-gradient(120deg, #c4b5fd 0%, #8b5cf6 35%, #22d3ee 100%);
+    background: linear-gradient(120deg, #FCA5A5 0%, #EF4444 35%, #22d3ee 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;

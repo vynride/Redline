@@ -3,14 +3,14 @@ import { cn } from "@/lib/cn";
 // Bright, vivid gradients with clear contrast, distinct and lively, still tasteful.
 // Picked deterministically from the name so a persona always wears the same one.
 const GRADIENTS = [
-  "linear-gradient(135deg, #a78bfa, #6366f1)", // violet → indigo
+  "linear-gradient(135deg, #F87171, #6366f1)", // violet → indigo
   "linear-gradient(135deg, #f472b6, #db2777)", // pink → rose
   "linear-gradient(135deg, #38bdf8, #4f46e5)", // sky → indigo
   "linear-gradient(135deg, #34d399, #0ea5e9)", // emerald → sky
   "linear-gradient(135deg, #fbbf24, #f97316)", // amber → orange
   "linear-gradient(135deg, #22d3ee, #3b82f6)", // cyan → blue
   "linear-gradient(135deg, #fb7185, #e11d48)", // rose → red
-  "linear-gradient(135deg, #c084fc, #7c3aed)", // fuchsia → violet
+  "linear-gradient(135deg, #c084fc, #DC2626)", // fuchsia → violet
 ];
 
 function pick(name: string): string {

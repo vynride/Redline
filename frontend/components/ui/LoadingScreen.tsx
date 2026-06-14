@@ -6,7 +6,7 @@ export function LoadingScreen() {
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(38% 38% at 50% 50%, rgba(124,58,237,0.07) 0%, transparent 70%)",
+            "radial-gradient(38% 38% at 50% 50%, rgba(220,38,38,0.07) 0%, transparent 70%)",
         }}
       />
 
@@ -33,7 +33,7 @@ export function LoadingScreen() {
             className="absolute inset-y-0 left-0 w-1/2 rounded-full"
             style={{
               background:
-                "linear-gradient(90deg, transparent 0%, #A78BFA 50%, transparent 100%)",
+                "linear-gradient(90deg, transparent 0%, #F87171 50%, transparent 100%)",
               animation: "redline-shimmer 2s ease-in-out infinite",
             }}
           />

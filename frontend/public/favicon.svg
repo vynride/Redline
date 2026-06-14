@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="4 4 248 248" role="img" aria-label="Redline">
   <defs>
     <linearGradient id="flakeGrad" x1="40" y1="20" x2="216" y2="236" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#B79CFF"/>
-      <stop offset="0.55" stop-color="#A78BFA"/>
-      <stop offset="1" stop-color="#7C5CFC"/>
+      <stop offset="0" stop-color="#FCA5A5"/>
+      <stop offset="0.55" stop-color="#F87171"/>
+      <stop offset="1" stop-color="#DC2626"/>
     </linearGradient>
   </defs>
   <g fill="url(#flakeGrad)">
