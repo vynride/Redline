@@ -243,7 +243,7 @@ function QuickStart({ scenarios }: { scenarios: ScenarioSummary[] }) {
             onClick={() => void handleGenerate()}
             disabled={generating || !query.trim()}
             title="Generate a brand-new scenario from your prompt"
-            className="flex items-center gap-2 rounded-xl bg-white px-6 py-2.5 text-[13px] font-semibold text-ink shadow-[0_2px_20px_-4px_rgba(255,255,255,0.2)] transition-all duration-150 hover:scale-[1.03] hover:shadow-[0_4px_28px_-4px_rgba(255,255,255,0.3)] disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-none"
+            className="flex items-center gap-2 rounded-xl bg-violet-500/15 px-6 py-2.5 text-[13px] font-semibold text-violet-200 transition-colors hover:bg-violet-500 hover:text-white disabled:opacity-50 disabled:hover:bg-violet-500/15 disabled:hover:text-violet-200"
           >
             {generating ? (
               <>
