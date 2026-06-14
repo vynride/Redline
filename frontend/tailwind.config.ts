@@ -1,9 +1,9 @@
 import type { Config } from "tailwindcss";
 
 // Tokens mirrored from DESIGN.md (repo root) — Redline's two-surface system: a
-// near-black product canvas (ink/panel) paired with a lavender accent surface for
+// near-black product canvas (ink/panel) paired with a red accent surface for
 // marketing moments, plus the premium glass/glow/aurora utilities used across the
-// landing page. Older violet-black app tokens are retained for the product shell.
+// landing page. Older dark app tokens are retained for the product shell.
 const config: Config = {
   content: [
     "./app/**/*.{ts,tsx}",
@@ -18,23 +18,23 @@ const config: Config = {
         surface: "#171226",
         "surface-2": "#211B36",
         "surface-3": "#2A2342",
-        line: "#2C2542",
-        "line-strong": "#3A3158",
-        accent: "#A78BFA",
-        "accent-strong": "#7C5CFC",
-        "accent-soft": "rgba(167,139,250,0.15)",
-        // Full violet scale (Tailwind defaults) + DEFAULT so `bg-violet` and the
-        // numbered shades (`violet-300`, `violet-500/15`, gradients) all resolve.
+        line: "#2C2020",
+        "line-strong": "#4A2C2C",
+        accent: "#F87171",
+        "accent-strong": "#DC2626",
+        "accent-soft": "rgba(248,113,113,0.15)",
+        // Red accent scale kept under the `violet` token name so the existing
+        // `violet-300` / `violet-500/15` / gradient classes recolor without churn.
         violet: {
-          DEFAULT: "#8B5CF6",
-          200: "#DDD6FE",
-          300: "#C4B5FD",
-          400: "#A78BFA",
-          500: "#8B5CF6",
-          600: "#7C3AED",
-          700: "#6D28D9",
+          DEFAULT: "#EF4444",
+          200: "#FECACA",
+          300: "#FCA5A5",
+          400: "#F87171",
+          500: "#EF4444",
+          600: "#DC2626",
+          700: "#B91C1C",
         },
-        "violet-deep": "#7C3AED",
+        "violet-deep": "#DC2626",
         cyan: "#22D3EE",
         "cyan-deep": "#06B6D4",
         // Near-neutral dark canvas + panels — the product/marketing dark surface.
@@ -43,10 +43,10 @@ const config: Config = {
         panel: "#141416",
         "panel-2": "#1A1A1D",
         "panel-line": "#242428",
-        // Hero lavender gradient stops.
-        "lav-1": "#8A7AE5",
-        "lav-2": "#9180E8",
-        "lav-3": "#9C8BEC",
+        // Hero red wash gradient stops.
+        "lav-1": "#C25555",
+        "lav-2": "#CC5B5B",
+        "lav-3": "#D66565",
         "on-accent": "#0E0A1A",
         positive: "#34D399",
         "positive-soft": "rgba(52,211,153,0.15)",
@@ -87,20 +87,20 @@ const config: Config = {
       },
       boxShadow: {
         card: "0 1px 0 rgba(245,243,255,0.08), 0 8px 24px rgba(14,10,26,0.4)",
-        hover: "0 8px 32px rgba(124,92,252,0.18)",
-        "glow-violet": "0 0 0 1px rgba(124,58,237,0.25), 0 20px 60px -20px rgba(124,58,237,0.45)",
+        hover: "0 8px 32px rgba(239,68,68,0.18)",
+        "glow-violet": "0 0 0 1px rgba(220,38,38,0.25), 0 20px 60px -20px rgba(220,38,38,0.45)",
         "glow-cyan": "0 0 0 1px rgba(34,211,238,0.2), 0 20px 60px -20px rgba(34,211,238,0.35)",
         glass: "inset 0 1px 0 rgba(255,255,255,0.06), 0 24px 60px -28px rgba(0,0,0,0.7)",
       },
       backgroundImage: {
-        "cta-gradient": "linear-gradient(135deg, #A78BFA, #7C5CFC)",
-        "neon-duo": "linear-gradient(135deg, #7C3AED 0%, #8B5CF6 40%, #22D3EE 100%)",
+        "cta-gradient": "linear-gradient(135deg, #F87171, #DC2626)",
+        "neon-duo": "linear-gradient(135deg, #DC2626 0%, #EF4444 40%, #22D3EE 100%)",
         // Light lavender hero wash that melts into the dark canvas at the bottom.
         "hero-lav":
-          "linear-gradient(180deg, #8A7AE5 0%, #9180E8 36%, #9C8BEC 60%, #6E62B4 82%, #0A0A0A 100%)",
-        "sky-card": "linear-gradient(170deg, #b9a9f0 0%, #9d8be8 55%, #7d6ccf 100%)",
+          "linear-gradient(180deg, #C25555 0%, #CC5B5B 36%, #D66565 60%, #7A3838 82%, #0A0A0A 100%)",
+        "sky-card": "linear-gradient(170deg, #ECA3A3 0%, #D67272 55%, #B84545 100%)",
         "grid-fade":
-          "linear-gradient(to right, rgba(124,92,252,0.07) 1px, transparent 1px), linear-gradient(to bottom, rgba(124,92,252,0.07) 1px, transparent 1px)",
+          "linear-gradient(to right, rgba(239,68,68,0.07) 1px, transparent 1px), linear-gradient(to bottom, rgba(239,68,68,0.07) 1px, transparent 1px)",
       },
       keyframes: {
         marquee: {

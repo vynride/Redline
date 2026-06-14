@@ -21,12 +21,12 @@ const PODIUM_ORDER: Record<number, string> = { 1: "sm:order-2", 2: "sm:order-1",
 // Gradient palette for users without a real photo. A user always lands on the
 // same one (hashed from their id), so avatars are varied but stable per person.
 const GRADIENTS = [
-  ["#8B5CF6", "#6366F1"],
-  ["#EC4899", "#8B5CF6"],
+  ["#EF4444", "#6366F1"],
+  ["#EC4899", "#EF4444"],
   ["#38BDF8", "#6366F1"],
   ["#34D399", "#0EA5E9"],
   ["#F59E0B", "#EF4444"],
-  ["#A78BFA", "#7C3AED"],
+  ["#F87171", "#DC2626"],
   ["#22D3EE", "#3B82F6"],
   ["#FB7185", "#F43F5E"],
 ];
@@ -71,7 +71,7 @@ function PodiumCard({ entry, isMe }: { entry: LeaderboardEntry; isMe: boolean })
       className={cn(
         "relative flex flex-col items-center gap-2 rounded-2xl border bg-panel px-4 text-center",
         PODIUM_ORDER[entry.rank],
-        first ? "py-5 shadow-[0_0_44px_-12px_rgba(124,58,237,0.55)]" : "py-4",
+        first ? "py-5 shadow-[0_0_44px_-12px_rgba(220,38,38,0.55)]" : "py-4",
         isMe ? "border-violet-500/50" : first ? "border-violet-500/40" : "border-panel-line",
       )}
     >

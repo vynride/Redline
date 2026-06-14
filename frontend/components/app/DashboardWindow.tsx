@@ -116,7 +116,7 @@ function QuickStart({ scenarios }: { scenarios: ScenarioSummary[] }) {
       <div
         className="pointer-events-none absolute -top-16 left-1/2 h-48 w-[560px] -translate-x-1/2"
         style={{
-          background: "radial-gradient(ellipse, rgba(124,58,237,0.18) 0%, transparent 68%)",
+          background: "radial-gradient(ellipse, rgba(220,38,38,0.18) 0%, transparent 68%)",
           filter: "blur(28px)",
         }}
       />
@@ -134,7 +134,7 @@ function QuickStart({ scenarios }: { scenarios: ScenarioSummary[] }) {
         </div>
 
         {/* ── Large prompt input ── */}
-        <div className="relative rounded-xl border border-panel-line bg-ink-2 transition-all duration-200 focus-within:border-violet-500/55 focus-within:shadow-[0_0_0_3px_rgba(124,58,237,0.08)]">
+        <div className="relative rounded-xl border border-panel-line bg-ink-2 transition-all duration-200 focus-within:border-violet-500/55 focus-within:shadow-[0_0_0_3px_rgba(220,38,38,0.08)]">
           <input
             ref={inputRef}
             type="text"
@@ -172,7 +172,7 @@ function QuickStart({ scenarios }: { scenarios: ScenarioSummary[] }) {
                 className={cn(
                   "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[12px] font-medium transition-all duration-150",
                   isActive
-                    ? "border-violet-500/60 bg-violet-500/18 text-violet-200 shadow-[0_0_12px_-2px_rgba(124,58,237,0.35)]"
+                    ? "border-violet-500/60 bg-violet-500/18 text-violet-200 shadow-[0_0_12px_-2px_rgba(220,38,38,0.35)]"
                     : "border-panel-line bg-panel-2 text-secondary hover:border-violet-500/35 hover:bg-violet-500/10 hover:text-white",
                 )}
               >

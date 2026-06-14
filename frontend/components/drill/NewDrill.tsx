@@ -227,7 +227,7 @@ function SelectorTile({
           : "border-panel-line bg-panel hover:border-violet-500/40",
       )}
     >
-      <span className={cn("text-body-strong", active ? "text-[#A78BFA]" : "text-secondary")}>{label}</span>
+      <span className={cn("text-body-strong", active ? "text-[#F87171]" : "text-secondary")}>{label}</span>
       {badge && (
         <span className={cn("rounded-md px-1.5 py-0.5 font-mono text-[10px] font-semibold", badge.cls)}>
           {badge.label}

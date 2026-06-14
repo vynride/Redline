@@ -89,7 +89,7 @@ function QuickStart() {
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-500/60 to-transparent" />
       <div
         className="pointer-events-none absolute -top-16 left-1/2 h-48 w-[560px] -translate-x-1/2"
-        style={{ background: "radial-gradient(ellipse, rgba(124,58,237,0.18) 0%, transparent 68%)", filter: "blur(28px)" }}
+        style={{ background: "radial-gradient(ellipse, rgba(220,38,38,0.18) 0%, transparent 68%)", filter: "blur(28px)" }}
       />
 
       {/* Top section */}
@@ -181,7 +181,7 @@ function QuickStart() {
 
 export function AppShowcase() {
   return (
-    <div className="overflow-hidden rounded-t-2xl border border-panel-line bg-ink-2 shadow-[0_-20px_80px_-30px_rgba(124,58,237,0.5),0_40px_120px_-40px_rgba(0,0,0,0.9)] sm:rounded-t-3xl">
+    <div className="overflow-hidden rounded-t-2xl border border-panel-line bg-ink-2 shadow-[0_-20px_80px_-30px_rgba(220,38,38,0.5),0_40px_120px_-40px_rgba(0,0,0,0.9)] sm:rounded-t-3xl">
       {/* Sticky-style header: brand · tabs · readiness · avatar */}
       <div className="flex items-center justify-between gap-3 border-b border-panel-line px-4 py-3 sm:px-6">
         <div className="flex items-center gap-2.5">

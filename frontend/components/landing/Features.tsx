@@ -32,7 +32,7 @@ function Block({
             <TagIcon className="h-4 w-4" /> {tag}
           </span>
           <h3 className="text-balance text-[clamp(1.75rem,3.4vw,2.75rem)] font-bold leading-[1.05] tracking-[-0.02em] text-white">
-            {title} <span className="text-[#A78BFA]">{accent}</span>
+            {title} <span className="text-[#F87171]">{accent}</span>
           </h3>
           <p className="max-w-md text-body-lg text-secondary">{body}</p>
         </div>
@@ -87,7 +87,7 @@ function StreakMock() {
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <span className="text-[12px] text-secondary">Readiness multiplier</span>
-        <span className="font-mono text-stat-mono text-[#A78BFA]">3.0×</span>
+        <span className="font-mono text-stat-mono text-[#F87171]">3.0×</span>
       </div>
       <motion.div
         initial={{ opacity: 0, y: 10 }}
@@ -101,7 +101,7 @@ function StreakMock() {
             key={i}
             style={{ height: `${b}%` }}
             className={`w-full rounded-t ${
-              i === bars.length - 1 ? "bg-[#A78BFA]" : "bg-violet-500/60"
+              i === bars.length - 1 ? "bg-[#F87171]" : "bg-violet-500/60"
             }`}
           />
         ))}
@@ -131,7 +131,7 @@ function LeaderboardMock() {
           }`}
         >
           <span className="flex items-center gap-3">
-            <span className={`font-mono text-[12px] ${r.you ? "text-[#A78BFA]" : "text-muted"}`}>
+            <span className={`font-mono text-[12px] ${r.you ? "text-[#F87171]" : "text-muted"}`}>
               #{r.rank}
             </span>
             <span className="grid h-7 w-7 place-items-center rounded-full bg-gradient-to-br from-violet-400 to-violet-700 text-[10px] font-bold text-white">
@@ -172,7 +172,7 @@ function IntensityMock() {
               l.on ? "border-violet-500 bg-violet-500/15" : "border-panel-line bg-ink/50"
             }`}
           >
-            <div className={`font-mono text-[15px] font-bold ${l.on ? "text-[#A78BFA]" : "text-white"}`}>
+            <div className={`font-mono text-[15px] font-bold ${l.on ? "text-[#F87171]" : "text-white"}`}>
               {l.ret}
             </div>
             <div className="mt-1 text-[10px] text-muted">{l.x}</div>
@@ -180,7 +180,7 @@ function IntensityMock() {
         ))}
       </div>
       <div className="h-1.5 overflow-hidden rounded-full bg-panel-2">
-        <div className="h-full w-3/4 rounded-full bg-gradient-to-r from-violet-500 to-[#A78BFA]" />
+        <div className="h-full w-3/4 rounded-full bg-gradient-to-r from-violet-500 to-[#F87171]" />
       </div>
     </div>
   );

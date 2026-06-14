@@ -55,7 +55,7 @@ export function MicButton({
             recording &&
               "bg-rose-500/15 text-rose-300 ring-2 ring-rose-500/40 shadow-[0_0_40px_-8px_rgba(244,63,94,0.6)]",
             state === "ready" &&
-              "bg-violet-500 text-white shadow-[0_12px_44px_-12px_rgba(124,58,237,0.85)] hover:bg-violet-400",
+              "bg-violet-500 text-white shadow-[0_12px_44px_-12px_rgba(220,38,38,0.85)] hover:bg-violet-400",
             state === "thinking" && "bg-panel-2 text-violet-300 ring-1 ring-panel-line",
             state === "ended" && "bg-panel-2 text-muted ring-1 ring-panel-line",
           )}

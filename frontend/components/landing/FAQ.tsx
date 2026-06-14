@@ -48,7 +48,7 @@ export function FAQ() {
             <h2 className="text-[clamp(2.25rem,5vw,4rem)] font-bold leading-[1.02] tracking-[-0.03em] text-white">
               Frequently
               <br />
-              Asked <span className="text-[#A78BFA]">Questions</span>
+              Asked <span className="text-[#F87171]">Questions</span>
             </h2>
           </Reveal>
           <Reveal variant="up" delay={0.08}>
