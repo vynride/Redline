@@ -5,6 +5,8 @@
 **/__pycache__
 **/.venv
 *.db
+.env
+*.env
 .specstory
 HANDOVER.md
 backend

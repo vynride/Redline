@@ -19,8 +19,10 @@ FROM node:22-alpine AS runner
 WORKDIR /app/frontend
 ENV NODE_ENV=production
 
-COPY --from=builder /app/frontend ./
-COPY --from=builder /app/shared ../shared
+# node:22-alpine ships an unprivileged `node` user (uid 1000); run as it.
+COPY --from=builder --chown=node:node /app/frontend ./
+COPY --from=builder --chown=node:node /app/shared ../shared
 
 EXPOSE 3000
+USER node
 CMD ["npm", "run", "start"]

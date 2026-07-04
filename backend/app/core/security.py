@@ -8,7 +8,7 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
-from jose import JWTError, jwt
+import jwt  # PyJWT
 
 from app.core.config import settings
 
@@ -22,7 +22,7 @@ def create_access_token(subject: str, expires_minutes: Optional[int] = None) -> 
 def decode_access_token(token: str) -> Optional[str]:
     try:
         payload = jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
-    except JWTError:
+    except jwt.PyJWTError:
         return None
     sub = payload.get("sub")
     return sub if isinstance(sub, str) else None
