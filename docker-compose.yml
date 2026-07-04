@@ -9,12 +9,11 @@ services:
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: redline
-      # No default: must be supplied via backend/.env. Never ship a known password.
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in backend/.env}
       POSTGRES_DB: redline
+      # POSTGRES_PASSWORD is supplied by backend/.env (env_file below). Never ship a known password.
     env_file:
       - path: ./backend/.env
-        required: false
+        required: true
     ports:
       - "127.0.0.1:5432:5432"
     volumes:
@@ -31,15 +30,14 @@ services:
       db:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql+psycopg2://redline:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in backend/.env}@db:5432/redline
       CORS_ORIGINS: http://localhost:3000
       FRONTEND_URL: http://localhost:3000
       OAUTH_REDIRECT_BASE: http://localhost:8000
-    # JWT_SECRET and the third-party secrets (Sarvam) and OAuth client IDs/secrets
-    # live in backend/.env — not committed.
+    # DATABASE_URL (Postgres, pointing at the `db` service), JWT_SECRET, the Sarvam
+    # key, and OAuth client IDs/secrets all come from backend/.env — not committed.
     env_file:
       - path: ./backend/.env
-        required: false
+        required: true
     ports:
       - "127.0.0.1:8000:8000"
 
