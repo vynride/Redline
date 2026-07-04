@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.core.logging import get_logger
+from app.core.ratelimit import scenario_generation_limit
 from app.db import get_db
 from app.models.generated_scenario import GeneratedScenario
 from app.models.user import User
@@ -37,7 +38,12 @@ def list_generated_scenarios(
     return [ScenarioSummary.from_scenario(Scenario.model_validate(r.scenario_json)) for r in rows]
 
 
-@router.post("", response_model=Scenario, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "",
+    response_model=Scenario,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(scenario_generation_limit)],
+)
 async def create_generated_scenario(
     payload: GenerateRequest,
     db: Session = Depends(get_db),

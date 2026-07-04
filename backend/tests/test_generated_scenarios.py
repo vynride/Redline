@@ -98,6 +98,20 @@ def test_can_drill_on_generated_scenario(client, auth_headers, fake_llm):
     assert resolved.json()["opening_line"] == sc["opening_line"]
 
 
+def test_generate_is_rate_limited(client, auth_headers, fake_llm):
+    fake_llm(_draft())
+    # The endpoint is capped at 10/minute per user (LLM cost). The keyed user gets a
+    # fresh bucket (unique UUID subject), so the 11th call in the window is throttled.
+    codes = [
+        client.post(
+            "/api/generated-scenarios", json={"prompt": "checkout is failing"}, headers=auth_headers
+        ).status_code
+        for _ in range(11)
+    ]
+    assert codes[:10] == [201] * 10, codes
+    assert codes[10] == 429, codes
+
+
 def test_cannot_drill_on_someone_elses_generated_scenario(client, auth_headers, make_auth, fake_llm):
     fake_llm(_draft())
     sc = client.post("/api/generated-scenarios", json={"prompt": "checkout is failing"}, headers=auth_headers).json()
