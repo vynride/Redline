@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from starlette.concurrency import run_in_threadpool
 
 from app.api.deps import get_current_user
+from app.core.ratelimit import pdf_export_limit
 from app.db import get_db
 from app.models.generated_scenario import GeneratedScenario
 from app.models.session import DrillSession, SessionStatus
@@ -139,7 +140,7 @@ async def get_debrief(
     return await get_or_create_debrief(db, drill, llm)
 
 
-@router.get("/{session_id}/debrief.pdf")
+@router.get("/{session_id}/debrief.pdf", dependencies=[Depends(pdf_export_limit)])
 async def export_debrief_pdf(
     session_id: str,
     db: Session = Depends(get_db),
