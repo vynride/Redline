@@ -6,33 +6,14 @@
 #   /ws/*   → 127.0.0.1:8002 (backend, WS upgrade)
 #   /*      → 127.0.0.1:3002 (frontend)
 #
-# All secrets live in backend/.env on the server (never committed). That file must
-# define DATABASE_URL (Postgres, pointing at the `db` service), POSTGRES_PASSWORD
-# (matching the password in DATABASE_URL), and JWT_SECRET — see backend/.env.example.
+# This app does NOT run its own Postgres. The backend joins the pre-existing external
+# Docker network `backend` and connects to a Postgres already running on it. All
+# secrets live in backend/.env on the server (never committed); that file must define
+# DATABASE_URL (pointing at that Postgres host), JWT_SECRET, the Sarvam key, and the
+# OAuth client IDs/secrets — see backend/.env.example.
 services:
-  db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_USER: redline
-      POSTGRES_DB: redline
-      # POSTGRES_PASSWORD is supplied by backend/.env (env_file below).
-    env_file:
-      - path: ./backend/.env
-        required: true
-    volumes:
-      - redline_pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U redline"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    restart: unless-stopped
-
   backend:
     build: ./backend
-    depends_on:
-      db:
-        condition: service_healthy
     environment:
       CORS_ORIGINS: https://redline.vynride.dev
       FRONTEND_URL: https://redline.vynride.dev
@@ -45,6 +26,9 @@ services:
         required: true
     ports:
       - "127.0.0.1:8002:8000"
+    networks:
+      - default   # published port + outbound (Sarvam API/STT/TTS)
+      - backend    # reach the external Postgres by its service name
     restart: unless-stopped
 
   frontend:
@@ -59,5 +43,8 @@ services:
       - "127.0.0.1:3002:3000"
     restart: unless-stopped
 
-volumes:
-  redline_pgdata:
+networks:
+  # Pre-existing network from your Postgres deployment — created outside this app.
+  # Create it once if it doesn't exist:  docker network create backend
+  backend:
+    external: true
