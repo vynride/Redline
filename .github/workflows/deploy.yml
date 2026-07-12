@@ -1,22 +1,32 @@
 name: Deploy
+
+# Auto-deploy is disabled for now — this workflow runs only on manual dispatch.
+# To re-enable, uncomment the `push:` trigger below. Requires the SSH secrets to
+# be set: SSH_HOST, SSH_USER, SSH_KEY (and SSH_PORT + the `port:` line if SSH
+# isn't on the default port).
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
+  # push:
+  #   branches: [main]
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
       - name: SSH and deploy
         uses: appleboy/ssh-action@v1.2.1
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.SSH_PASSWORD }}
+          key: ${{ secrets.SSH_KEY }}
+          # port: ${{ secrets.SSH_PORT }}   # uncomment if SSH isn't on the default port
           script: |
-            cd /root/redline
-            git pull
-            docker compose -f docker-compose.prod.yml up -d --build
+            set -euo pipefail
+            cd ~/Redline
+            git pull --ff-only
+            docker compose -f docker-compose.prod.yml up -d --build --remove-orphans
             docker image prune -f
-            docker container prune -f
-            docker volume prune -f
