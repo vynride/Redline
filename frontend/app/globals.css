@@ -44,24 +44,23 @@
     color: #f5f3ff;
   }
 
-  /* Thin, on-brand scrollbar for the dark canvas. */
+  /* Ultra-thin hairline scrollbar — thumb derived from the text color (10%
+     into transparent) so it tracks theme changes; track kept transparent so
+     it disappears on any surface and only the thumb shows. */
   * {
     scrollbar-width: thin;
-    scrollbar-color: #4A2C2C transparent;
+    scrollbar-color: color-mix(in oklab, theme("colors.primary") 10%, transparent) transparent;
   }
   ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 4px;
+    height: 4px;
   }
   ::-webkit-scrollbar-thumb {
-    background: #2C2020;
+    background: color-mix(in oklab, theme("colors.primary") 10%, transparent);
     border-radius: 9999px;
-    border: 2px solid transparent;
-    background-clip: content-box;
   }
-  ::-webkit-scrollbar-thumb:hover {
-    background: #4A2C2C;
-    background-clip: content-box;
+  ::-webkit-scrollbar-track {
+    background: transparent;
   }
 }
 
