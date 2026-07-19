@@ -59,8 +59,22 @@
     background: color-mix(in oklab, theme("colors.primary") 10%, transparent);
     border-radius: 9999px;
   }
+  ::-webkit-scrollbar-thumb:hover,
+  ::-webkit-scrollbar-thumb:active {
+    background: color-mix(in oklab, theme("colors.primary") 30%, transparent);
+  }
   ::-webkit-scrollbar-track {
     background: transparent;
+  }
+  /* Corner square where both scrollbars meet defaults to white — kill it. */
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+  /* Reserve the 4px gutter so panel content doesn't shift sideways when it
+     crosses the overflow threshold. Matches Tailwind's scroll utilities. */
+  [class~="overflow-y-auto"],
+  [class~="overflow-auto"] {
+    scrollbar-gutter: stable;
   }
 }
 
