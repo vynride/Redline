@@ -66,6 +66,7 @@ class SarvamLLM:
         # Reasoning length is stochastic, so a roll occasionally overruns the budget even
         # at low effort. Those truncations are independent — retry a couple of times before
         # giving up rather than failing the whole request on one unlucky roll.
+        truncated = 0
         for attempt in range(_MAX_GENERATE_ATTEMPTS):
             completion = await self._client.chat.completions.create(
                 model=self._model,
@@ -88,17 +89,25 @@ class SarvamLLM:
                     "Sarvam response unusable (finish_reason=%s, empty=%s) on attempt %d/%d",
                     choice.finish_reason, not content, attempt + 1, _MAX_GENERATE_ATTEMPTS,
                 )
+                truncated += choice.finish_reason == "length"
                 continue
             try:
                 return response_schema.model_validate_json(content)
             except ValueError:  # tolerate the odd code-fenced payload
                 return response_schema.model_validate(json.loads(_strip_fence(content)))
 
+        if truncated:
+            raise RuntimeError(
+                "Sarvam could not return a complete response within the output-token budget "
+                f"(max_tokens={settings.sarvam_max_tokens}) after {_MAX_GENERATE_ATTEMPTS} attempts. "
+                "Lower SARVAM_REASONING_EFFORT, raise SARVAM_MAX_TOKENS (needs a higher Sarvam plan), "
+                "or shorten the input."
+            )
+        # Every attempt finished normally but with no content: a budget change won't help.
         raise RuntimeError(
-            "Sarvam could not return a complete response within the output-token budget "
-            f"(max_tokens={settings.sarvam_max_tokens}) after {_MAX_GENERATE_ATTEMPTS} attempts. "
-            "Lower SARVAM_REASONING_EFFORT, raise SARVAM_MAX_TOKENS (needs a higher Sarvam plan), "
-            "or shorten the input."
+            f"Sarvam model '{self._model}' returned empty content on all {_MAX_GENERATE_ATTEMPTS} "
+            "attempts (finish_reason=stop, so not a token-budget cutoff). The model may not "
+            "support this request; try a different SARVAM_CHAT_MODEL."
         )
 
 
