@@ -18,7 +18,7 @@ from app.core.logging import get_logger
 
 log = get_logger("redline.llm")
 
-# sarvam-30b is a reasoning model: it spends completion tokens "thinking" before it emits
+# Reasoning models (e.g. sarvam-105b) spend completion tokens "thinking" before they emit
 # the structured JSON, and that reasoning shares the output budget. Too small a budget
 # (the provider default is 2048) gets swallowed by reasoning on larger outputs like the
 # debrief, leaving empty/truncated content — so the budget is configurable via

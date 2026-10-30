@@ -13,7 +13,7 @@
   <img alt="Next.js" src="https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=nextdotjs&logoColor=white" />
   <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi&logoColor=white" />
   <img alt="PostgreSQL" src="https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql&logoColor=white" />
-  <img alt="Sarvam" src="https://img.shields.io/badge/Sarvam-sarvam--30b-FF6B35?style=flat-square" />
+  <img alt="Sarvam" src="https://img.shields.io/badge/Sarvam-sarvam--105b--conversations-FF6B35?style=flat-square" />
   <img alt="Docker" src="https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker&logoColor=white" />
 </p>
 
@@ -72,7 +72,7 @@ Browser mic → Binary audio (WS) → Saaras STT
 | **Frontend** | Next.js 15 (App Router) · React 19 · Tailwind CSS · Framer Motion · Lenis |
 | **Backend** | FastAPI · SQLAlchemy 2 · Alembic · Pydantic |
 | **Auth** | Google + GitHub OAuth · JWT (python-jose + passlib/bcrypt) |
-| **LLM** | Sarvam (`sarvam-30b`, OpenAI-compatible, JSON-schema structured output) |
+| **LLM** | Sarvam (`sarvam-105b-conversations`, OpenAI-compatible, JSON-schema structured output) |
 | **Speech-to-text** | Saaras v3 (streaming WebSocket recognition, 16kHz PCM) |
 | **Text-to-speech** | Bulbul v3 (streaming WebSocket, 24kHz PCM) |
 | **Database** | PostgreSQL 16 (SQLite for local dev) |
@@ -150,7 +150,7 @@ Copy `backend/.env.example` to `backend/.env` and fill in:
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google OAuth app credentials |
 | `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | GitHub OAuth app credentials |
 | `SARVAM_API_KEY` | Sarvam subscription key (chat + Saaras STT + Bulbul TTS) |
-| `SARVAM_CHAT_MODEL` | Chat model id (default `sarvam-30b`) |
+| `SARVAM_CHAT_MODEL` | Chat model id (default `sarvam-105b-conversations`) |
 | `SARVAM_STT_MODEL` | Speech-to-text model id (default `saaras:v3`) |
 | `SARVAM_TTS_MODEL` | Text-to-speech model id (default `bulbul:v3`) |
 | `SARVAM_TTS_DEFAULT_SPEAKER` | Fallback Bulbul speaker (default `aditya`) |

@@ -13,7 +13,7 @@ scenarios, full debrief analytics, and deployment config — not a throwaway dem
 
 | Concern            | Choice                                  | Notes |
 |--------------------|-----------------------------------------|-------|
-| LLM                | **Sarvam** (`sarvam-30b`)               | OpenAI-compatible chat completions (`https://api.sarvam.ai/v1`) with `json_schema` structured output for persona voicing + state. |
+| LLM                | **Sarvam** (`sarvam-105b-conversations`)| OpenAI-compatible chat completions (`https://api.sarvam.ai/v1`) with `json_schema` structured output for persona voicing + state. |
 | TTS                | **Bulbul v3**                           | Realtime streaming TTS over WebSocket (`wss://api.sarvam.ai/text-to-speech/ws`, `model=bulbul:v3`, PCM@24k). Emotion → speaking pace. Behind a `tts` adapter with a non-streaming `/text-to-speech` fallback. |
 | STT                | **Saaras v3**                           | Streaming speech-to-text over WebSocket (`wss://api.sarvam.ai/speech-to-text-translate/ws`); one WAV-wrapped utterance per turn, finalised with a flush. |
 | Realtime transport | **WebSocket, turn-based**               | Browser records a full user turn → WS → backend STT→LLM→TTS → streams audio back. |

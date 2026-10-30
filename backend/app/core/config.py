@@ -52,13 +52,16 @@ class Settings(BaseSettings):
 
     # Chat — Sarvam's OpenAI-compatible endpoint (structured JSON output).
     sarvam_base_url: str = Field(default="https://api.sarvam.ai/v1")
-    sarvam_chat_model: str = Field(default="sarvam-30b")
-    # Output-token ceiling per completion. sarvam-30b is a reasoning model whose
+    # sarvam-30b is deprecated. Plain sarvam-105b (a reasoning model) returns empty
+    # content on mid-drill turns, so default to the non-reasoning conversations variant.
+    sarvam_chat_model: str = Field(default="sarvam-105b-conversations")
+    # Output-token ceiling per completion. On reasoning models (e.g. sarvam-105b) the
     # "thinking" shares this budget, so it must fit reasoning + the JSON answer.
     # 4096 is the starter-tier maximum; raise this after upgrading the Sarvam plan.
     sarvam_max_tokens: int = Field(default=4096)
-    # Reasoning budget for sarvam-30b. Left unconstrained the model spends the entire
-    # max_tokens budget "thinking" and truncates the JSON ("finish_reason: length").
+    # Reasoning budget for reasoning models (ignored by the conversations variant). Left
+    # unconstrained the model spends the entire max_tokens budget "thinking" and
+    # truncates the JSON ("finish_reason: length").
     # "low" leaves ample room for the answer and still reasons well enough for these
     # structured tasks; "" disables the parameter. ("low" | "medium" | "high" | "")
     sarvam_reasoning_effort: str = Field(default="low")
