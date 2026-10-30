@@ -1,0 +1,125 @@
+#!/bin/bash
+# Redline first-boot bootstrap (EC2 user data, rendered by Terraform).
+# Progress: sudo tail -f /var/log/redline-bootstrap.log   (via SSM Session Manager)
+set -euxo pipefail
+exec > >(tee -a /var/log/redline-bootstrap.log) 2>&1
+
+COMPOSE_VERSION=v2.29.7
+BUILDX_VERSION=v0.17.1
+
+# --- 1. Swap: t3.micro has 1 GB RAM; the Next.js build needs more ---------------
+if [ ! -f /swapfile ]; then
+  dd if=/dev/zero of=/swapfile bs=1M count=2048
+  chmod 600 /swapfile
+  mkswap /swapfile
+  swapon /swapfile
+  echo '/swapfile swap swap defaults 0 0' >> /etc/fstab
+fi
+
+# --- 2. Docker + Compose + Buildx -----------------------------------------------
+dnf install -y docker git
+systemctl enable --now docker
+
+ARCH=$(uname -m) # x86_64 | aarch64
+case "$ARCH" in
+  x86_64)  BUILDX_ARCH=amd64 ;;
+  aarch64) BUILDX_ARCH=arm64 ;;
+esac
+mkdir -p /usr/local/lib/docker/cli-plugins
+curl -fsSL -o /usr/local/lib/docker/cli-plugins/docker-compose \
+  "https://github.com/docker/compose/releases/download/$COMPOSE_VERSION/docker-compose-linux-$ARCH"
+curl -fsSL -o /usr/local/lib/docker/cli-plugins/docker-buildx \
+  "https://github.com/docker/buildx/releases/download/$BUILDX_VERSION/buildx-$BUILDX_VERSION.linux-$BUILDX_ARCH"
+chmod +x /usr/local/lib/docker/cli-plugins/*
+
+# --- 3. App config rendered by Terraform -----------------------------------------
+mkdir -p /opt/redline
+cd /opt/redline
+
+cat > compose.yml <<'EOF_COMPOSE'
+${compose_yml}
+EOF_COMPOSE
+
+cat > nginx.conf <<'EOF_NGINX'
+${nginx_conf}
+EOF_NGINX
+
+# --- 4. deploy.sh: pull code + secrets, rebuild, restart (re-runnable) -----------
+cat > deploy.sh <<'EOF_DEPLOY'
+#!/bin/bash
+set -euo pipefail
+cd /opt/redline
+
+if [ -d src/.git ]; then
+  git -C src fetch --depth 1 origin "${git_ref}"
+  git -C src checkout -f FETCH_HEAD
+else
+  git clone --depth 1 --branch "${git_ref}" "${repo_url}" src
+fi
+
+# Secrets: SSM /redline/secrets/<name> -> NAME='value' in backend.env (root-only).
+umask 077
+aws ssm get-parameters-by-path --region "${region}" --path "${secrets_prefix}/" \
+  --with-decryption --query 'Parameters[].[Name,Value]' --output text |
+  while IFS=$'\t' read -r name value; do
+    printf "%s='%s'\n" "$(basename "$name" | tr '[:lower:]' '[:upper:]')" "$value"
+  done > backend.env.tmp
+mv backend.env.tmp backend.env
+
+# Build one image at a time so the small instance doesn't run out of memory.
+docker compose -f compose.yml build backend
+docker compose -f compose.yml build frontend
+docker compose -f compose.yml up -d --remove-orphans
+docker image prune -f
+EOF_DEPLOY
+chmod 700 deploy.sh
+
+# --- 5. Nightly pg_dump of RDS -> S3 ---------------------------------------------
+cat > backup.sh <<'EOF_BACKUP'
+#!/bin/bash
+set -euo pipefail
+url=$(grep '^DATABASE_URL=' /opt/redline/backend.env | cut -d= -f2- | tr -d "'")
+# Hand pg_dump the connection via PG* env vars in a root-only file, so the password
+# never appears in a process command line (visible to `ps`).
+re='^postgresql[^:]*://([^:]+):([^@]+)@([^:/]+):([0-9]+)/([^?]+)'
+[[ $url =~ $re ]] || { echo "unparseable DATABASE_URL" >&2; exit 1; }
+umask 077
+env_file=$(mktemp)
+trap 'rm -f "$env_file"' EXIT
+printf 'PGUSER=%s\nPGPASSWORD=%s\nPGHOST=%s\nPGPORT=%s\nPGDATABASE=%s\nPGSSLMODE=require\n' \
+  "$${BASH_REMATCH[@]:1:5}" > "$env_file"
+stamp=$(date -u +%Y%m%dT%H%M%SZ)
+docker run --rm --env-file "$env_file" postgres:16-alpine pg_dump --no-owner |
+  gzip | aws s3 cp - "s3://${backup_bucket}/pg_dump/redline-$stamp.sql.gz" --region "${region}"
+EOF_BACKUP
+chmod 700 backup.sh
+
+cat > /etc/systemd/system/redline-backup.service <<'EOF_UNIT'
+[Unit]
+Description=Redline: dump RDS Postgres to S3
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/redline/backup.sh
+EOF_UNIT
+
+cat > /etc/systemd/system/redline-backup.timer <<'EOF_TIMER'
+[Unit]
+Description=Redline: nightly database backup (02:00 IST)
+
+[Timer]
+OnCalendar=*-*-* 20:30:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+EOF_TIMER
+
+systemctl daemon-reload
+systemctl enable --now redline-backup.timer
+
+# --- 6. First deploy --------------------------------------------------------------
+/opt/redline/deploy.sh
+echo "REDLINE BOOTSTRAP COMPLETE"

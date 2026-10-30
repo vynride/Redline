@@ -1,0 +1,18 @@
+# Copy to terraform.tfvars (git-ignored) and fill in.
+
+sarvam_api_key = "sk_..."
+
+# Optional — leave empty to skip a provider. Register the callback URLs printed by
+# `terraform output oauth_redirect_uris` in each provider's console.
+google_client_id     = ""
+google_client_secret = ""
+github_client_id     = ""
+github_client_secret = ""
+
+# Optional — CloudWatch alarm + AWS Budgets emails (confirm the SNS email link).
+alert_email        = ""
+monthly_budget_usd = 1
+
+# instance_type = "t3.small"   # only if your account is on the new free plan
+
+# domain_name = "redline.example.com"   # see domain.tf for the 2-step rollout
