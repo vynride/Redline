@@ -1,0 +1,45 @@
+# Redline on AWS — rendered by Terraform into /opt/redline/compose.yml.
+# Only nginx publishes a port; the security group lets CloudFront alone reach it.
+
+x-logging: &cloudwatch
+  driver: awslogs
+  options:
+    awslogs-region: ${region}
+    awslogs-group: ${log_group}
+    tag: "{{.Name}}"
+
+services:
+  backend:
+    build: ./src/backend
+    env_file: ./backend.env # secrets pulled from SSM Parameter Store
+    environment:
+      ENVIRONMENT: production
+      DEBUG: "false"
+      CORS_ORIGINS: ${public_url}
+      FRONTEND_URL: ${public_url}
+      OAUTH_REDIRECT_BASE: ${public_url}
+    restart: unless-stopped
+    logging: *cloudwatch
+
+  frontend:
+    build:
+      context: ./src
+      dockerfile: frontend/Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE: ${public_url}
+    depends_on:
+      - backend
+    restart: unless-stopped
+    logging: *cloudwatch
+
+  nginx:
+    image: nginx:1.27-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - backend
+      - frontend
+    restart: unless-stopped
+    logging: *cloudwatch
