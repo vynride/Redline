@@ -1,6 +1,11 @@
 # Redline on AWS — rendered by Terraform into /opt/redline/compose.yml.
 # Only nginx publishes a port; the security group lets CloudFront alone reach it.
 
+# Every container: no privilege escalation via setuid binaries.
+x-hardening: &hardening
+  security_opt:
+    - no-new-privileges:true
+
 x-logging: &cloudwatch
   driver: awslogs
   options:
@@ -11,6 +16,7 @@ x-logging: &cloudwatch
 services:
   backend:
     build: ./src/backend
+    cap_drop: [ALL] # runs as an unprivileged user on a high port; needs no capabilities
     env_file: ./backend.env # secrets pulled from SSM Parameter Store
     environment:
       ENVIRONMENT: production
@@ -20,8 +26,10 @@ services:
       OAUTH_REDIRECT_BASE: ${public_url}
     restart: unless-stopped
     logging: *cloudwatch
+    <<: *hardening
 
   frontend:
+    cap_drop: [ALL]
     build:
       context: ./src
       dockerfile: frontend/Dockerfile
@@ -31,9 +39,10 @@ services:
       - backend
     restart: unless-stopped
     logging: *cloudwatch
+    <<: *hardening
 
   nginx:
-    image: nginx:1.27-alpine
+    image: nginx:1.30-alpine # current stable branch
     ports:
       - "80:80"
     volumes:
@@ -43,3 +52,4 @@ services:
       - frontend
     restart: unless-stopped
     logging: *cloudwatch
+    <<: *hardening

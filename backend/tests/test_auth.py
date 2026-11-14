@@ -1,8 +1,11 @@
 """Auth flow tests — OAuth login and current-user resolution."""
 from __future__ import annotations
 
+import httpx
+import pytest
 from sqlalchemy import select
 
+from app.core.config import Settings
 from app.models.user import User
 from app.services import oauth
 
@@ -56,5 +59,46 @@ def test_callback_creates_user_and_issues_token(client, db_session, monkeypatch)
     client.cookies.set("redline_oauth_state", "matching-state")
     r = client.get("/api/auth/google/callback?code=the-code&state=matching-state", follow_redirects=False)
     assert r.status_code == 307
-    assert "token=" in r.headers["location"]
+    location = r.headers["location"]
+    assert "#token=" in location and "?token=" not in location
     assert db_session.scalar(select(User).where(User.email == "new@example.com")) is not None
+
+
+# --- OAuth email handling and production settings ---------------------------------
+
+
+def _json_transport(routes):
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json=routes[request.url.path])
+    return httpx.MockTransport(handler)
+
+
+@pytest.mark.asyncio
+async def test_google_rejects_missing_email_verified_flag():
+    transport = _json_transport({"/v1/userinfo": {"sub": "1", "email": "victim@example.com"}})
+    async with httpx.AsyncClient(transport=transport) as c:
+        with pytest.raises(oauth.OAuthError):
+            await oauth._google_user(c, "tok")
+
+
+@pytest.mark.asyncio
+async def test_github_ignores_unverified_public_email():
+    transport = _json_transport({
+        "/user": {"id": 7, "login": "eve", "email": "victim@example.com"},
+        "/user/emails": [{"email": "eve@example.com", "primary": True, "verified": True}],
+    })
+    async with httpx.AsyncClient(transport=transport) as c:
+        user = await oauth._github_user(c, "tok")
+    assert user.email == "eve@example.com"
+
+
+def test_production_refuses_default_jwt_secret():
+    with pytest.raises(ValueError, match="JWT_SECRET"):
+        Settings(_env_file=None, environment="production",
+                 database_url="postgresql+psycopg2://u:p@h/db")
+
+
+def test_production_accepts_strong_config():
+    s = Settings(_env_file=None, environment="production", jwt_secret="x" * 64,
+                 database_url="postgresql+psycopg2://u:p@h/db", cors_origins="https://example.com")
+    assert s.is_production

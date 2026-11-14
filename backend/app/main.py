@@ -27,6 +27,10 @@ def create_app() -> FastAPI:
         version=__version__,
         description="AI voice crisis-drill simulator.",
         lifespan=lifespan,
+        # Don't publish the API schema/explorer on the public internet.
+        docs_url=None if settings.is_production else "/docs",
+        redoc_url=None if settings.is_production else "/redoc",
+        openapi_url=None if settings.is_production else "/openapi.json",
     )
 
     app.add_middleware(

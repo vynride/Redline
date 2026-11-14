@@ -24,7 +24,12 @@ function CallbackHandler() {
     if (handled.current) return;
     handled.current = true;
 
-    const token = params.get("token");
+    // The backend returns the JWT in the URL fragment and errors in the query string.
+    // Clear the fragment from history once read.
+    const token = new URLSearchParams(window.location.hash.slice(1)).get("token");
+    if (window.location.hash) {
+      window.history.replaceState(null, "", window.location.pathname + window.location.search);
+    }
     const err = params.get("error");
     if (err || !token) {
       setError(ERROR_MESSAGES[err ?? ""] ?? "Sign-in failed. Please try again.");

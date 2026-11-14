@@ -9,7 +9,12 @@ export interface EndTurn {
 export interface EndSession {
   type: "end_session";
 }
-export type ClientMessage = EndTurn | EndSession;
+/** Must be the first frame on a new connection. */
+export interface Auth {
+  type: "auth";
+  token: string;
+}
+export type ClientMessage = Auth | EndTurn | EndSession;
 
 // server -> client (JSON; binary frames carry raw PCM audio)
 export interface TranscriptMsg {

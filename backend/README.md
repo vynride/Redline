@@ -7,12 +7,12 @@ FastAPI service: REST API, realtime voice WebSocket, scenario engine, and coachi
 ```bash
 cd backend
 python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements-dev.txt   # runtime deps + pytest
 cp .env.example .env        # fill in keys
 uvicorn app.main:app --reload
 ```
 
-- API docs: http://localhost:8000/docs
+- API docs: http://localhost:8000/docs (disabled when `ENVIRONMENT=production`)
 - Health: http://localhost:8000/health
 
 ## Layout

@@ -6,12 +6,13 @@ The login flow is the standard server-side Authorization Code dance:
    stores a random ``state`` in an httpOnly cookie (CSRF protection).
 2. The provider redirects back to ``GET /api/auth/{provider}/callback`` with a
    ``code``; we verify ``state``, exchange the code, upsert the user, mint a JWT,
-   and redirect to the frontend ``/auth/callback`` with the token in the query.
+   and redirect to the frontend ``/auth/callback`` with the token in the URL fragment.
 """
 from __future__ import annotations
 
 import secrets
 from typing import Optional
+from urllib.parse import quote
 
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Query, status
 from fastapi.responses import RedirectResponse
@@ -109,5 +110,6 @@ def _upsert_user(db: Session, profile: oauth.OAuthUser) -> User:
 
 
 def _frontend_redirect(*, token: Optional[str] = None, error: Optional[str] = None) -> RedirectResponse:
-    query = f"?token={token}" if token else f"?error={error}"
-    return RedirectResponse(f"{settings.frontend_url}/auth/callback{query}")
+    # The JWT is delivered in the URL fragment, which stays client-side.
+    suffix = f"#token={token}" if token else f"?error={quote(error or 'access_denied', safe='')}"
+    return RedirectResponse(f"{settings.frontend_url}/auth/callback{suffix}")

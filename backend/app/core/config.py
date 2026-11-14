@@ -9,8 +9,11 @@ from __future__ import annotations
 
 from functools import lru_cache
 
-from pydantic import Field
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# Local-dev fallback only; the production validator below rejects it.
+_DEV_JWT_SECRET = "dev-insecure-change-me"
 
 
 class Settings(BaseSettings):
@@ -21,7 +24,7 @@ class Settings(BaseSettings):
     # --- App ---
     app_name: str = "Redline"
     environment: str = Field(default="development")
-    debug: bool = Field(default=True)
+    debug: bool = Field(default=False)
 
     # Comma-separated list of allowed CORS origins.
     cors_origins: str = Field(default="http://localhost:3000")
@@ -30,7 +33,7 @@ class Settings(BaseSettings):
     database_url: str = Field(default="sqlite:///./redline.db")
 
     # --- Auth ---
-    jwt_secret: str = Field(default="dev-insecure-change-me")
+    jwt_secret: str = Field(default=_DEV_JWT_SECRET)
     jwt_algorithm: str = Field(default="HS256")
     access_token_expire_minutes: int = Field(default=60 * 24)
 
@@ -77,6 +80,26 @@ class Settings(BaseSettings):
     sarvam_tts_language: str = Field(default="en-IN")
     sarvam_tts_default_speaker: str = Field(default="aditya")
     sarvam_tts_sample_rate: int = Field(default=24000)
+
+    @property
+    def is_production(self) -> bool:
+        return self.environment.strip().lower() == "production"
+
+    @model_validator(mode="after")
+    def _refuse_insecure_production(self) -> "Settings":
+        """Validate required production settings at boot."""
+        if not self.is_production:
+            return self
+        problems = []
+        if self.jwt_secret == _DEV_JWT_SECRET or len(self.jwt_secret) < 32:
+            problems.append("JWT_SECRET must be set to a random string of at least 32 characters")
+        if self.database_url.startswith("sqlite"):
+            problems.append("DATABASE_URL must point at Postgres, not the SQLite dev default")
+        if any(o == "*" for o in self.cors_origin_list):
+            problems.append("CORS_ORIGINS must list explicit origins, not '*'")
+        if problems:
+            raise ValueError("Refusing to start in production: " + "; ".join(problems))
+        return self
 
     @property
     def cors_origin_list(self) -> list[str]:
