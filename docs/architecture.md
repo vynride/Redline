@@ -109,8 +109,9 @@ REST (JWT):
 - `GET  /api/sessions/{id}` — state + transcript (replay)
 - `GET  /api/sessions/{id}/debrief`
 
-WebSocket `/ws/session/{id}?token=…`:
-- client → server: binary audio chunks; `{type:"end_turn"}`; `{type:"end_session"}`
+WebSocket `/ws/session/{id}`:
+- client → server: first frame `{type:"auth", token}`; then binary audio chunks
+  (≤ ~3 min per turn); `{type:"end_turn"}`; `{type:"end_session"}`
 - server → client: `{type:"transcript", role, text}`; `{type:"state", …}`; binary TTS
   audio; `{type:"turn_complete"}`; `{type:"session_complete"}`; `{type:"error"}`
 

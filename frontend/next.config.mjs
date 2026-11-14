@@ -33,6 +33,7 @@ const securityHeaders = [
 
 const nextConfig = {
   reactStrictMode: true,
+  poweredByHeader: false,
   env: {
     NEXT_PUBLIC_API_BASE: API_BASE,
   },

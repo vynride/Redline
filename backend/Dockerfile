@@ -2,7 +2,9 @@
 FROM python:3.12-slim
 
 ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1
+    PYTHONDONTWRITEBYTECODE=1 \
+    # appuser is a system user with no home; give Fontconfig (WeasyPrint) a writable cache.
+    XDG_CACHE_HOME=/tmp/.cache
 
 WORKDIR /app
 

@@ -131,7 +131,8 @@ async def _google_user(client: httpx.AsyncClient, access_token: str) -> OAuthUse
         raise OAuthError("Failed to fetch Google profile.")
     data = resp.json()
     email = data.get("email")
-    if not email or not data.get("email_verified", True):
+    # Accounts are linked by email across providers; require a verified address.
+    if not email or data.get("email_verified") is not True:
         raise OAuthError("Google account has no verified email.")
     return OAuthUser(
         provider="google",
@@ -148,7 +149,8 @@ async def _github_user(client: httpx.AsyncClient, access_token: str) -> OAuthUse
     if resp.status_code != 200:
         raise OAuthError("Failed to fetch GitHub profile.")
     data = resp.json()
-    email = data.get("email") or await _github_primary_email(client, headers)
+    # Use /user/emails, which carries a `verified` flag.
+    email = await _github_primary_email(client, headers)
     if not email:
         raise OAuthError("GitHub account has no accessible verified email.")
     return OAuthUser(
@@ -166,6 +168,8 @@ async def _github_primary_email(client: httpx.AsyncClient, headers: dict[str, st
     if resp.status_code != 200:
         return None
     emails = resp.json()
+    if not isinstance(emails, list):
+        return None
     primary = next((e for e in emails if e.get("primary") and e.get("verified")), None)
     verified = primary or next((e for e in emails if e.get("verified")), None)
     return verified["email"] if verified else None

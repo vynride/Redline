@@ -9,6 +9,13 @@ from app.schemas.common import Emotion
 from app.schemas.session import SessionState
 
 
+class Auth(BaseModel):
+    """First client frame on a new connection — carries the JWT."""
+
+    type: Literal["auth"] = "auth"
+    token: str
+
+
 class EndTurn(BaseModel):
     type: Literal["end_turn"] = "end_turn"
 

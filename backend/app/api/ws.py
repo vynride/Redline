@@ -7,12 +7,15 @@ Protocol (one connection per drill session):
                      binary TTS audio frames; {"type":"turn_complete", index};
                      {"type":"session_complete"}; {"type":"error", detail}
 
-Auth is via a ``?token=`` query parameter (the browser cannot set Authorization
-headers on a WebSocket); the JWT is resolved with the same helper the REST API uses.
+Auth: the browser cannot set Authorization headers on a WebSocket, so the client's
+first frame must be JSON {"type":"auth","token":"<jwt>"} (sent within
+``_AUTH_TIMEOUT_S``). The JWT is resolved with the same helper the REST API uses.
 """
 from __future__ import annotations
 
+import asyncio
 import json
+from typing import Optional
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
@@ -43,6 +46,31 @@ log = get_logger("redline.ws")
 
 router = APIRouter()
 
+# How long a fresh connection may sit before sending its auth frame.
+_AUTH_TIMEOUT_S = 10
+# Per-turn cap on buffered PCM (16 kHz, 16-bit mono = 32 KB/s -> ~3 minutes).
+_MAX_TURN_AUDIO_BYTES = 32_000 * 180
+
+
+async def _receive_auth_token(websocket: WebSocket) -> Optional[str]:
+    """Wait for the client's {"type":"auth","token":...} frame; None if absent/invalid."""
+    try:
+        message = await asyncio.wait_for(websocket.receive(), timeout=_AUTH_TIMEOUT_S)
+    except asyncio.TimeoutError:
+        return None
+    if message.get("type") == "websocket.disconnect":
+        raise WebSocketDisconnect(message.get("code", 1000))
+    text = message.get("text")
+    if not text:
+        return None
+    try:
+        data = json.loads(text)
+    except json.JSONDecodeError:
+        return None
+    if isinstance(data, dict) and data.get("type") == "auth" and isinstance(data.get("token"), str):
+        return data["token"]
+    return None
+
 
 async def _emit_complete(websocket: WebSocket, db, session: DrillSession, llm) -> None:
     """Generate the debrief (if the drill is gradable) and tell the client we're done."""
@@ -72,7 +100,7 @@ async def drill_ws(websocket: WebSocket, session_id: str) -> None:
     await websocket.accept()
     db = SessionLocal()
     try:
-        token = websocket.query_params.get("token")
+        token = await _receive_auth_token(websocket)
         user = resolve_user_from_token(token, db) if token else None
         if user is None:
             await websocket.send_json(dump(ErrorMsg(detail="Not authenticated", code="unauthorized")))
@@ -111,6 +139,7 @@ async def drill_ws(websocket: WebSocket, session_id: str) -> None:
             await websocket.send_json(dump(TurnComplete(index=0)))
 
         stream = None
+        buffered = 0
         while True:
             message = await websocket.receive()
             if message.get("type") == "websocket.disconnect":
@@ -120,6 +149,12 @@ async def drill_ws(websocket: WebSocket, session_id: str) -> None:
             if audio is not None:
                 if stream is None:
                     stream = stt_service.stream()
+                    buffered = 0
+                buffered += len(audio)
+                if buffered > _MAX_TURN_AUDIO_BYTES:
+                    await websocket.send_json(dump(ErrorMsg(detail="Turn too long", code="turn_too_long")))
+                    await websocket.close(code=1009)  # message too big
+                    break
                 stream.write(audio)
                 continue
 
@@ -173,10 +208,10 @@ async def drill_ws(websocket: WebSocket, session_id: str) -> None:
 
     except WebSocketDisconnect:
         log.info("ws disconnected for session %s", session_id)
-    except Exception as exc:  # noqa: BLE001 — report and close cleanly
+    except Exception:  # noqa: BLE001 — report and close cleanly
         log.exception("ws error for session %s", session_id)
         try:
-            await websocket.send_json(dump(ErrorMsg(detail=str(exc), code="internal")))
+            await websocket.send_json(dump(ErrorMsg(detail="Internal server error", code="internal")))
         except Exception:
             pass
     finally:

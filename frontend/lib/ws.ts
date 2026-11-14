@@ -16,8 +16,8 @@ export class DrillSocket {
   constructor(private sessionId: string, private handlers: DrillHandlers) {}
 
   connect(): void {
-    const token = getToken() ?? "";
-    const ws = new WebSocket(`${WS_BASE}/ws/session/${this.sessionId}?token=${encodeURIComponent(token)}`);
+    // Authenticate with the first frame once the socket opens.
+    const ws = new WebSocket(`${WS_BASE}/ws/session/${encodeURIComponent(this.sessionId)}`);
     ws.binaryType = "arraybuffer";
     ws.onmessage = (e: MessageEvent) => {
       if (typeof e.data === "string") {
@@ -26,7 +26,10 @@ export class DrillSocket {
         this.handlers.onAudio(e.data as ArrayBuffer);
       }
     };
-    ws.onopen = () => this.handlers.onOpen?.();
+    ws.onopen = () => {
+      this.send({ type: "auth", token: getToken() ?? "" });
+      this.handlers.onOpen?.();
+    };
     ws.onclose = () => this.handlers.onClose?.();
     this.ws = ws;
   }
