@@ -4,8 +4,8 @@
 set -euxo pipefail
 exec > >(tee -a /var/log/redline-bootstrap.log) 2>&1
 
-COMPOSE_VERSION=v2.29.7
-BUILDX_VERSION=v0.17.1
+COMPOSE_VERSION=v2.40.3
+BUILDX_VERSION=v0.39.0
 
 # --- 1. Swap: t3.micro has 1 GB RAM; the Next.js build needs more ---------------
 if [ ! -f /swapfile ]; then
@@ -16,7 +16,9 @@ if [ ! -f /swapfile ]; then
   echo '/swapfile swap swap defaults 0 0' >> /etc/fstab
 fi
 
-# --- 2. Docker + Compose + Buildx -----------------------------------------------
+# --- 2. OS security patches, then Docker + Compose + Buildx ---------------------
+# Apply pending security errata from the AMI's locked release before exposing anything.
+dnf upgrade -y --security
 dnf install -y docker git
 systemctl enable --now docker
 

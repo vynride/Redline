@@ -26,6 +26,8 @@ services:
         required: true
     ports:
       - "127.0.0.1:8002:8000"
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]   # unprivileged user on a high port; needs no capabilities
     networks:
       - default   # published port + outbound (Sarvam API/STT/TTS)
       - backend    # reach the external Postgres by its service name
@@ -39,6 +41,8 @@ services:
         NEXT_PUBLIC_API_BASE: https://redline.vynride.dev
     depends_on:
       - backend
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
     ports:
       - "127.0.0.1:3002:3000"
     restart: unless-stopped
