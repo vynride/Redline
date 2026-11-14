@@ -52,7 +52,7 @@ async def create_generated_scenario(
 ) -> Scenario:
     prompt = payload.prompt.strip()
     if not prompt:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Describe the scenario you want.")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Describe the scenario you want.")
     try:
         return await generate_scenario(db=db, user=user, prompt=prompt, llm=llm)
     except Exception:  # noqa: BLE001 — surface a clean message, log the cause

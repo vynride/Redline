@@ -52,10 +52,10 @@ def create_session(
         scenario = Scenario.model_validate(generated.scenario_json)
         snapshot = generated.scenario_json
     if payload.role not in scenario.roles:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                             detail="This role is not available for the selected scenario.")
     if payload.difficulty not in scenario.difficulties:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                             detail="This difficulty is not available for the selected scenario.")
 
     drill = DrillSession(
